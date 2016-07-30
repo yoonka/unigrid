@@ -37,7 +37,7 @@ SystemJS.config({
   },
   packages: {
     "unigrid": {
-      "main": "unigrid.js",
+      "main": "app.js",
       "format": "esm",
       "meta": {
         "*.js": {
