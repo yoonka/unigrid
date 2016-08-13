@@ -3,6 +3,7 @@
     "name": "unigrid",
     "main": "unigrid.js",
     "dependencies": {
+      "json": "github:systemjs/plugin-json@^0.1.2",
       "react-dom": "npm:react-dom@^15.3.0"
     },
     "devDependencies": {

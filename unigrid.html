@@ -43,7 +43,7 @@
     <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody">&lt;tbody&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components, each of which can contain either <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> or <a href="#unigrid-cell"><b>UnigridCell</b></a> components.</p>
 
     <h2 id="unigrid-footer">UnigridFooter</h2>
-    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot">&lt;tfoot&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components,</p>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot">&lt;tfoot&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components.</p>
 
     <h2 id="unigrid-row">UnigridRow</h2>
     <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr">&lt;tr&gt;</a>. Contains zero or more of either <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> or <a href="#unigrid-cell"><b>UnigridCell</b></a> (a single <a href="#unigrid-row"><b>UnigridRow</b></a> component <b>can not</b> intermix <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> with <a href="#unigrid-cell"><b>UnigridCell</b></a> components). It's the basic component to build rows of the table. Depending on the contained components, if the row contains <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> components it will become a header of a table or section row, or if the row contains <a href="unigrid-cell"><b>UnigridCell</b></a> components it will become a row of a table section.</p>
@@ -54,11 +54,11 @@
     <h2 id="unigrid-cell">UnigridCell</h2>
     <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td">&lt;td&gt;</a>. This is the parent component for all types of cell components that can be shown in rows of table sections.</p>
 
+    <h1>Unigrid Example</h1>
+    <div id="container"></div>
+
     <script src="jspm_packages/system.js"></script>
     <script src="jspm.config.js"></script>
-    <div id="container"></div>
-    <script>
-      SystemJS.import('app.js');
-    </script>
+    <script>SystemJS.import('app.js');</script>
   </body>
 </html>
