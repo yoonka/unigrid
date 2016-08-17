@@ -50,24 +50,68 @@ var subSorter = function(a, b) {
 var props = {
   data: tableData,
   table: [
-    {select: 0,
-     show: [{cell: "text", property: "hAgent"}, "hDate", "hStreet", "hName", "hNumber"],
-     as: "header"},
+    {
+      section: "header",
+      show: [
+        {
+          select: 0,
+          show: [
+            {
+              cells: [
+                {property: "hAgent", as: "text"},
+                "hDate",
+                "hStreet",
+                "hName",
+                "hNumber"
+              ], as: "header"}
+          ]
+        }
+      ],
+    },
     {
       select: "all",
-      rows: [
-        {from: "list", select: 0, show: ["hCategory", {colspan: 4}]},
-        {show: ["agent", "date", "street", "name", "number"]},
-        {from: "list", select: "all", show: [{colspan: 3}, "name", "number"]}
-      ],
-      as: "section"
+      show: [
+        {
+          section: "body",
+          show: [
+            {
+              condition: {ifDoes: "exist", property: "list"},
+              from: "list",
+              select: 0,
+              show: [
+                {
+                  cells: ["hCategory", {colspan: 4}],
+                  as: "header"
+                }
+              ]
+            },
+            {
+              cells: ["agent", "date", "street", "name", "number"]
+            },
+            {
+              condition: {ifDoes: "exist", property: "list"},
+              from: "list",
+              select: "all",
+              show: [
+                {cells: [{colspan: 3}, "name", "number"]}
+              ]
+            }
+          ]
+        }
+      ]
     },
-    {select: 0,
-     rows: [
-       {show: [null, null, null, "fSum", "fTotal"]},
-       {show: [null, null, null, "sum", "total"]}
-     ],
-     as: "footer"}
+    {
+      section: "footer",
+      show: [
+        {
+          select: 0,
+          show: [
+            {cells: [null, null, null, "fSum", "fTotal"]},
+            {cells: [null, null, null, "sum", "total"]}
+          ]
+        }
+      ]
+    }
   ],
   sorters: [topSorter, {from: "list", use: subSorter}],
   renderer: null
