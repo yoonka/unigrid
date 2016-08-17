@@ -1,37 +1,33 @@
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 import React from 'react';
-
-export class UnigridTextCell extends React.Component {
-  render() {
-    return (<td>{this.props.text}</td>);
-  }
-}
-
-export class UnigridRow extends React.Component {
-  addCell(arr, cell, item, key) {
-    let text = JSON.stringify(item[cell]);
-    arr.push(<UnigridTextCell key={key} text={text} />);
-  }
-
-  render() {
-    let cells = this.props.cells || [];
-    let arr = [];
-    for (let i=0; i<cells.length; i++) {
-      this.addCell(arr, cells[i], this.props.item, i);
-    }
-    return (<tr>{arr}</tr>);
-  }
-}
+import {UnigridRow} from 'src/UnigridRow';
 
 export class Unigrid extends React.Component {
-
-  constructor() {
-    super();
-    this._index = 0;
-  }
-
-  newKey() {
-    return this._index++;
-  }
 
   makeNumberIterator(data, select) {
     var delivered = false;
@@ -98,11 +94,6 @@ export class Unigrid extends React.Component {
     }
   }
 
-  addRow(acc, cells, as, item) {
-    let key = this._index++;
-    acc.push(<UnigridRow key={key} cells={cells} as={as} item={item} />);
-  }
-
   addRows(acc, cfg, ctx) {
     for(let i=0; i<cfg.length; i++) {
       let c=cfg[i];
@@ -114,14 +105,14 @@ export class Unigrid extends React.Component {
       if (c.hasOwnProperty("section")) {
         let elem = this.toElem(c.section);
         let children = this.createTable(c.show, ctx);
-        let key = this.newKey();
-        acc.push(React.createElement(elem, {key: key}, children));
+        acc.push(React.createElement(elem, null, children));
       } else if (c.hasOwnProperty("select")) {
         let newCtx = c.hasOwnProperty("from") ?
-            {list: ctx.item[c.from], item: ctx.item} : ctx;
+          {list: ctx.item[c.from], item: ctx.item} : ctx;
         this.executeSelect(c.select, c.show, newCtx, acc);
       } else if (c.hasOwnProperty("cells")) {
-        this.addRow(acc, c.cells, c.as, ctx.item);
+        acc.push(<UnigridRow definition={c} item={ctx.item}
+          cellTypes={this.props.cellTypes} />);
       }
     }
   }

@@ -1,3 +1,4 @@
+/*
 Copyright (c) 2016, Grzegorz Junka
 All rights reserved.
 
@@ -21,3 +22,30 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+import React from 'react';
+
+export class UnigridEmptyCell extends React.Component {
+  render() {
+    let span = this.props.colspan || 1;
+    return this.props.as === "header" ?
+      (span === 1 ? (<th/>) : (<th colSpan={span} />))
+    : (span === 1 ? (<td/>) : (<td colSpan={span} />));
+  }
+}
+
+export class UnigridTextCell extends React.Component {
+  render() {
+    return this.props.as === "header" ?
+      (<th>{this.props.value}</th>) : (<td>{this.props.value}</td>);
+  }
+}
+
+export class UnigridNumberCell extends React.Component {
+  render() {
+    return this.props.as === "header" ?
+      (<th>{this.props.value.toString()}</th>)
+    : (<td>{this.props.value.toString()}</td>);
+  }
+}
