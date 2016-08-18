@@ -27,6 +27,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import React from 'react';
 import {UnigridRow} from 'src/UnigridRow';
 
+export class UnigridHeader extends React.Component {
+  render() {
+    return (<thead>{this.props.children}</thead>);
+  }
+}
+
+export class UnigridSegment extends React.Component {
+  render() {
+    return (<tbody>{this.props.children}</tbody>);
+  }
+}
+
+export class UnigridFooter extends React.Component {
+  render() {
+    return (<tfoot>{this.props.children}</tfoot>);
+  }
+}
+
 export class Unigrid extends React.Component {
 
   makeNumberIterator(data, select) {
@@ -86,11 +104,11 @@ export class Unigrid extends React.Component {
     return false;
   }
 
-  toElem(section) {
+  createSection(section, children) {
     switch (section) {
-    case "header": return "thead";
-    case "body":   return "tbody";
-    case "footer": return "tfoot";
+    case "header": return (<UnigridHeader children={children} />);
+    case "body":   return (<UnigridSegment children={children} />);
+    case "footer": return (<UnigridFooter children={children} />);
     }
   }
 
@@ -103,9 +121,8 @@ export class Unigrid extends React.Component {
       }
 
       if (c.hasOwnProperty("section")) {
-        let elem = this.toElem(c.section);
         let children = this.createTable(c.show, ctx);
-        acc.push(React.createElement(elem, null, children));
+        acc.push(this.createSection(c.section, children));
       } else if (c.hasOwnProperty("select")) {
         let newCtx = c.hasOwnProperty("from") ?
           {list: ctx.item[c.from], item: ctx.item} : ctx;
