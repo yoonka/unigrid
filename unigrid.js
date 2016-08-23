@@ -6,6 +6,20 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var _defineProperty = (function (obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -19,6 +33,18 @@ var _defineProperty = (function (obj, key, value) {
   }
 
   return obj;
+})
+
+var _objectWithoutProperties = (function (obj, keys) {
+  var target = {};
+
+  for (var i in obj) {
+    if (keys.indexOf(i) >= 0) continue;
+    if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;
+    target[i] = obj[i];
+  }
+
+  return target;
 })
 
 var _classCallCheck = (function (instance, Constructor) {
@@ -81,8 +107,7 @@ var UnigridEmptyCell = function (_React$Component) {
   _createClass(UnigridEmptyCell, [{
     key: "render",
     value: function render() {
-      var span = this.props.colspan || 1;
-      return this.props.as === "header" ? span === 1 ? React.createElement("th", null) : React.createElement("th", { colSpan: span }) : span === 1 ? React.createElement("td", null) : React.createElement("td", { colSpan: span });
+      return this.props.rowAs === "header" ? React.createElement("th", this.props) : React.createElement("td", this.props);
     }
   }]);
 
@@ -101,14 +126,15 @@ var UnigridTextCell = function (_React$Component2) {
   _createClass(UnigridTextCell, [{
     key: "render",
     value: function render() {
-      return this.props.as === "header" ? React.createElement(
+      var p = this.props;
+      return p.rowAs === "header" ? React.createElement(
         "th",
-        null,
-        this.props.value
+        p,
+        p.cell
       ) : React.createElement(
         "td",
-        null,
-        this.props.value
+        p,
+        p.cell
       );
     }
   }]);
@@ -128,14 +154,15 @@ var UnigridNumberCell = function (_React$Component3) {
   _createClass(UnigridNumberCell, [{
     key: "render",
     value: function render() {
-      return this.props.as === "header" ? React.createElement(
+      var p = this.props;
+      return p.rowAs === "header" ? React.createElement(
         "th",
-        null,
-        this.props.value.toString()
+        p,
+        p.cell.toString()
       ) : React.createElement(
         "td",
-        null,
-        this.props.value.toString()
+        p,
+        p.cell.toString()
       );
     }
   }]);
@@ -153,73 +180,124 @@ var UnigridRow = function (_React$Component) {
   }
 
   _createClass(UnigridRow, [{
+    key: 'createErrorCell',
+    value: function createErrorCell(nProps, msg) {
+      return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + msg }));
+    }
+  }, {
     key: 'createCellForType',
-    value: function createCellForType(value, as) {
-      switch (typeof value) {
-        case "string":
-          return React.createElement(UnigridTextCell, { value: value, as: as });
-        case "number":
-          return React.createElement(UnigridNumberCell, { value: value, as: as });
+    value: function createCellForType(type, oProps, rowAs) {
+      var show = oProps.show;
+      var using = oProps.using;
+      var as = oProps.as;
+
+      var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as']);
+
+      Object.assign(nProps, { rowAs: rowAs });
+
+      if (typeof type !== 'string') {
+        return React.createElement(type, nProps);
       }
-      var err = "Error: " + JSON.stringify(value);
-      return React.createElement(UnigridTextCell, { value: err, as: as });
+
+      if (this.props.hasOwnProperty('cellTypes') && this.props.cellTypes.hasOwnProperty(type)) {
+        return React.createElement(this.props.cellTypes[type], nProps);
+      }
+
+      switch (type) {
+        case 'string':
+          return React.createElement(UnigridTextCell, nProps);
+        case 'number':
+          return React.createElement(UnigridNumberCell, nProps);
+        case 'empty':
+          return React.createElement(UnigridEmptyCell, nProps);
+      }
+
+      return this.createErrorCell(nProps, JSON.stringify(type));
+    }
+  }, {
+    key: 'getItemValue',
+    value: function getItemValue(item, property) {
+      return property && item.hasOwnProperty(property) ? item[property] : undefined;
     }
   }, {
     key: 'createCell',
-    value: function createCell(cell, item, as) {
-      if (typeof cell === "string") {
-        if (item.hasOwnProperty(cell)) {
-          return this.createCellForType(item[cell], as);
-        }
-        return React.createElement(UnigridTextCell, { value: "Error: " + cell, as: as });
+    value: function createCell(item, cell, rowAs) {
+      if (typeof cell === 'string') {
+        var _value = this.getItemValue(item, cell);
+        return _value !== undefined ? this.createCellForType(typeof _value, { cell: _value }, rowAs) : this.createErrorCell({ rowAs: rowAs }, cell);
       }
       if (cell === null) {
-        return React.createElement(UnigridEmptyCell, { as: as });
+        return this.createCellForType('empty', {}, rowAs);
       }
-      if (typeof cell !== "object") {
-        return React.createElement(UnigridTextCell, { value: "Error: " + cell.toString(), as: as });
+      if (typeof cell !== 'object') {
+        return this.createErrorCell({ rowAs: rowAs }, cell.toString());
       }
-      if (cell.hasOwnProperty("colspan")) {
-        return React.createElement(UnigridEmptyCell, { colspan: cell.colspan, as: as });
+
+      var value = this.getItemValue(item, cell.show);
+      if (value !== undefined) {
+        Object.assign(cell, { cell: value });
       }
-      if (!cell.hasOwnProperty("property")) {
-        var _err = "Error: " + JSON.stringify(cell);
-        return React.createElement(UnigridTextCell, { value: _err, as: as });
+
+      if (cell.hasOwnProperty('using')) {
+        return this.createCellForType(cell.using, cell, rowAs);
       }
-      if (cell.hasOwnProperty("using")) {
-        var props = { value: item[cell.property], as: as };
-        return React.createElement(cell.using, props);
+      if (cell.hasOwnProperty('as')) {
+        return this.createCellForType(cell.as, cell, rowAs);
       }
-      if (cell.hasOwnProperty("as")) {
-        var elem = this.props.cellTypes[cell.as];
-        var _props = { value: item[cell.property], as: as };
-        return React.createElement(elem, _props);
-      }
-      var err = "Error: " + JSON.stringify(cell);
-      return React.createElement(UnigridTextCell, { value: err, as: as });
+
+      Object.assign(cell, { rowAs: rowAs });
+      return this.createErrorCell(cell, JSON.stringify(cell));
     }
   }, {
     key: 'render',
     value: function render() {
-      var cfg = this.props.definition;
-      var cells = cfg.cells || [];
+      var cfg = this.props;
+      var elems = cfg.cells || [];
       var arr = [];
-      for (var i = 0; i < cells.length; i++) {
-        arr.push(this.createCell(cells[i], this.props.item, cfg.as));
+      for (var i = 0; i < elems.length; i++) {
+        arr.push(this.createCell(cfg.item, elems[i], cfg.as));
       }
-      return React.createElement(
-        'tr',
-        null,
-        arr
-      );
+
+      var cells = cfg.cells;
+      var as = cfg.as;
+      var item = cfg.item;
+      var cellTypes = cfg.cellTypes;
+
+      var nProps = _objectWithoutProperties(cfg, ['cells', 'as', 'item', 'cellTypes']);
+
+      return React.createElement('tr', nProps, arr);
     }
   }]);
 
   return UnigridRow;
 }(React.Component);
 
-var UnigridHeader = function (_React$Component) {
-  _inherits(UnigridHeader, _React$Component);
+var UnigridSection = function (_React$Component) {
+  _inherits(UnigridSection, _React$Component);
+
+  function UnigridSection() {
+    _classCallCheck(this, UnigridSection);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSection).apply(this, arguments));
+  }
+
+  _createClass(UnigridSection, [{
+    key: 'makeElement',
+    value: function makeElement(name) {
+      var _props = this.props;
+      var children = _props.children;
+
+      var other = _objectWithoutProperties(_props, ['children']);
+
+      return React.createElement(name, other, children);
+    }
+  }]);
+
+  return UnigridSection;
+}(React.Component);
+
+var UnigridHeader = function (_UnigridSection) {
+  _inherits(UnigridHeader, _UnigridSection);
 
   function UnigridHeader() {
     _classCallCheck(this, UnigridHeader);
@@ -230,19 +308,15 @@ var UnigridHeader = function (_React$Component) {
   _createClass(UnigridHeader, [{
     key: 'render',
     value: function render() {
-      return React.createElement(
-        'thead',
-        null,
-        this.props.children
-      );
+      return this.makeElement('thead');
     }
   }]);
 
   return UnigridHeader;
-}(React.Component);
+}(UnigridSection);
 
-var UnigridSegment = function (_React$Component2) {
-  _inherits(UnigridSegment, _React$Component2);
+var UnigridSegment = function (_UnigridSection2) {
+  _inherits(UnigridSegment, _UnigridSection2);
 
   function UnigridSegment() {
     _classCallCheck(this, UnigridSegment);
@@ -253,19 +327,15 @@ var UnigridSegment = function (_React$Component2) {
   _createClass(UnigridSegment, [{
     key: 'render',
     value: function render() {
-      return React.createElement(
-        'tbody',
-        null,
-        this.props.children
-      );
+      return this.makeElement('tbody');
     }
   }]);
 
   return UnigridSegment;
-}(React.Component);
+}(UnigridSection);
 
-var UnigridFooter = function (_React$Component3) {
-  _inherits(UnigridFooter, _React$Component3);
+var UnigridFooter = function (_UnigridSection3) {
+  _inherits(UnigridFooter, _UnigridSection3);
 
   function UnigridFooter() {
     _classCallCheck(this, UnigridFooter);
@@ -276,19 +346,15 @@ var UnigridFooter = function (_React$Component3) {
   _createClass(UnigridFooter, [{
     key: 'render',
     value: function render() {
-      return React.createElement(
-        'tfoot',
-        null,
-        this.props.children
-      );
+      return this.makeElement('tfoot');
     }
   }]);
 
   return UnigridFooter;
-}(React.Component);
+}(UnigridSection);
 
-var Unigrid = function (_React$Component4) {
-  _inherits(Unigrid, _React$Component4);
+var Unigrid = function (_React$Component2) {
+  _inherits(Unigrid, _React$Component2);
 
   function Unigrid() {
     _classCallCheck(this, Unigrid);
@@ -323,7 +389,7 @@ var Unigrid = function (_React$Component4) {
   }, {
     key: 'makeStringIterator',
     value: function makeStringIterator(data, select) {
-      if (select === "all") {
+      if (select === 'all') {
         return this.makeAllIterator(data);
       }
     }
@@ -331,19 +397,19 @@ var Unigrid = function (_React$Component4) {
     key: 'makeIterator',
     value: function makeIterator(data, select) {
       switch (typeof select) {
-        case "number":
+        case 'number':
           return this.makeNumberIterator(data, select);
-        case "string":
+        case 'string':
           return this.makeStringIterator(data, select);
       }
     }
   }, {
     key: 'executeSelect',
     value: function executeSelect(select, cfg, ctx, acc) {
-      var _this5 = this;
+      var _this6 = this;
 
       var it = _defineProperty({}, Symbol.iterator, function () {
-        return _this5.makeIterator(ctx.list, select);
+        return _this6.makeIterator(ctx.list, select);
       });
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -374,9 +440,9 @@ var Unigrid = function (_React$Component4) {
   }, {
     key: 'shouldSkip',
     value: function shouldSkip(condition, item) {
-      if (condition.hasOwnProperty("ifDoes")) {
-        if (condition.ifDoes === "exist") {
-          if (condition.hasOwnProperty("property")) {
+      if (condition.hasOwnProperty('ifDoes')) {
+        if (condition.ifDoes === 'exist') {
+          if (condition.hasOwnProperty('property')) {
             if (!item.hasOwnProperty(condition.property)) {
               return true;
             }
@@ -387,15 +453,26 @@ var Unigrid = function (_React$Component4) {
     }
   }, {
     key: 'createSection',
-    value: function createSection(section, children) {
-      switch (section) {
-        case "header":
-          return React.createElement(UnigridHeader, { children: children });
-        case "body":
-          return React.createElement(UnigridSegment, { children: children });
-        case "footer":
-          return React.createElement(UnigridFooter, { children: children });
+    value: function createSection(cfg, children) {
+
+      function getComponent(section) {
+        switch (section) {
+          case 'header':
+            return UnigridHeader;
+          case 'body':
+            return UnigridSegment;
+          case 'footer':
+            return UnigridFooter;
+        }
       }
+
+      var section = cfg.section;
+      var show = cfg.show;
+
+      var other = _objectWithoutProperties(cfg, ['section', 'show']);
+
+      Object.assign(other, { children: children });
+      return React.createElement(getComponent(section), other);
     }
   }, {
     key: 'addRows',
@@ -403,19 +480,19 @@ var Unigrid = function (_React$Component4) {
       for (var i = 0; i < cfg.length; i++) {
         var c = cfg[i];
 
-        if (c.hasOwnProperty("condition")) {
+        if (c.hasOwnProperty('condition')) {
           if (this.shouldSkip(c.condition, ctx.item)) continue;
         }
 
-        if (c.hasOwnProperty("section")) {
-          var children = this.createTable(c.show, ctx);
-          acc.push(this.createSection(c.section, children));
-        } else if (c.hasOwnProperty("select")) {
-          var newCtx = c.hasOwnProperty("from") ? { list: ctx.item[c.from], item: ctx.item } : ctx;
+        if (c.hasOwnProperty('section')) {
+          var children = this.createTable(c, ctx);
+          acc.push(this.createSection(c, children));
+        } else if (c.hasOwnProperty('select')) {
+          var newCtx = c.hasOwnProperty('fromProperty') ? { list: ctx.item[c.fromProperty], item: ctx.item } : ctx;
           this.executeSelect(c.select, c.show, newCtx, acc);
-        } else if (c.hasOwnProperty("cells")) {
-          acc.push(React.createElement(UnigridRow, { definition: c, item: ctx.item,
-            cellTypes: this.props.cellTypes }));
+        } else if (c.hasOwnProperty('cells')) {
+          var cTypes = this.props.cellTypes;
+          acc.push(React.createElement(UnigridRow, _extends({}, c, { item: ctx.item, cellTypes: cTypes })));
         }
       }
     }
@@ -423,20 +500,20 @@ var Unigrid = function (_React$Component4) {
     key: 'createTable',
     value: function createTable(cfg, ctx) {
       var acc = [];
-      this.addRows(acc, cfg, ctx);
+      this.addRows(acc, cfg.show, ctx);
       return acc;
     }
   }, {
     key: 'render',
     value: function render() {
-      console.log(this.props);
-
       var ctx = { list: this.props.data, item: null };
-      return React.createElement(
-        'table',
-        null,
-        this.createTable(this.props.table, ctx)
-      );
+      var _props$table = this.props.table;
+      var show = _props$table.show;
+
+      var other = _objectWithoutProperties(_props$table, ['show']);
+
+      var children = this.createTable(this.props.table, ctx);
+      return React.createElement('table', other, children);
     }
   }]);
 
