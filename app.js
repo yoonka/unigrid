@@ -27,58 +27,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Unigrid} from 'src/Unigrid';
-import {UnigridTextCell} from 'src/UnigridCells';
+import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
 
 function compareString(a, b) {
-  let la = a.toLowerCase();
-  let lb = b.toLowerCase();
+  const la = a.toLowerCase();
+  const lb = b.toLowerCase();
 
-  if(la < lb) return -1;
-  if(la > lb) return 1;
+  if (la < lb) return -1;
+  if (la > lb) return 1;
   return 0;
 };
 
-function compareAttributes(attrA, attrB) {
-  if(typeof attrA === "object") attrA = attrA.valueOf();
-  if(typeof attrB === "object") attrB = attrB.valueOf();
+function compareAttributes(oAttrA, oAttrB) {
+  const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
+  const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
 
-  let aType = typeof attrA;
-  let bType = typeof attrB;
+  const aType = typeof attrA;
+  const bType = typeof attrB;
 
-  if(aType !== bType) return 0;
+  if (aType !== bType) return 0;
 
-  if(aType === "string") {
-    if((retVal = compareString(attrA, attrB)) !== 0) return retVal;
-  } else if(aType === "number") {
-    if((retVal = attrA - attrB) !== 0) return retVal;
+  if (aType === 'string') {
+    const retVal = compareString(attrA, attrB);
+    if(retVal !== 0) return retVal;
+  } else if (aType === 'number') {
+    const retVal = attrA - attrB;
+    if (retVal !== 0) return retVal;
   }
   return 0;
 };
 
 function compareObjects(a, b, attrs) {
-  for(let i=0, retVal=null; i<attrs.length; i++) {
-    if((retVal = compareAttributes(a[attrs[i]], b[attrs[i]])) === 0)
+  for (let i = 0; i < attrs.length; i++) {
+    const retVal = compareAttributes(a[attrs[i]], b[attrs[i]]);
+    if(retVal === 0) {
       continue;
-    else
+    } else {
       return retVal;
+    }
   }
   return 0;
 };
 
-var topSorter = function(a, b) {
-  return compareObjects(a, b, ["agent", "date", "street", "name", "number"]);
+function topSorter(a, b) {
+  return compareObjects(a, b, ['agent', 'date', 'street', 'name', 'number']);
 };
 
-var subSorter = function(a, b) {
-  return compareObjects(a, b, ["name", "number"]);
+function subSorter(a, b) {
+  return compareObjects(a, b, ['name', 'number']);
 };
 
-var counter = ( () => {var counter = 0; return () => counter += 1;} )()
+const idCounter = ( () => {var counter = 0; return () => counter += 1;} )()
 
-var addIds = function(data, property) {
-  for(let i=0; i<data.length; i++) {
-    data[i].id = counter();
+function addIds(data, property) {
+  for (let i = 0; i < data.length; i++) {
+    data[i].id = idCounter();
     if(data[i].hasOwnProperty(property)) {
       addIds(data[i][property], property);
     }
@@ -87,73 +91,82 @@ var addIds = function(data, property) {
 
 var props = {
   data: tableData,
-  table: [
-    {
-      section: "header",
-      show: [
-        {
-          select: 0,
-          show: [
-            {
-              cells: [
-                {property: "hAgent", using: UnigridTextCell},
-                "hDate",
-                "hStreet",
-                {property: "hName", as: "text"},
-                "hNumber"
-              ], as: "header"}
-          ]
-        }
-      ],
-    },
-    {
-      select: "all",
-      show: [
-        {
-          section: "body",
-          show: [
-            {
-              condition: {ifDoes: "exist", property: "list"},
-              from: "list",
-              select: 0,
-              show: [
-                {
-                  cells: ["hCategory", {colspan: 4}],
-                  as: "header"
-                }
-              ]
-            },
-            {
-              cells: ["agent", "date", "street", "name", "number"]
-            },
-            {
-              condition: {ifDoes: "exist", property: "list"},
-              from: "list",
-              select: "all",
-              show: [
-                {cells: [{colspan: 3}, "name", "number"]}
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      section: "footer",
-      show: [
-        {
-          select: 0,
-          show: [
-            {cells: [null, null, null, "fSum", "fTotal"]},
-            {cells: [null, null, null, "sum", "total"]}
-          ]
-        }
-      ]
-    }
-  ],
-  sorters: [topSorter, {from: "list", use: subSorter}],
+  table: {
+    className: 'unigrid-main-class',
+    show: [
+      {
+        section: 'header',
+        className: 'unigrid-header',
+        show: [
+          {
+            select: 0,
+            show: [
+              {
+                cells: [
+                  {show: 'hAgent', using: UnigridTextCell},
+                  'hDate',
+                  'hStreet',
+                  {show: 'hName', as: 'string', className: 'name-header-cell'},
+                  'hNumber'
+                ], as: 'header'}
+            ]
+          }
+        ],
+      },
+      {
+        select: 'all',
+        show: [
+          {
+            section: 'body',
+            className: 'unigrid-segment',
+            show: [
+              {
+                condition: {ifDoes: 'exist', property: 'list'},
+                fromProperty: 'list',
+                select: 0,
+                show: [
+                  {
+                    cells: ['hCategory', {as: 'empty', colSpan: 4}],
+                    as: 'header'
+                  }
+                ]
+              },
+              {
+                className: 'some-row-class',
+                cells: ['agent', 'date', 'street', 'name',
+                        {show: 'number', as: 'string', className: 'numer-cell'}]
+              },
+              {
+                condition: {ifDoes: 'exist', property: 'list'},
+                fromProperty: 'list',
+                select: 'all',
+                show: [
+                  {cells: [{as: 'empty', colSpan: 3}, 'name', 'number']}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        section: 'footer',
+        className: 'unigrid-footer',
+        show: [
+          {
+            select: 0,
+            show: [
+              {cells: [null, null, null, 'fSum', 'fTotal']},
+              {cells: [null, null, null, 'sum', 'total']}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  sorters: [topSorter, {fromProperty: 'list', use: subSorter}],
   cellTypes: {
-    text: UnigridTextCell
+    empty: UnigridEmptyCell,
+    string: UnigridTextCell
   },
   renderer: null
 };
@@ -161,7 +174,7 @@ var props = {
 let container = document.getElementById('container');
 
 function callback() {
-  addIds(props.data, "list");
+  addIds(props.data, 'list');
   ReactDOM.render(React.createElement(Unigrid, props), container);
 };
 

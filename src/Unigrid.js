@@ -27,22 +27,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import React from 'react';
 import {UnigridRow} from 'src/UnigridRow';
 
-export class UnigridHeader extends React.Component {
-  render() {
-    return (<thead>{this.props.children}</thead>);
+class UnigridSection extends React.Component {
+  makeElement(name) {
+    const {children, ...other} = this.props;
+    return React.createElement(name, other, children);
   }
 }
 
-export class UnigridSegment extends React.Component {
-  render() {
-    return (<tbody>{this.props.children}</tbody>);
-  }
+export class UnigridHeader extends UnigridSection {
+  render() {return this.makeElement('thead');}
 }
 
-export class UnigridFooter extends React.Component {
-  render() {
-    return (<tfoot>{this.props.children}</tfoot>);
-  }
+export class UnigridSegment extends UnigridSection {
+  render() {return this.makeElement('tbody');}
+}
+
+export class UnigridFooter extends UnigridSection {
+  render() {return this.makeElement('tfoot');}
 }
 
 export class Unigrid extends React.Component {
@@ -71,15 +72,15 @@ export class Unigrid extends React.Component {
   }
 
   makeStringIterator(data, select) {
-    if (select === "all") {
+    if (select === 'all') {
       return this.makeAllIterator(data);
     }
   }
 
   makeIterator(data, select) {
     switch (typeof(select)) {
-    case "number": return this.makeNumberIterator(data, select);
-    case "string": return this.makeStringIterator(data, select);
+    case 'number': return this.makeNumberIterator(data, select);
+    case 'string': return this.makeStringIterator(data, select);
     }
   }
 
@@ -92,9 +93,9 @@ export class Unigrid extends React.Component {
   }
 
   shouldSkip(condition, item) {
-    if (condition.hasOwnProperty("ifDoes")) {
-      if (condition.ifDoes === "exist") {
-        if (condition.hasOwnProperty("property")) {
+    if (condition.hasOwnProperty('ifDoes')) {
+      if (condition.ifDoes === 'exist') {
+        if (condition.hasOwnProperty('property')) {
           if (!item.hasOwnProperty(condition.property)) {
             return true;
           }
@@ -104,46 +105,58 @@ export class Unigrid extends React.Component {
     return false;
   }
 
-  createSection(section, children) {
-    switch (section) {
-    case "header": return (<UnigridHeader children={children} />);
-    case "body":   return (<UnigridSegment children={children} />);
-    case "footer": return (<UnigridFooter children={children} />);
+  createSection(cfg, children) {
+
+    function getComponent(section) {
+      switch (section) {
+      case 'header': return UnigridHeader;
+      case 'body':   return UnigridSegment;
+      case 'footer': return UnigridFooter;
+      }
     }
+
+    let {section, show, ...other} = cfg;
+    Object.assign(other, {children: children});
+    return React.createElement(getComponent(section), other);
   }
 
   addRows(acc, cfg, ctx) {
     for(let i=0; i<cfg.length; i++) {
       let c=cfg[i];
 
-      if (c.hasOwnProperty("condition")) {
+      if (c.hasOwnProperty('condition')) {
         if (this.shouldSkip(c.condition, ctx.item)) continue;
       }
 
-      if (c.hasOwnProperty("section")) {
-        let children = this.createTable(c.show, ctx);
-        acc.push(this.createSection(c.section, children));
-      } else if (c.hasOwnProperty("select")) {
-        let newCtx = c.hasOwnProperty("from") ?
-          {list: ctx.item[c.from], item: ctx.item} : ctx;
+      if (c.hasOwnProperty('section')) {
+        let children = this.createTable(c, ctx);
+        acc.push(this.createSection(c, children));
+      } else if (c.hasOwnProperty('select')) {
+        let newCtx = c.hasOwnProperty('fromProperty') ?
+          {list: ctx.item[c.fromProperty], item: ctx.item} : ctx;
         this.executeSelect(c.select, c.show, newCtx, acc);
-      } else if (c.hasOwnProperty("cells")) {
-        acc.push(<UnigridRow definition={c} item={ctx.item}
-          cellTypes={this.props.cellTypes} />);
+      } else if (c.hasOwnProperty('cells')) {
+        const cTypes = this.props.cellTypes;
+        acc.push(<UnigridRow {...c} item={ctx.item} cellTypes={cTypes} />);
       }
     }
   }
 
   createTable(cfg, ctx) {
     let acc = [];
-    this.addRows(acc, cfg, ctx);
+    this.addRows(acc, cfg.show, ctx);
     return acc;
   }
 
   render() {
-    console.log(this.props);
-
-    var ctx = {list: this.props.data, item: null};
-    return (<table>{this.createTable(this.props.table, ctx)}</table>);
+    const ctx = {list: this.props.data, item: null};
+    const {show, ...other} = this.props.table;
+    const children = this.createTable(this.props.table, ctx);
+    return React.createElement('table', other, children);
   }
 }
+
+export {UnigridRow} from 'src/UnigridRow';
+export {UnigridEmptyCell,
+        UnigridTextCell,
+        UnigridNumberCell} from 'src/UnigridCells';

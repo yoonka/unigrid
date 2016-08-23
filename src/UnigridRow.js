@@ -30,55 +30,77 @@ import {UnigridEmptyCell,
         UnigridNumberCell} from 'src/UnigridCells';
 
 export class UnigridRow extends React.Component {
-  createCellForType(value, as) {
-    switch (typeof(value)) {
-    case "string": return (<UnigridTextCell value={value} as={as} />);
-    case "number": return (<UnigridNumberCell value={value} as={as} />);
-    }
-    let err = "Error: " + JSON.stringify(value);
-    return (<UnigridTextCell value={err} as={as} />);
+
+  createErrorCell(nProps, msg) {
+    return (<UnigridTextCell {...nProps} cell={"Error: " + msg} />);
   }
 
-  createCell(cell, item, as) {
-    if (typeof(cell) === "string") {
-      if (item.hasOwnProperty(cell)) {
-        return this.createCellForType(item[cell], as);
-      }
-      return (<UnigridTextCell value={"Error: " + cell} as={as} />);
+  createCellForType(type, oProps, rowAs) {
+    let {show, using, as, ...nProps} = oProps;
+    Object.assign(nProps, {rowAs: rowAs});
+
+    if (typeof(type) !== 'string') {
+      return React.createElement(type, nProps);
+    }
+
+    if (this.props.hasOwnProperty('cellTypes')
+        && this.props.cellTypes.hasOwnProperty(type)) {
+      return React.createElement(this.props.cellTypes[type], nProps);
+    }
+
+    switch (type) {
+    case 'string': return (<UnigridTextCell   {...nProps} />);
+    case 'number': return (<UnigridNumberCell {...nProps} />);
+    case 'empty':  return (<UnigridEmptyCell  {...nProps} />);
+    }
+
+    return this.createErrorCell(nProps, JSON.stringify(type));
+  }
+
+  getItemValue(item, property) {
+    return property && item.hasOwnProperty(property) ?
+      item[property] : undefined;
+  }
+
+  createCell(item, cell, rowAs) {
+    if (typeof(cell) === 'string') {
+      const value = this.getItemValue(item, cell);
+      return value !== undefined ?
+        this.createCellForType(typeof(value), {cell: value}, rowAs)
+      : this.createErrorCell({rowAs: rowAs}, cell);
     }
     if (cell === null) {
-      return (<UnigridEmptyCell as={as} />);
+      return this.createCellForType('empty', {}, rowAs);
     }
-    if (typeof(cell) !== "object") {
-      return (<UnigridTextCell value={"Error: " + cell.toString()} as={as} />);
+    if (typeof(cell) !== 'object') {
+      return this.createErrorCell({rowAs: rowAs}, cell.toString());
     }
-    if (cell.hasOwnProperty("colspan")) {
-      return (<UnigridEmptyCell colspan={cell.colspan} as={as} />);
+
+    const value = this.getItemValue(item, cell.show);
+    if (value !== undefined) {
+      Object.assign(cell, {cell: value});
     }
-    if (!cell.hasOwnProperty("property")) {
-      let err = "Error: " + JSON.stringify(cell);
-      return (<UnigridTextCell value={err} as={as} />);
+
+    if (cell.hasOwnProperty('using')) {
+      return this.createCellForType(cell.using, cell, rowAs)
     }
-    if (cell.hasOwnProperty("using")) {
-      let props = {value: item[cell.property], as: as};
-      return React.createElement(cell.using, props);
+    if (cell.hasOwnProperty('as')) {
+      return this.createCellForType(cell.as, cell, rowAs);
     }
-    if (cell.hasOwnProperty("as")) {
-      let elem = this.props.cellTypes[cell.as];
-      let props = {value: item[cell.property], as: as};
-      return React.createElement(elem, props);
-    }
-    let err = "Error: " + JSON.stringify(cell);
-    return (<UnigridTextCell value={err} as={as} />);
+
+    Object.assign(cell, {rowAs: rowAs});
+    return this.createErrorCell(cell, JSON.stringify(cell));
   }
 
   render() {
-    let cfg = this.props.definition;
-    let cells = cfg.cells || [];
+    let cfg = this.props;
+    let elems = cfg.cells || [];
     let arr = [];
-    for (let i=0; i<cells.length; i++) {
-      arr.push(this.createCell(cells[i], this.props.item, cfg.as));
+    for (let i = 0; i < elems.length; i++) {
+      arr.push(this.createCell(cfg.item, elems[i], cfg.as));
     }
-    return (<tr>{arr}</tr>);
+
+    let {cells, as, item, cellTypes, ...nProps} = cfg;
+    return React.createElement('tr', nProps, arr);
   }
 }

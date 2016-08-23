@@ -28,24 +28,24 @@ import React from 'react';
 
 export class UnigridEmptyCell extends React.Component {
   render() {
-    let span = this.props.colspan || 1;
-    return this.props.as === "header" ?
-      (span === 1 ? (<th/>) : (<th colSpan={span} />))
-    : (span === 1 ? (<td/>) : (<td colSpan={span} />));
+    return this.props.rowAs === "header" ?
+      (<th {...this.props} />) : (<td {...this.props} />);
   }
 }
 
 export class UnigridTextCell extends React.Component {
   render() {
-    return this.props.as === "header" ?
-      (<th>{this.props.value}</th>) : (<td>{this.props.value}</td>);
+    const p = this.props;
+    return p.rowAs === "header" ?
+      (<th {...p} >{p.cell}</th>) : (<td {...p} >{p.cell}</td>);
   }
 }
 
 export class UnigridNumberCell extends React.Component {
   render() {
-    return this.props.as === "header" ?
-      (<th>{this.props.value.toString()}</th>)
-    : (<td>{this.props.value.toString()}</td>);
+    const p = this.props;
+    return p.rowAs === "header" ?
+      (<th {...p} >{p.cell.toString()}</th>)
+    : (<td {...p} >{p.cell.toString()}</td>);
   }
 }
