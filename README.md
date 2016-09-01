@@ -1,6 +1,6 @@
 #Unigrid
 
-Easily create HTML tables of arbitrary complexity. Define tables using a simple configuration-based domain-specific language. Implement more complex table components by creating table definitions dynamically and leveraging Unigrid for the actual rendering.
+Easily create HTML tables of arbitrary complexity. Define tables using a simple configuration-based domain-specific language. Implement more complex table components by creating table definitions dynamically and rendering them with Unigrid.
 
 Functionally Unigrid is a renderer which renders a grid of cells grouped into sections and rows. Being a React component it will re-render only what's necessary when the table changes.
 
@@ -8,13 +8,13 @@ Functionally Unigrid is a renderer which renders a grid of cells grouped into se
 
 The Unigrid component consumes the following properties:
 
-**data** -- An array. Contains the elements to show in the table.
-**table** -- An object. The actual definition of the table. Contains instructions how to generate the table and how to present the elements contained in the data array.
+**data** -- Either an array or an object. Contains the element(s) to show in the table.
+**table** -- An object. The actual definition of the table. Contains instructions how to generate the table and how to present the element(s) contained in the data property.
 **cellTypes** - An array. Contains a mapping of cell types to React components implementing those types.
 
 Example:
 
-     <Unigrid data={this.myJson}
+    <Unigrid data={this.myJson}
              table={this.myTable}
              cellTypes={myCellTypes} />
 
@@ -22,10 +22,10 @@ Example:
 
 The table definition is essentially a tree of objects, where each object may contain an array of other objects. Each object is an expression which defines:
  - how to interpret object expressions in the contained array
- - how to present items from the data array
+ - how to present items from the data property
  - both of the above
 
-The tree represents nested lists in the input data. Unigrid traverses the table definition to read and interpret the expressions. Then based on those interpretations it reads the input data and maps it to the output flat structure of the resulting HTML table.
+The table definition tree represents nested lists of the input data. Unigrid traverses the table definition to read and interpret the expressions. Then based on those interpretations it reads the input data and maps it to the output flat structure of the resulting HTML table.
 
 When interpreting an object expression results in creating a new part of the resulting HTML table, that part is created using a dedicated React component and properties of the object expression are passed to that component as its _props_.
 
@@ -43,7 +43,7 @@ Before Unigrid starts traversing the definition tree it creates an object with t
 * **list** (array) - contains the current list.
 * **item** (object) - contains the current item.
 
-The context is initialized with the _data_ property passed to Unigrid: if the data is an array then it's stored as _list_ in the context, if it's an object then it's stored as _item_ in the context. In either case the other cotext property is initialized to _null_.
+The context is initialized with the _data_ property passed to Unigrid: if that data is an array then it's stored as _list_ in the context, if it's an object then it's stored as _item_ in the context. In either case the other context property is initialized to _null_.
 
 Unigrid traverses the definition tree recursively updating the context object according to the interpretations of visited object expressions (instructions).
 
@@ -82,12 +82,12 @@ There are three types automatically supported by Unigrid:
 - **number** - values of type _number_ will be implemented using **UnigridNumberCell** unless overridden in the _cellTypes_ map.
 - **empty** - a special type that renders empty tag, either _td_ or _th_ (_th_ if the row is of type _header_).
 
-Either one of the two special properties are available in the React component implementing the cell:
+There are two special properties which may be available in the React component implementing the cell:
 
-* **cell** - The value of the property of the _item_ object in the context specified in the cell definition as _string_ or an object containing the _show_ property.
-* **item** - If the cell definition is an object but doesn't specify the property to show by name (i.e. using _show_) then the whole row is passed to the component as the _item_ property.
+* **item** - The _item_ property of the context object, contains the item from the input data that is to be shown in the current row.
+* **cell** - The value of the property of the _item_ object in the context specified in the cell definition as a _string_ or _show_ property of the object that defines the cell.
 
-The only exception is the cell used to render the type _empty_ in which those properties are not available (since it only renders an empty tag).
+The only exception is the cell used to render the type _empty_, in which those properties are not available (since it only renders an empty tag).
 
 ##Usage
 
@@ -99,7 +99,7 @@ The only exception is the cell used to render the type _empty_ in which those pr
 
 For npm there is a pre-compiled _cjs_ version created with command:
 
-      jspm build src/Unigrid.js unigrid.js --externals react --format cjs
+    jspm build src/Unigrid.js unigrid.js --externals react --format cjs
 
 or
 
