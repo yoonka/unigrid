@@ -149,7 +149,12 @@ export class Unigrid extends React.Component {
   }
 
   render() {
-    const ctx = {list: this.props.data, item: null};
+    const ctx = {list: null, item: null};
+    if (this.props.data.constructor === Array) {
+      ctx.list = this.props.data;
+    } else {
+      ctx.item = this.props.data;
+    }
     const {show, ...other} = this.props.table;
     const children = this.createTable(this.props.table, ctx);
     return React.createElement('table', other, children);

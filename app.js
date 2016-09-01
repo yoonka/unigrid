@@ -37,7 +37,7 @@ function compareString(a, b) {
   if (la < lb) return -1;
   if (la > lb) return 1;
   return 0;
-};
+}
 
 function compareAttributes(oAttrA, oAttrB) {
   const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
@@ -56,34 +56,34 @@ function compareAttributes(oAttrA, oAttrB) {
     if (retVal !== 0) return retVal;
   }
   return 0;
-};
+}
 
 function compareObjects(a, b, attrs) {
   for (let i = 0; i < attrs.length; i++) {
     const retVal = compareAttributes(a[attrs[i]], b[attrs[i]]);
-    if(retVal === 0) {
+    if (retVal === 0) {
       continue;
     } else {
       return retVal;
     }
   }
   return 0;
-};
+}
 
 function topSorter(a, b) {
   return compareObjects(a, b, ['agent', 'date', 'street', 'name', 'number']);
-};
+}
 
 function subSorter(a, b) {
   return compareObjects(a, b, ['name', 'number']);
-};
+}
 
 const idCounter = ( () => {var counter = 0; return () => counter += 1;} )()
 
 function addIds(data, property) {
   for (let i = 0; i < data.length; i++) {
     data[i].id = idCounter();
-    if(data[i].hasOwnProperty(property)) {
+    if (data[i].hasOwnProperty(property)) {
       addIds(data[i][property], property);
     }
   }
@@ -111,7 +111,7 @@ var props = {
                 ], as: 'header'}
             ]
           }
-        ],
+        ]
       },
       {
         select: 'all',

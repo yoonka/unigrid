@@ -77,7 +77,9 @@ export class UnigridRow extends React.Component {
     }
 
     const value = this.getItemValue(item, cell.show);
-    if (value !== undefined) {
+    if (value === undefined) {
+      Object.assign(cell, {item: item});
+    } else {
       Object.assign(cell, {cell: value});
     }
 
