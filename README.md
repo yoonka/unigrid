@@ -82,6 +82,13 @@ There are three types automatically supported by Unigrid:
 - **number** - values of type _number_ will be implemented using **UnigridNumberCell** unless overridden in the _cellTypes_ map.
 - **empty** - a special type that renders empty tag, either _td_ or _th_ (_th_ if the row is of type _header_).
 
+Either one of the two special properties are available in the React component implementing the cell:
+
+* **cell** - The value of the property of the _item_ object in the context specified in the cell definition as _string_ or an object containing the _show_ property.
+* **item** - If the cell definition is an object but doesn't specify the property to show by name (i.e. using _show_) then the whole row is passed to the component as the _item_ property.
+
+The only exception is the cell used to render the type _empty_ in which those properties are not available (since it only renders an empty tag).
+
 ##Usage
 
     git clone https://github.com/yoonka/unigrid.git
@@ -92,7 +99,7 @@ There are three types automatically supported by Unigrid:
 
 For npm there is a pre-compiled _cjs_ version created with command:
 
-    jspm build src/Unigrid.js unigrid.js --externals react --format cjs
+      jspm build src/Unigrid.js unigrid.js --externals react --format cjs
 
 or
 
