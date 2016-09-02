@@ -32,7 +32,6 @@ When interpreting an object expression results in creating a new part of the res
 Therefore, each object contained in the table definition tree can have properties of the following types:
  - **retained** - read by Unigrid and passed to the resulting React component
  - **consumed** - read by Unigrid but not passed to the resulting React component
- - **renamed** - read by Unigrid and passed to the resulting React component under a different name
  - **read** - contained only in object expressions that don't create any React components. They would be only read and interpreted by Unigrid.
  - **native** - neither read nor understood by Unigrid. All properties not recognized by Unigrid are automatically passed to the resulting React component. If an object expression doesn't create any React component, properties not recognized by Unigrid are ignored.
 
@@ -65,7 +64,8 @@ Unigrid traverses the definition tree recursively updating the context object ac
  - **show** (consumed) - see **Select** above.
 - **Cells** - creates a table row according to cell definition in the expression object and using data from the _item_ property of the context. Properties:
  - **cells** (consumed) - array of cell definitions - see **Cells** section below.
- - **as** (renamed as _rowAs_) - type of the row. Can be any string, which is then passed as _rowAs_ to the cell. A special type _header_ is recognized by Unigrid cells - when specified it causes the cell the render as _th_ instead of _td_.
+ - **rowAs** (retained) - type of the row. Can be any string, which is then passed as _rowAs_ to the cell. A special type _header_ is recognized by Unigrid cells - when specified it causes the cell the render as _th_ instead of _td_.
+ - **mixIn** (consumed) - an object that will be mixed-in to each cell when constructing cells of the given row.
 
 ##Cells
 
@@ -76,6 +76,7 @@ Each single cell in a row is defined using either a string or an object:
  - **show** - similar to defining the cell with a string only - name of the property in the current _item_ in the context. Unigrid reads the value of that property and depending on its type renders one of the default cell types (see section **Types** below).
  - **as** - explicitly state the type of the cell. The type is mapped to the React component rendering that particular type in the _cellTypes_ property passed to Unigrid.
  - **using** - explicitly state the React component that should be used to render the cell.
+ - **bindToCell** - a string or an array of strings that represent names of functions (props of the given cell) that should be bound to the React component cell when called (e.g. 'onClick').
 
 There are three types automatically supported by Unigrid:
 - **string** - values of type _string_ will be implemented using **UnigridTextCell** unless overridden in the _cellTypes_ map.
@@ -86,8 +87,6 @@ There are two special properties which may be available in the React component i
 
 * **item** - The _item_ property of the context object, contains the item from the input data that is to be shown in the current row.
 * **cell** - The value of the property of the _item_ object in the context specified in the cell definition as a _string_ or _show_ property of the object that defines the cell.
-
-The only exception is the cell used to render the type _empty_, in which those properties are not available (since it only renders an empty tag).
 
 ##Usage
 

@@ -89,6 +89,10 @@ function addIds(data, property) {
   }
 }
 
+function handleClick() {
+  console.log(this.props.item);
+}
+
 var props = {
   data: tableData,
   table: {
@@ -108,7 +112,7 @@ var props = {
                   'hStreet',
                   {show: 'hName', as: 'string', className: 'name-header-cell'},
                   'hNumber'
-                ], as: 'header'}
+                ], rowAs: 'header'}
             ]
           }
         ]
@@ -127,21 +131,24 @@ var props = {
                 show: [
                   {
                     cells: ['hCategory', {as: 'empty', colSpan: 4}],
-                    as: 'header'
+                    rowAs: 'header'
                   }
                 ]
               },
               {
                 className: 'some-row-class',
                 cells: ['agent', 'date', 'street', 'name',
-                        {show: 'number', as: 'string', className: 'numer-cell'}]
+                        {show: 'number', as: 'string', className: 'number-cell', onClick: handleClick, bindToCell: ['onClick']}]
               },
               {
                 condition: {ifDoes: 'exist', property: 'list'},
                 fromProperty: 'list',
                 select: 'all',
                 show: [
-                  {cells: [{as: 'empty', colSpan: 3}, 'name', 'number']}
+                  {
+                    cells: [{as: 'empty', colSpan: 3}, 'name', 'number'],
+                    mixIn: {onClick: handleClick, bindToCell: 'onClick'}
+                  }
                 ]
               }
             ]

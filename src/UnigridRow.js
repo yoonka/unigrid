@@ -31,13 +31,22 @@ import {UnigridEmptyCell,
 
 export class UnigridRow extends React.Component {
 
-  createErrorCell(nProps, msg) {
-    return (<UnigridTextCell {...nProps} cell={"Error: " + msg} />);
+  mkProps(cell, item, value, rowAs, mixIn) {
+    if (item !== undefined) {
+      Object.assign(cell, {item: item});
+    }
+    if (value !== undefined) {
+      Object.assign(cell, {cell: value});
+    }
+    if (rowAs !== undefined) {
+      Object.assign(cell, {rowAs: rowAs});
+    }
+    Object.assign(cell, mixIn);
+    return cell;
   }
 
-  createCellForType(type, oProps, rowAs) {
-    let {show, using, as, ...nProps} = oProps;
-    Object.assign(nProps, {rowAs: rowAs});
+  createCellForType(type, oProps) {
+    let {show, using, as, bindToCell, ...nProps} = oProps;
 
     if (typeof(type) !== 'string') {
       return React.createElement(type, nProps);
@@ -54,7 +63,8 @@ export class UnigridRow extends React.Component {
     case 'empty':  return (<UnigridEmptyCell  {...nProps} />);
     }
 
-    return this.createErrorCell(nProps, JSON.stringify(type));
+    // 'error' type
+    return (<UnigridTextCell {...nProps} cell={"Error: " + nProps.cell} />);
   }
 
   getItemValue(item, property) {
@@ -62,46 +72,73 @@ export class UnigridRow extends React.Component {
       item[property] : undefined;
   }
 
-  createCell(item, cell, rowAs) {
+  getCell(item, cell, rowAs, mixIn) {
     if (typeof(cell) === 'string') {
       const value = this.getItemValue(item, cell);
-      return value !== undefined ?
-        this.createCellForType(typeof(value), {cell: value}, rowAs)
-      : this.createErrorCell({rowAs: rowAs}, cell);
+      if (value !== undefined) {
+        return [typeof(value), this.mkProps({}, item, value, rowAs, mixIn)];
+      } else {
+        return ['error', this.mkProps({}, item, cell, rowAs, mixIn)];
+      }
     }
     if (cell === null) {
-      return this.createCellForType('empty', {}, rowAs);
+      return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
     }
     if (typeof(cell) !== 'object') {
-      return this.createErrorCell({rowAs: rowAs}, cell.toString());
+      return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
     }
 
-    Object.assign(cell, {item: item});
     const value = this.getItemValue(item, cell.show);
-    if (value !== undefined) {
-      Object.assign(cell, {cell: value});
-    }
+    let nProps = this.mkProps(cell, item, value, rowAs, mixIn);
 
     if (cell.hasOwnProperty('using')) {
-      return this.createCellForType(cell.using, cell, rowAs)
+      return [cell.using, nProps];
     }
     if (cell.hasOwnProperty('as')) {
-      return this.createCellForType(cell.as, cell, rowAs);
+      return [cell.as, nProps];
     }
 
-    Object.assign(cell, {rowAs: rowAs});
-    return this.createErrorCell(cell, JSON.stringify(cell));
+    Object.assign(nProps, {cell: JSON.stringify(cell)});
+    return ['error', nProps];
+  }
+
+  createAndProcessCell(item, cell, rowAs, mixIn) {
+    let [type, props] = this.getCell(item, cell, rowAs, mixIn);
+    let binds = props.bindToCell || [];
+    if (typeof(binds) === 'string') {
+      binds = [binds];
+    }
+    let toAdd = [];
+    for (let i = 0; i < binds.length; i++) {
+      let funName = binds[i];
+      let oldFun = props[funName];
+      if (oldFun !== undefined) {
+        let newFun = function() {
+          return oldFun.apply(this.unigridCell, arguments);
+        }
+        toAdd.push(newFun);
+        props[funName] = newFun.bind(newFun);
+      }
+    }
+    let component = this.createCellForType(type, props);
+    for (let i = 0; i < toAdd.length; i++) {
+      toAdd[i].unigridCell = component;
+    }
+
+    console.log(component);
+    return component;
   }
 
   render() {
     let cfg = this.props;
     let elems = cfg.cells || [];
+    let cfgMixIn = cfg.mixIn;
     let arr = [];
     for (let i = 0; i < elems.length; i++) {
-      arr.push(this.createCell(cfg.item, elems[i], cfg.as));
+      arr.push(this.createAndProcessCell(cfg.item, elems[i], cfg.rowAs, cfgMixIn));
     }
 
-    let {cells, as, item, cellTypes, ...nProps} = cfg;
+    let {cells, as, mixIn, item, cellTypes, ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
 }
