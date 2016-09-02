@@ -95,6 +95,44 @@ var _inherits = (function (subClass, superClass) {
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 })
 
+var _slicedToArray = (function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+})();
+
 var UnigridEmptyCell = function (_React$Component) {
   _inherits(UnigridEmptyCell, _React$Component);
 
@@ -180,20 +218,29 @@ var UnigridRow = function (_React$Component) {
   }
 
   _createClass(UnigridRow, [{
-    key: 'createErrorCell',
-    value: function createErrorCell(nProps, msg) {
-      return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + msg }));
+    key: 'mkProps',
+    value: function mkProps(cell, item, value, rowAs, mixIn) {
+      if (item !== undefined) {
+        Object.assign(cell, { item: item });
+      }
+      if (value !== undefined) {
+        Object.assign(cell, { cell: value });
+      }
+      if (rowAs !== undefined) {
+        Object.assign(cell, { rowAs: rowAs });
+      }
+      Object.assign(cell, mixIn);
+      return cell;
     }
   }, {
     key: 'createCellForType',
-    value: function createCellForType(type, oProps, rowAs) {
+    value: function createCellForType(type, oProps) {
       var show = oProps.show;
       var using = oProps.using;
       var as = oProps.as;
+      var bindToCell = oProps.bindToCell;
 
-      var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as']);
-
-      Object.assign(nProps, { rowAs: rowAs });
+      var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as', 'bindToCell']);
 
       if (typeof type !== 'string') {
         return React.createElement(type, nProps);
@@ -212,7 +259,8 @@ var UnigridRow = function (_React$Component) {
           return React.createElement(UnigridEmptyCell, nProps);
       }
 
-      return this.createErrorCell(nProps, JSON.stringify(type));
+      // 'error' type
+      return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + nProps.cell }));
     }
   }, {
     key: 'getItemValue',
@@ -220,50 +268,93 @@ var UnigridRow = function (_React$Component) {
       return property && item.hasOwnProperty(property) ? item[property] : undefined;
     }
   }, {
-    key: 'createCell',
-    value: function createCell(item, cell, rowAs) {
+    key: 'getCell',
+    value: function getCell(item, cell, rowAs, mixIn) {
       if (typeof cell === 'string') {
         var _value = this.getItemValue(item, cell);
-        return _value !== undefined ? this.createCellForType(typeof _value, { cell: _value }, rowAs) : this.createErrorCell({ rowAs: rowAs }, cell);
+        if (_value !== undefined) {
+          return [typeof _value, this.mkProps({}, item, _value, rowAs, mixIn)];
+        } else {
+          return ['error', this.mkProps({}, item, cell, rowAs, mixIn)];
+        }
       }
       if (cell === null) {
-        return this.createCellForType('empty', {}, rowAs);
+        return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
       }
       if (typeof cell !== 'object') {
-        return this.createErrorCell({ rowAs: rowAs }, cell.toString());
+        return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
       }
 
       var value = this.getItemValue(item, cell.show);
-      if (value !== undefined) {
-        Object.assign(cell, { cell: value });
-      }
+      var nProps = this.mkProps(cell, item, value, rowAs, mixIn);
 
       if (cell.hasOwnProperty('using')) {
-        return this.createCellForType(cell.using, cell, rowAs);
+        return [cell.using, nProps];
       }
       if (cell.hasOwnProperty('as')) {
-        return this.createCellForType(cell.as, cell, rowAs);
+        return [cell.as, nProps];
       }
 
-      Object.assign(cell, { rowAs: rowAs });
-      return this.createErrorCell(cell, JSON.stringify(cell));
+      Object.assign(nProps, { cell: JSON.stringify(cell) });
+      return ['error', nProps];
+    }
+  }, {
+    key: 'createAndProcessCell',
+    value: function createAndProcessCell(item, cell, rowAs, mixIn) {
+      var _getCell = this.getCell(item, cell, rowAs, mixIn);
+
+      var _getCell2 = _slicedToArray(_getCell, 2);
+
+      var type = _getCell2[0];
+      var props = _getCell2[1];
+
+      var binds = props.bindToCell || [];
+      if (typeof binds === 'string') {
+        binds = [binds];
+      }
+      var toAdd = [];
+
+      var _loop = function _loop(i) {
+        var funName = binds[i];
+        var oldFun = props[funName];
+        if (oldFun !== undefined) {
+          var newFun = function newFun() {
+            return oldFun.apply(this.unigridCell, arguments);
+          };
+          toAdd.push(newFun);
+          props[funName] = newFun.bind(newFun);
+        }
+      };
+
+      for (var i = 0; i < binds.length; i++) {
+        _loop(i);
+      }
+      var component = this.createCellForType(type, props);
+      for (var _i = 0; _i < toAdd.length; _i++) {
+        toAdd[_i].unigridCell = component;
+      }
+
+      console.log(component);
+      return component;
     }
   }, {
     key: 'render',
     value: function render() {
       var cfg = this.props;
       var elems = cfg.cells || [];
+      var cfgMixIn = cfg.mixIn;
       var arr = [];
       for (var i = 0; i < elems.length; i++) {
-        arr.push(this.createCell(cfg.item, elems[i], cfg.as));
+        arr.push(this.createAndProcessCell(cfg.item, elems[i], cfg.rowAs, cfgMixIn));
       }
 
       var cells = cfg.cells;
       var as = cfg.as;
+      var mixIn = cfg.mixIn;
       var item = cfg.item;
       var cellTypes = cfg.cellTypes;
 
-      var nProps = _objectWithoutProperties(cfg, ['cells', 'as', 'item', 'cellTypes']);
+      var nProps = _objectWithoutProperties(cfg, ['cells', 'as', 'mixIn', 'item', 'cellTypes']);
 
       return React.createElement('tr', nProps, arr);
     }
@@ -506,7 +597,12 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: 'render',
     value: function render() {
-      var ctx = { list: this.props.data, item: null };
+      var ctx = { list: null, item: null };
+      if (this.props.data.constructor === Array) {
+        ctx.list = this.props.data;
+      } else {
+        ctx.item = this.props.data;
+      }
       var _props$table = this.props.table;
       var show = _props$table.show;
 
