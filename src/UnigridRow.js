@@ -89,7 +89,10 @@ export class UnigridRow extends React.Component {
     }
 
     const value = this.getItemValue(item, cell.show);
-    let nProps = this.mkProps(cell, item, value, rowAs, mixIn);
+
+    // create a shallow copy to avoid modifying the cell config (which props is based on)
+    let nProps = Object.assign({}, cell);
+    nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
 
     if (cell.hasOwnProperty('using')) {
       return [cell.using, nProps];
@@ -124,8 +127,6 @@ export class UnigridRow extends React.Component {
     for (let i = 0; i < toAdd.length; i++) {
       toAdd[i].unigridCell = component;
     }
-
-    console.log(component);
     return component;
   }
 

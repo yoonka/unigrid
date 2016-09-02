@@ -286,7 +286,10 @@ var UnigridRow = function (_React$Component) {
       }
 
       var value = this.getItemValue(item, cell.show);
-      var nProps = this.mkProps(cell, item, value, rowAs, mixIn);
+
+      // create a shallow copy to avoid modifying the cell config (which props is based on)
+      var nProps = Object.assign({}, cell);
+      nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
 
       if (cell.hasOwnProperty('using')) {
         return [cell.using, nProps];
@@ -333,8 +336,6 @@ var UnigridRow = function (_React$Component) {
       for (var _i = 0; _i < toAdd.length; _i++) {
         toAdd[_i].unigridCell = component;
       }
-
-      console.log(component);
       return component;
     }
   }, {
