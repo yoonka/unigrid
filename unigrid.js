@@ -266,7 +266,7 @@ var UnigridRow = function (_React$Component) {
     key: 'getItemValue',
     value: function getItemValue(item, property) {
       if (typeof property === 'function') {
-        return property();
+        return property.apply(this, arguments);
       }
 
       return property && item.hasOwnProperty(property) ? item[property] : undefined;

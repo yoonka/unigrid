@@ -69,7 +69,7 @@ export class UnigridRow extends React.Component {
 
   getItemValue(item, property) {
     if (typeof(property) === 'function') {
-      return property();
+      return property.apply(this, arguments);
     }
 
     return property && item.hasOwnProperty(property) ?

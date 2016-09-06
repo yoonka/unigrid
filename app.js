@@ -94,6 +94,10 @@ function handleClick() {
 }
 
 function showFun() {
+  return this.props.item.hCategory;
+}
+
+function showFun2() {
   return 'testValue';
 }
 
@@ -134,7 +138,12 @@ var props = {
                 select: 0,
                 show: [
                   {
-                    cells: ['hCategory', {as: 'empty', colSpan: 2}, showFun, 'hNumber'],
+                    cells: [
+                      'hCategory',
+                      {as: 'empty', colSpan: 1},
+                      {show: showFun, bindToCell: 'show'},
+                      showFun2,
+                      'hNumber'],
                     rowAs: 'header'
                   }
                 ]
