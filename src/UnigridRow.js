@@ -68,12 +68,18 @@ export class UnigridRow extends React.Component {
   }
 
   getItemValue(item, property) {
+    if (typeof(property) === 'function') {
+      return property();
+    }
+
     return property && item.hasOwnProperty(property) ?
       item[property] : undefined;
   }
 
   getCell(item, cell, rowAs, mixIn) {
-    if (typeof(cell) === 'string') {
+    let tCell = typeof(cell);
+
+    if (tCell === 'string' || tCell === 'function') {
       const value = this.getItemValue(item, cell);
       if (value !== undefined) {
         return [typeof(value), this.mkProps({}, item, value, rowAs, mixIn)];
@@ -84,7 +90,7 @@ export class UnigridRow extends React.Component {
     if (cell === null) {
       return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
     }
-    if (typeof(cell) !== 'object') {
+    if (tCell !== 'object') {
       return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
     }
 
@@ -99,6 +105,10 @@ export class UnigridRow extends React.Component {
     }
     if (cell.hasOwnProperty('as')) {
       return [cell.as, nProps];
+    }
+
+    if (value !== undefined) {
+      return [typeof(value), nProps];
     }
 
     Object.assign(nProps, {cell: JSON.stringify(cell)});

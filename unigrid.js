@@ -265,12 +265,18 @@ var UnigridRow = function (_React$Component) {
   }, {
     key: 'getItemValue',
     value: function getItemValue(item, property) {
+      if (typeof property === 'function') {
+        return property();
+      }
+
       return property && item.hasOwnProperty(property) ? item[property] : undefined;
     }
   }, {
     key: 'getCell',
     value: function getCell(item, cell, rowAs, mixIn) {
-      if (typeof cell === 'string') {
+      var tCell = typeof cell;
+
+      if (tCell === 'string' || tCell === 'function') {
         var _value = this.getItemValue(item, cell);
         if (_value !== undefined) {
           return [typeof _value, this.mkProps({}, item, _value, rowAs, mixIn)];
@@ -281,7 +287,7 @@ var UnigridRow = function (_React$Component) {
       if (cell === null) {
         return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
       }
-      if (typeof cell !== 'object') {
+      if (tCell !== 'object') {
         return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
       }
 
@@ -296,6 +302,10 @@ var UnigridRow = function (_React$Component) {
       }
       if (cell.hasOwnProperty('as')) {
         return [cell.as, nProps];
+      }
+
+      if (value !== undefined) {
+        return [typeof value, nProps];
       }
 
       Object.assign(nProps, { cell: JSON.stringify(cell) });

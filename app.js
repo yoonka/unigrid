@@ -93,6 +93,10 @@ function handleClick() {
   console.log(this.props.item);
 }
 
+function showFun() {
+  return 'testValue';
+}
+
 var props = {
   data: tableData,
   table: {
@@ -130,7 +134,7 @@ var props = {
                 select: 0,
                 show: [
                   {
-                    cells: ['hCategory', {as: 'empty', colSpan: 4}],
+                    cells: ['hCategory', {as: 'empty', colSpan: 2}, showFun, 'hNumber'],
                     rowAs: 'header'
                   }
                 ]
@@ -169,6 +173,9 @@ var props = {
         ]
       }
     ]
+  },
+  preprocess: {
+    sort: topSorter
   },
   sorters: [topSorter, {fromProperty: 'list', use: subSorter}],
   cellTypes: {

@@ -27,6 +27,7 @@
     "list": [
       {
         "hCategory": "cat1",
+        "hNumber": "No",
         "name": "Berta",
         "number": 3
       },
