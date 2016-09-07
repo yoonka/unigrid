@@ -68,9 +68,12 @@ export class UnigridRow extends React.Component {
     return (<UnigridTextCell {...nProps} cell={"Error: " + nProps.cell} />);
   }
 
-  getItemValue(item, property) {
+  getItemValue(item, cell) {
+    let property = cell.show;
+
     if (typeof(property) === 'function') {
-      return property.apply(item, arguments);
+      let fakeCell = Object.assign({item: item}, cell);
+      return property.apply(fakeCell, arguments);
     }
 
     return property && item.hasOwnProperty(property) ?
@@ -81,7 +84,7 @@ export class UnigridRow extends React.Component {
     let tCell = typeof(cell);
 
     if (tCell === 'string' || tCell === 'function') {
-      const value = this.getItemValue(item, cell);
+      const value = this.getItemValue(item, {show: cell});
       if (value !== undefined) {
         return [typeof(value), this.mkProps({}, item, value, rowAs, mixIn)];
       } else {
@@ -95,7 +98,7 @@ export class UnigridRow extends React.Component {
       return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
     }
 
-    const value = this.getItemValue(item, cell.show);
+    const value = this.getItemValue(item, cell);
 
     // create a shallow copy to avoid modifying the cell config (which props is based on)
     let nProps = Object.assign({}, cell);

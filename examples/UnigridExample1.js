@@ -97,7 +97,7 @@ export class UnigridExample1 extends React.Component {
   }
 
   showFun() {
-    return this.hCategory;
+    return this.item.hCategory;
   }
 
   showFun2() {
@@ -140,7 +140,7 @@ export class UnigridExample1 extends React.Component {
                         cells: [
                           'hCategory',
                           {as: 'empty', colSpan: 1},
-                          {show: this.showFun, bindToCell: 'show'},
+                          {show: this.showFun},
                           this.showFun2,
                           'hNumber'],
                         rowAs: 'header'
@@ -155,7 +155,7 @@ export class UnigridExample1 extends React.Component {
                         cells: [
                           'hCategory',
                           {as: 'empty', colSpan: 1},
-                          {show: this.showFun, bindToCell: 'show'},
+                          {show: this.showFun},
                           this.showFun2,
                           'hNumber'],
                         rowAs: 'header'
