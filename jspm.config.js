@@ -1,8 +1,10 @@
 SystemJS.config({
   paths: {
+    "*": "*.js",
     "npm:": "jspm_packages/npm/",
     "github:": "jspm_packages/github/",
-    "unigrid/": "src/"
+    "unigrid/": "src/",
+    "examples/": "examples/"
   },
   browserConfig: {
     "baseURL": "/"
@@ -10,7 +12,20 @@ SystemJS.config({
   transpiler: "plugin-babel",
   packages: {
     "unigrid": {
-      "main": "app.js",
+      "main": "unigrid.js",
+      "format": "esm",
+      "meta": {
+        "*.js": {
+          "babelOptions": {
+            "plugins": [
+              "babel-plugin-transform-react-jsx"
+            ]
+          }
+        }
+      }
+    },
+    "examples": {
+      "main": "examples.js",
       "format": "esm",
       "meta": {
         "*.js": {

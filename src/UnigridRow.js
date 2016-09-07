@@ -53,6 +53,7 @@ export class UnigridRow extends React.Component {
     }
 
     if (this.props.hasOwnProperty('cellTypes')
+        && this.props.cellTypes
         && this.props.cellTypes.hasOwnProperty(type)) {
       return React.createElement(this.props.cellTypes[type], nProps);
     }
@@ -69,7 +70,7 @@ export class UnigridRow extends React.Component {
 
   getItemValue(item, property) {
     if (typeof(property) === 'function') {
-      return property.apply(this, arguments);
+      return property.apply(item, arguments);
     }
 
     return property && item.hasOwnProperty(property) ?
@@ -149,7 +150,7 @@ export class UnigridRow extends React.Component {
       arr.push(this.createAndProcessCell(cfg.item, elems[i], cfg.rowAs, cfgMixIn));
     }
 
-    let {cells, as, mixIn, item, cellTypes, ...nProps} = cfg;
+    let {cells, rowAs, mixIn, item, cellTypes, ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
 }
