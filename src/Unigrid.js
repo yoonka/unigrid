@@ -48,6 +48,19 @@ export class UnigridFooter extends UnigridSection {
 
 export class Unigrid extends React.Component {
 
+  shouldSkip(condition, item) {
+    if (condition.hasOwnProperty('ifDoes')) {
+      if (condition.ifDoes === 'exist') {
+        if (condition.hasOwnProperty('property')) {
+          if (!item.hasOwnProperty(condition.property)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   makeNumberIterator(data, select) {
     var delivered = false;
     return {
@@ -84,28 +97,14 @@ export class Unigrid extends React.Component {
     }
   }
 
-  executeSelect(select, cfg, ctx, acc) {
-    let it = {[Symbol.iterator]: () => this.makeIterator(ctx.list, select)};
+  executeSelect(select, cfg, data, acc) {
+    let it = {[Symbol.iterator]: () => this.makeIterator(data, select)};
     for (let i of it) {
-      let newCtx = {list: ctx.list, item: i};
-      this.addRows(acc, cfg, newCtx)
+      this.addRows(acc, cfg, data, i);
     }
   }
 
-  shouldSkip(condition, item) {
-    if (condition.hasOwnProperty('ifDoes')) {
-      if (condition.ifDoes === 'exist') {
-        if (condition.hasOwnProperty('property')) {
-          if (!item.hasOwnProperty(condition.property)) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  createSection(cfg, children) {
+  createSection(cfg, data, item) {
 
     function getComponent(section) {
       switch (section) {
@@ -116,47 +115,51 @@ export class Unigrid extends React.Component {
     }
 
     let {section, show, ...other} = cfg;
+    let children = this.createChildren(cfg, data, item);
     Object.assign(other, {children: children});
     return React.createElement(getComponent(section), other);
   }
 
-  addRows(acc, cfg, ctx) {
-    for(let i=0; i<cfg.length; i++) {
-      let c=cfg[i];
+  addRows(acc, cfg, oData, oItem) {
+    for (let i = 0; i < cfg.show.length; i++) {
+      let data = oData;
+      let item = oItem;
+      let c = cfg.show[i];
 
       if (c.hasOwnProperty('condition')) {
-        if (this.shouldSkip(c.condition, ctx.item)) continue;
+        if (this.shouldSkip(c.condition, item)) continue;
+      }
+
+      if (c.hasOwnProperty('fromProperty')) {
+        data = item[c.fromProperty];
+        item = undefined;
       }
 
       if (c.hasOwnProperty('section')) {
-        let children = this.createTable(c, ctx);
-        acc.push(this.createSection(c, children));
+        acc.push(this.createSection(c, data, item));
       } else if (c.hasOwnProperty('select')) {
-        let newCtx = c.hasOwnProperty('fromProperty') ?
-          {list: ctx.item[c.fromProperty], item: ctx.item} : ctx;
-        this.executeSelect(c.select, c.show, newCtx, acc);
+        this.executeSelect(c.select, c, data, acc);
       } else if (c.hasOwnProperty('cells')) {
         const cTypes = this.props.cellTypes;
-        acc.push(<UnigridRow {...c} item={ctx.item} cellTypes={cTypes} />);
+        acc.push(<UnigridRow {...c} item={item} cellTypes={cTypes} />);
       }
     }
   }
 
-  createTable(cfg, ctx) {
+  createChildren(cfg, data, item) {
     let acc = [];
-    this.addRows(acc, cfg.show, ctx);
+    if (item === undefined) {
+      this.executeSelect(0, cfg, data, acc);
+    } else {
+      this.addRows(acc, cfg, data, item);
+    }
     return acc;
   }
 
   render() {
-    const ctx = {list: null, item: null};
-    if (this.props.data.constructor === Array) {
-      ctx.list = this.props.data;
-    } else {
-      ctx.item = this.props.data;
-    }
-    const {show, ...other} = this.props.table;
-    const children = this.createTable(this.props.table, ctx);
+    let table = this.props.table;
+    const {show, ...other} = table;
+    const children = this.createChildren(table, this.props.data, undefined);
     return React.createElement('table', other, children);
   }
 }

@@ -465,6 +465,20 @@ var Unigrid = function (_React$Component2) {
   }
 
   _createClass(Unigrid, [{
+    key: 'shouldSkip',
+    value: function shouldSkip(condition, item) {
+      if (condition.hasOwnProperty('ifDoes')) {
+        if (condition.ifDoes === 'exist') {
+          if (condition.hasOwnProperty('property')) {
+            if (!item.hasOwnProperty(condition.property)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+  }, {
     key: 'makeNumberIterator',
     value: function makeNumberIterator(data, select) {
       var delivered = false;
@@ -507,11 +521,11 @@ var Unigrid = function (_React$Component2) {
     }
   }, {
     key: 'executeSelect',
-    value: function executeSelect(select, cfg, ctx, acc) {
+    value: function executeSelect(select, cfg, data, acc) {
       var _this6 = this;
 
       var it = _defineProperty({}, Symbol.iterator, function () {
-        return _this6.makeIterator(ctx.list, select);
+        return _this6.makeIterator(data, select);
       });
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -521,8 +535,7 @@ var Unigrid = function (_React$Component2) {
         for (var _iterator = it[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          var newCtx = { list: ctx.list, item: i };
-          this.addRows(acc, cfg, newCtx);
+          this.addRows(acc, cfg, data, i);
         }
       } catch (err) {
         _didIteratorError = true;
@@ -540,22 +553,8 @@ var Unigrid = function (_React$Component2) {
       }
     }
   }, {
-    key: 'shouldSkip',
-    value: function shouldSkip(condition, item) {
-      if (condition.hasOwnProperty('ifDoes')) {
-        if (condition.ifDoes === 'exist') {
-          if (condition.hasOwnProperty('property')) {
-            if (!item.hasOwnProperty(condition.property)) {
-              return true;
-            }
-          }
-        }
-      }
-      return false;
-    }
-  }, {
     key: 'createSection',
-    value: function createSection(cfg, children) {
+    value: function createSection(cfg, data, item) {
 
       function getComponent(section) {
         switch (section) {
@@ -573,53 +572,57 @@ var Unigrid = function (_React$Component2) {
 
       var other = _objectWithoutProperties(cfg, ['section', 'show']);
 
+      var children = this.createChildren(cfg, data, item);
       Object.assign(other, { children: children });
       return React.createElement(getComponent(section), other);
     }
   }, {
     key: 'addRows',
-    value: function addRows(acc, cfg, ctx) {
-      for (var i = 0; i < cfg.length; i++) {
-        var c = cfg[i];
+    value: function addRows(acc, cfg, oData, oItem) {
+      for (var i = 0; i < cfg.show.length; i++) {
+        var data = oData;
+        var item = oItem;
+        var c = cfg.show[i];
 
         if (c.hasOwnProperty('condition')) {
-          if (this.shouldSkip(c.condition, ctx.item)) continue;
+          if (this.shouldSkip(c.condition, item)) continue;
+        }
+
+        if (c.hasOwnProperty('fromProperty')) {
+          data = item[c.fromProperty];
+          item = undefined;
         }
 
         if (c.hasOwnProperty('section')) {
-          var children = this.createTable(c, ctx);
-          acc.push(this.createSection(c, children));
+          acc.push(this.createSection(c, data, item));
         } else if (c.hasOwnProperty('select')) {
-          var newCtx = c.hasOwnProperty('fromProperty') ? { list: ctx.item[c.fromProperty], item: ctx.item } : ctx;
-          this.executeSelect(c.select, c.show, newCtx, acc);
+          this.executeSelect(c.select, c, data, acc);
         } else if (c.hasOwnProperty('cells')) {
           var cTypes = this.props.cellTypes;
-          acc.push(React.createElement(UnigridRow, _extends({}, c, { item: ctx.item, cellTypes: cTypes })));
+          acc.push(React.createElement(UnigridRow, _extends({}, c, { item: item, cellTypes: cTypes })));
         }
       }
     }
   }, {
-    key: 'createTable',
-    value: function createTable(cfg, ctx) {
+    key: 'createChildren',
+    value: function createChildren(cfg, data, item) {
       var acc = [];
-      this.addRows(acc, cfg.show, ctx);
+      if (item === undefined) {
+        this.executeSelect(0, cfg, data, acc);
+      } else {
+        this.addRows(acc, cfg, data, item);
+      }
       return acc;
     }
   }, {
     key: 'render',
     value: function render() {
-      var ctx = { list: null, item: null };
-      if (this.props.data.constructor === Array) {
-        ctx.list = this.props.data;
-      } else {
-        ctx.item = this.props.data;
-      }
-      var _props$table = this.props.table;
-      var show = _props$table.show;
+      var table = this.props.table;
+      var show = table.show;
 
-      var other = _objectWithoutProperties(_props$table, ['show']);
+      var other = _objectWithoutProperties(table, ['show']);
 
-      var children = this.createTable(this.props.table, ctx);
+      var children = this.createChildren(table, this.props.data, undefined);
       return React.createElement('table', other, children);
     }
   }]);

@@ -111,18 +111,13 @@ var props = {
         className: 'unigrid-header',
         show: [
           {
-            select: 0,
-            show: [
-              {
-                cells: [
-                  {show: 'hAgent', using: UnigridTextCell},
-                  'hDate',
-                  'hStreet',
-                  {show: 'hName', as: 'string', className: 'name-header-cell'},
-                  'hNumber'
-                ], rowAs: 'header'}
-            ]
-          }
+            cells: [
+              {show: 'hAgent', using: UnigridTextCell},
+              'hDate',
+              'hStreet',
+              {show: 'hName', as: 'string', className: 'name-header-cell'},
+              'hNumber'
+            ], rowAs: 'header'}
         ]
       },
       {
