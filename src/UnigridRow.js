@@ -104,11 +104,11 @@ export class UnigridRow extends React.Component {
     let nProps = Object.assign({}, cell);
     nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
 
-    if (cell.hasOwnProperty('using')) {
-      return [cell.using, nProps];
+    if (nProps.hasOwnProperty('using')) {
+      return [nProps.using, nProps];
     }
-    if (cell.hasOwnProperty('as')) {
-      return [cell.as, nProps];
+    if (nProps.hasOwnProperty('as')) {
+      return [nProps.as, nProps];
     }
 
     if (value !== undefined) {

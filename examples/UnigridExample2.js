@@ -39,6 +39,11 @@ export class UnigridExample2 extends React.Component {
       cells: ['key1', 'key2']
     };
 
-    return (<Unigrid data={tableData} table={table} />);
+    return (
+      <div>
+      <p>Compact definition</p>
+      <Unigrid data={tableData} table={table} />
+      </div>
+    );
   }
 }

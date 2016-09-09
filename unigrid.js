@@ -143,9 +143,10 @@ var UnigridEmptyCell = function (_React$Component) {
   }
 
   _createClass(UnigridEmptyCell, [{
-    key: "render",
+    key: 'render',
     value: function render() {
-      return this.props.rowAs === "header" ? React.createElement("th", this.props) : React.createElement("td", this.props);
+      var Tx = this.props.rowAs === "header" ? 'th' : 'td';
+      return React.createElement(Tx, this.props);
     }
   }]);
 
@@ -162,15 +163,12 @@ var UnigridTextCell = function (_React$Component2) {
   }
 
   _createClass(UnigridTextCell, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var p = this.props;
-      return p.rowAs === "header" ? React.createElement(
-        "th",
-        p,
-        p.cell
-      ) : React.createElement(
-        "td",
+      var Tx = p.rowAs === "header" ? 'th' : 'td';
+      return React.createElement(
+        Tx,
         p,
         p.cell
       );
@@ -190,15 +188,12 @@ var UnigridNumberCell = function (_React$Component3) {
   }
 
   _createClass(UnigridNumberCell, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var p = this.props;
-      return p.rowAs === "header" ? React.createElement(
-        "th",
-        p,
-        p.cell.toString()
-      ) : React.createElement(
-        "td",
+      var Tx = p.rowAs === "header" ? 'th' : 'td';
+      return React.createElement(
+        Tx,
         p,
         p.cell.toString()
       );
@@ -300,11 +295,11 @@ var UnigridRow = function (_React$Component) {
       var nProps = Object.assign({}, cell);
       nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
 
-      if (cell.hasOwnProperty('using')) {
-        return [cell.using, nProps];
+      if (nProps.hasOwnProperty('using')) {
+        return [nProps.using, nProps];
       }
-      if (cell.hasOwnProperty('as')) {
-        return [cell.as, nProps];
+      if (nProps.hasOwnProperty('as')) {
+        return [nProps.as, nProps];
       }
 
       if (value !== undefined) {

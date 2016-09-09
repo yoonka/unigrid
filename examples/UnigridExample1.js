@@ -213,6 +213,11 @@ export class UnigridExample1 extends React.Component {
 
     this.addIds(props.data, 'list');
 
-    return (<Unigrid {...props} />);
+    return (
+      <div>
+      <p>Multitable</p>
+      <Unigrid {...props} />
+      </div>
+    );
   }
 }

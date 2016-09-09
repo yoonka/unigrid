@@ -25,21 +25,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {UnigridExample1} from 'examples/UnigridExample1';
-import {UnigridExample2} from 'examples/UnigridExample2';
-import {UnigridExample3} from 'examples/UnigridExample3';
+import {Unigrid} from 'src/Unigrid';
+import tableData from '/json/tableResp2.json!';
 
-export class UnigridExamples extends React.Component {
+export class UnigridExample3 extends React.Component {
   render() {
+    const table = {
+      fromProperty: 'nList',
+      select: 'all',
+      section: 'body',
+      cells: [
+        {myData: 'key1'},
+        {myData: 'key2'}
+      ],
+      mixIn: {as: 'myCell'}
+    };
+
+    const cellTypes = {
+      myCell: ({myData, item}) => <td>{item[myData]}</td>
+    }
+
     return (
       <div>
-      <hr />
-      <UnigridExample1 />
-      <hr />
-      <UnigridExample2 />
-      <hr />
-      <UnigridExample3 />
-      <hr />
+      <p>Custom cell</p>
+      <Unigrid data={tableData} table={table} cellTypes={cellTypes} />
       </div>
     );
   }
