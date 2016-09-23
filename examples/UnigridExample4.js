@@ -26,13 +26,73 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import {Unigrid} from 'src/Unigrid';
-import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from '/json/tableResp1.json!';
 
-export class UnigridExample1 extends React.Component {
+export class UnigridExample4 extends React.Component {
   constructor() {
     super();
     this.idCounter = () => {var counter = 0; return () => counter += 1;}
+  }
+
+  compareString(a, b) {
+    const la = a.toLowerCase();
+    const lb = b.toLowerCase();
+
+    if (la < lb) return -1;
+    if (la > lb) return 1;
+    return 0;
+  }
+
+  compareAttributes(oAttrA, oAttrB) {
+    const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
+    const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
+
+    const aType = typeof attrA;
+    const bType = typeof attrB;
+
+    if (aType !== bType) return 0;
+
+    if (aType === 'string') {
+      const retVal = this.compareString(attrA, attrB);
+      if(retVal !== 0) return retVal;
+    } else if (aType === 'number') {
+      const retVal = attrA - attrB;
+      if (retVal !== 0) return retVal;
+    }
+    return 0;
+  }
+
+  compareObjects(a, b, attrs) {
+    for (let i = 0; i < attrs.length; i++) {
+      const retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
+      if (retVal === 0) {
+        continue;
+      } else {
+        return retVal;
+      }
+    }
+    return 0;
+  }
+
+  topSorter(a, b, arr) {
+    return this.compareObjects(a, b, arr/*['agent', 'date', 'street', 'name', 'number']*/);
+  }
+
+  subSorter(a, b, arr) {
+    return this.compareObjects(a, b, arr/*['name', 'number']*/);
+  }
+
+  sorter(data, arr) {
+    const subSort = function(item) {
+      const nItem = item;
+      if (item.hasOwnProperty('list')) {
+        nItem.list = item.list.sort((a, b) => this.subSorter(a, b, arr));
+      }
+      return nItem;
+    }
+
+    const nData = data.sort((a, b) => this.topSorter(a, b, arr));
+    return nData.map(subSort.bind(this));
   }
 
   addIds(data, property) {
@@ -44,37 +104,32 @@ export class UnigridExample1 extends React.Component {
     }
   }
 
-  handleClick() {
-    console.log(this.props.item);
-  }
-
-  showFun(props) {
-    return props.item.hCategory;
-  }
-
-  showFun2() {
-    return 'testValue';
+  clickHandler(field) {
+    //    return () => this.(unigrid).setBox({fields: [field]});
+    return undefined;
   }
 
   render() {
     const props = {
       data: tableData,
+      sorter: this.sorter.bind(this),
+      box: {fields: []},
       table: {
         className: 'unigrid-main-class',
+//        process: this.topSorter,
         $do: [
           {
             section: 'header',
             className: 'unigrid-header',
-            $do: [
-              {
-                cells: [
-                  {show: 'hAgent', as: UnigridTextCell},
-                  'hDate',
-                  'hStreet',
-                  {show: 'hName', as: 'string', className: 'name-header-cell'},
-                  'hNumber'
-                ], rowAs: 'header'}
-            ]
+            cells: [
+              {show: 'hAgent', onClick: this.clickHandler('hAgent')},
+              {show: 'hDate', onClick: this.clickHandler('hDate')},
+              {show: 'hStreet', onClick: this.clickHandler('hStreet')},
+              {show: 'hName', onClick: this.clickHandler('hName')},
+              {show: 'hNumber', onClick: this.clickHandler('hNumber')}
+            ],
+            mixIn: {bindToTable: 'onClick'},
+            rowAs: 'header'
           },
           {
             select: 'all',
@@ -86,51 +141,26 @@ export class UnigridExample1 extends React.Component {
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
-                    select: 0,
-                    $do: [
-                      {
-                        cells: [
-                          'hCategory',
-                          {as: 'empty', colSpan: 1},
-                          {show: this.showFun},
-                          this.showFun2,
-                          'hNumber'],
-                        rowAs: 'header'
-                      }
-                    ]
-                  },
-                  {
-                    condition: {ifDoes: 'exist', property: 'list'},
-                    fromProperty: 'list',
-                    $do: [
-                      {
-                        cells: [
-                          {cell: 'category2'},
-                          {as: 'empty', colSpan: 3},
-                          'hNumber'],
-                        rowAs: 'header'
-                      }
-                    ]
+                    cells: [
+                      'hCategory',
+                      {as: 'empty', colSpan: 3},
+                      'hNumber'
+                    ],
+                    rowAs: 'header'
                   },
                   {
                     className: 'some-row-class',
                     cells: ['agent', 'date', 'street', 'name',
                             {show: 'number',
                              as: 'string',
-                             className: 'number-cell',
-                             onClick: this.handleClick,
-                             bindToCell: ['onClick']}]
+                             className: 'number-cell'}]
                   },
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
+//                    process: this.subSorter,
                     select: 'all',
-                    $do: [
-                      {
-                        cells: [{as: 'empty', colSpan: 3}, 'name', 'number'],
-                        mixIn: {onClick: this.handleClick, bindToCell: 'onClick'}
-                      }
-                    ]
+                    cells: [{as: 'empty', colSpan: 3}, 'name', 'number']
                   }
                 ]
               }
@@ -140,20 +170,11 @@ export class UnigridExample1 extends React.Component {
             section: 'footer',
             className: 'unigrid-footer',
             $do: [
-              {
-                select: 0,
-                $do: [
-                  {cells: [null, null, null, 'fSum', 'fTotal']},
-                  {cells: [null, null, null, 'sum', 'total']}
-                ]
-              }
+              {cells: [null, null, null, 'fSum', 'fTotal']},
+              {cells: [null, null, null, 'sum', 'total']}
             ]
           }
         ]
-      },
-      cellTypes: {
-        empty: UnigridEmptyCell,
-        string: UnigridTextCell
       }
     };
 
@@ -161,7 +182,7 @@ export class UnigridExample1 extends React.Component {
 
     return (
       <div>
-      <p>Multitable</p>
+      <p>Sortable Multitable</p>
       <Unigrid {...props} />
       </div>
     );

@@ -47,6 +47,10 @@ export class UnigridFooter extends UnigridSection {
 }
 
 export class Unigrid extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = null;
+  }
 
   createChildren(cfg, data, item) {
     let acc = [];
@@ -116,27 +120,33 @@ export class Unigrid extends React.Component {
       return;
     }
 
+    if (cfg.hasOwnProperty('process')) {
+      const {condition, fromProperty, process, ...nCfg} = cfg;
+      this.addRows(acc, nCfg, data, cfg.process(item, box));
+      return;
+    }
+
     if (cfg.hasOwnProperty('select')) {
-      const {condition, fromProperty, select, ...nCfg} = cfg;
+      const {condition, fromProperty, process, select, ...nCfg} = cfg;
       this.executeSelect(acc, cfg.select, nCfg, data);
       return;
     }
 
     if (cfg.hasOwnProperty('section')) {
-      const {condition, fromProperty, select, section, ...nCfg} = cfg;
+      const {condition, fromProperty, process, select, section, ...nCfg} = cfg;
       acc.push(this.createSection(cfg.section, nCfg, data, item));
       return;
     }
 
     if (cfg.hasOwnProperty('cells')) {
-      const {condition, fromProperty, select, section, ...nCfg} = cfg;
+      const {condition, fromProperty, process, select, section, ...nCfg} = cfg;
       const cTypes = this.props.cellTypes
       acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} />);
     }
 
-    if (cfg.hasOwnProperty('show')) {
-      for (let i = 0; i < cfg.show.length; i++) {
-        this.addChildren(acc, cfg.show[i], data, item);
+    if (cfg.hasOwnProperty('$do')) {
+      for (let i = 0; i < cfg.$do.length; i++) {
+        this.addChildren(acc, cfg.$do[i], data, item);
       }
     }
   }
@@ -165,15 +175,19 @@ export class Unigrid extends React.Component {
     }
 
     let children = this.createChildren(cfg, data, item);
-    const {cells, show, rowAs, mixIn, ...other} = cfg;
+    const {cells, $do, rowAs, mixIn, ...other} = cfg;
     Object.assign(other, {children: children});
     return React.createElement(getComponent(section), other);
   }
 
   cleanProps(props) {
-    const {condition, fromProperty, select, section, cells, show, rowAs, mixIn,
-           ...other} = props;
+    const {condition, fromProperty, process, select, section, cells, rowAs,
+           mixIn, $do, ...other} = props;
     return other;
+  }
+
+  setBox(box) {
+    this.setState({box: box});
   }
 
   render() {

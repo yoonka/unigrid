@@ -31,18 +31,22 @@ import {UnigridEmptyCell,
 
 export class UnigridRow extends React.Component {
 
-  mkProps(cell, item, value, rowAs, mixIn) {
+  mkProps(item, cell, rowAs, mixIn) {
+    const tCell = typeof(cell);
+    // create a shallow copy to avoid mutating props
+    let props = tCell === 'object' ? Object.assign({}, cell) : {};
+
     if (item !== undefined) {
-      Object.assign(cell, {item: item});
+      Object.assign(props, {item: item});
     }
-    if (value !== undefined) {
-      Object.assign(cell, {cell: value});
+    if (tCell !== 'object' && cell !== undefined) {
+      Object.assign(props, {show: cell});
     }
     if (rowAs !== undefined) {
-      Object.assign(cell, {rowAs: rowAs});
+      Object.assign(props, {rowAs: rowAs});
     }
-    Object.assign(cell, mixIn);
-    return cell;
+    Object.assign(props, mixIn);
+    return props;
   }
 
   createCellForType(type, oProps) {
@@ -64,59 +68,46 @@ export class UnigridRow extends React.Component {
     case 'empty':  return (<UnigridEmptyCell  {...nProps} />);
     }
 
-    // 'error' type
-    return (<UnigridTextCell {...nProps} cell={"Error: " + nProps.cell} />);
+    // 'undefined' type
+    return (<UnigridTextCell {...nProps} cell={"Error: " + JSON.stringify(oProps)} />);
   }
 
-  getItemValue(item, cell) {
-    let property = cell.show;
+  propertyFormatter(cellProps) {
+    let property = cellProps.show;
 
-    if (typeof(property) === 'function') {
-      let fakeCell = Object.assign({item: item}, cell);
-      return property.apply(fakeCell, arguments);
+    return property && cellProps.item.hasOwnProperty(property) ?
+      cellProps.item[property] : undefined;
+  }
+
+  functionFormatter(cellProps) {
+    return cellProps.show(cellProps);
+  }
+
+  applyFormatter(cellProps) {
+    let tShow = typeof(cellProps.show);
+    switch(tShow) {
+    case 'string': return this.propertyFormatter(cellProps);
+    case 'function': return this.functionFormatter(cellProps);
     }
-
-    return property && item.hasOwnProperty(property) ?
-      item[property] : undefined;
+    return undefined;
   }
 
   getCell(item, cell, rowAs, mixIn) {
-    let tCell = typeof(cell);
-
-    if (tCell === 'string' || tCell === 'function') {
-      const value = this.getItemValue(item, {show: cell});
-      if (value !== undefined) {
-        return [typeof(value), this.mkProps({}, item, value, rowAs, mixIn)];
-      } else {
-        return ['error', this.mkProps({}, item, cell, rowAs, mixIn)];
-      }
-    }
     if (cell === null) {
-      return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
-    }
-    if (tCell !== 'object') {
-      return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
+      return ['empty', this.mkProps(item, undefined, rowAs, mixIn)];
     }
 
-    const value = this.getItemValue(item, cell);
+    let cellProps = this.mkProps(item, cell, rowAs, mixIn);
 
-    // create a shallow copy to avoid modifying the cell config (which props is based on)
-    let nProps = Object.assign({}, cell);
-    nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
-
-    if (nProps.hasOwnProperty('using')) {
-      return [nProps.using, nProps];
-    }
-    if (nProps.hasOwnProperty('as')) {
-      return [nProps.as, nProps];
+    if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
+      Object.assign(cellProps, {cell: this.applyFormatter(cellProps)});
     }
 
-    if (value !== undefined) {
-      return [typeof(value), nProps];
+    if (cellProps.hasOwnProperty('as')) {
+      return [cellProps.as, cellProps];
     }
 
-    Object.assign(nProps, {cell: JSON.stringify(cell)});
-    return ['error', nProps];
+    return [typeof(cellProps.cell), cellProps];
   }
 
   createAndProcessCell(item, cell, rowAs, mixIn) {
