@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {Unigrid} from 'src/Unigrid';
+import UnigridSortable from 'src/UnigridSortable';
 import tableData from '/json/tableResp1.json!';
 
 export class UnigridExample4 extends React.Component {
@@ -62,37 +62,34 @@ export class UnigridExample4 extends React.Component {
     return 0;
   }
 
-  compareObjects(a, b, attrs) {
+  compareObjects(a, b, attrs, isAsc) {
     for (let i = 0; i < attrs.length; i++) {
       const retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
       if (retVal === 0) {
         continue;
       } else {
-        return retVal;
+        return isAsc ? retVal : -retVal;
       }
     }
     return 0;
   }
 
-  topSorter(a, b, arr) {
-    return this.compareObjects(a, b, arr/*['agent', 'date', 'street', 'name', 'number']*/);
+  topSorter(data, {field, type}) {
+    const isAsc = type === 'asc';
+    const sorter = (a, b) => this.compareObjects(a, b, [field], isAsc);
+    return data.slice().sort(sorter);
   }
 
-  subSorter(a, b, arr) {
-    return this.compareObjects(a, b, arr/*['name', 'number']*/);
-  }
-
-  sorter(data, arr) {
-    const subSort = function(item) {
-      const nItem = item;
-      if (item.hasOwnProperty('list')) {
-        nItem.list = item.list.sort((a, b) => this.subSorter(a, b, arr));
-      }
-      return nItem;
+  subSorter(data, {field, type}) {
+    let nField = field;
+    let nType = type;
+    if (field !== 'name' && field !== 'number') {
+      nField = 'name';
+      nType = 'asc';
     }
-
-    const nData = data.sort((a, b) => this.topSorter(a, b, arr));
-    return nData.map(subSort.bind(this));
+    const isAsc = nType === 'asc';
+    const sorter = (a, b) => this.compareObjects(a, b, [nField], isAsc);
+    return data.slice().sort(sorter);
   }
 
   addIds(data, property) {
@@ -104,34 +101,43 @@ export class UnigridExample4 extends React.Component {
     }
   }
 
-  clickHandler(field) {
-    //    return () => this.(unigrid).setBox({fields: [field]});
-    return undefined;
+  clickHandler(nField) {
+    return () => {
+      const box = this.unigrid.state;
+      let {field, type} = box;
+      if (field === nField) {
+        type = type === 'asc' ? 'desc' : 'asc';
+      } else {
+        field = nField;
+        type = 'asc';
+      }
+      box.field = field;
+      box.type = type;
+      this.unigrid.setState(box);
+    }
   }
 
   render() {
     const props = {
       data: tableData,
-      sorter: this.sorter.bind(this),
-      box: {fields: []},
+      box: {field: 'agent', type: 'asc'},
       table: {
         className: 'unigrid-main-class',
-//        process: this.topSorter,
         $do: [
           {
             section: 'header',
             className: 'unigrid-header',
             cells: [
-              {show: 'hAgent', onClick: this.clickHandler('hAgent')},
-              {show: 'hDate', onClick: this.clickHandler('hDate')},
-              {show: 'hStreet', onClick: this.clickHandler('hStreet')},
-              {show: 'hName', onClick: this.clickHandler('hName')},
-              {show: 'hNumber', onClick: this.clickHandler('hNumber')}
+              {show: 'hAgent', onClick: this.clickHandler('agent')},
+              {show: 'hDate', onClick: this.clickHandler('date')},
+              {show: 'hStreet', onClick: this.clickHandler('street')},
+              {show: 'hName', onClick: this.clickHandler('name')},
+              {show: 'hNumber', onClick: this.clickHandler('number')}
             ],
-            mixIn: {bindToTable: 'onClick'},
             rowAs: 'header'
           },
           {
+            process: this.topSorter.bind(this),
             select: 'all',
             $do: [
               {
@@ -158,7 +164,7 @@ export class UnigridExample4 extends React.Component {
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
-//                    process: this.subSorter,
+                    process: this.subSorter.bind(this),
                     select: 'all',
                     cells: [{as: 'empty', colSpan: 3}, 'name', 'number']
                   }
@@ -183,7 +189,7 @@ export class UnigridExample4 extends React.Component {
     return (
       <div>
       <p>Sortable Multitable</p>
-      <Unigrid {...props} />
+      <UnigridSortable {...props} ref={(ref) => {this.unigrid = ref;}} />
       </div>
     );
   }

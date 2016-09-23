@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {Unigrid} from 'src/Unigrid';
+import Unigrid from 'src/Unigrid';
 import tableData from '/json/tableResp2.json!';
 
 export class UnigridExample2 extends React.Component {

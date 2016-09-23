@@ -46,12 +46,7 @@ export class UnigridFooter extends UnigridSection {
   render() {return this.makeElement('tfoot');}
 }
 
-export class Unigrid extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = null;
-  }
-
+export default class Unigrid extends React.Component {
   createChildren(cfg, data, item) {
     let acc = [];
     this.addChildren(acc, cfg, data, item);
@@ -122,7 +117,7 @@ export class Unigrid extends React.Component {
 
     if (cfg.hasOwnProperty('process')) {
       const {condition, fromProperty, process, ...nCfg} = cfg;
-      this.addRows(acc, nCfg, data, cfg.process(item, box));
+      this.addChildren(acc, nCfg, cfg.process(data, this.props.box), undefined);
       return;
     }
 
@@ -184,10 +179,6 @@ export class Unigrid extends React.Component {
     const {condition, fromProperty, process, select, section, cells, rowAs,
            mixIn, $do, ...other} = props;
     return other;
-  }
-
-  setBox(box) {
-    this.setState({box: box});
   }
 
   render() {

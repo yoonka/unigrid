@@ -26,30 +26,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import Unigrid from 'src/Unigrid';
-import tableData from '/json/tableResp2.json!';
 
-export class UnigridExample3 extends React.Component {
+export default class UnigridSortable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = this.props.hasOwnProperty('box') ? this.props.box : undefined;
+  }
+
   render() {
-    const table = {
-      fromProperty: 'nList',
-      select: 'all',
-      section: 'body',
-      cells: [
-        {myData: 'key1'},
-        {myData: 'key2'}
-      ],
-      mixIn: {as: 'myCell'}
-    };
-
-    const cellTypes = {
-      myCell: ({myData, item}) => <td>{item[myData]}</td>
-    }
-
-    return (
-      <div>
-      <p>Custom cell</p>
-      <Unigrid data={tableData} table={table} cellTypes={cellTypes} />
-      </div>
-    );
+    return (<Unigrid {...this.props} box={this.state} />);
   }
 }
