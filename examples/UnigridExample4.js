@@ -34,64 +34,6 @@ export class UnigridExample4 extends React.Component {
     this.idCounter = () => {var counter = 0; return () => counter += 1;}
   }
 
-  compareString(a, b) {
-    const la = a.toLowerCase();
-    const lb = b.toLowerCase();
-
-    if (la < lb) return -1;
-    if (la > lb) return 1;
-    return 0;
-  }
-
-  compareAttributes(oAttrA, oAttrB) {
-    const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
-    const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
-
-    const aType = typeof attrA;
-    const bType = typeof attrB;
-
-    if (aType !== bType) return 0;
-
-    if (aType === 'string') {
-      const retVal = this.compareString(attrA, attrB);
-      if(retVal !== 0) return retVal;
-    } else if (aType === 'number') {
-      const retVal = attrA - attrB;
-      if (retVal !== 0) return retVal;
-    }
-    return 0;
-  }
-
-  compareObjects(a, b, attrs, isAsc) {
-    for (let i = 0; i < attrs.length; i++) {
-      const retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
-      if (retVal === 0) {
-        continue;
-      } else {
-        return isAsc ? retVal : -retVal;
-      }
-    }
-    return 0;
-  }
-
-  topSorter(data, {field, type}) {
-    const isAsc = type === 'asc';
-    const sorter = (a, b) => this.compareObjects(a, b, [field], isAsc);
-    return data.slice().sort(sorter);
-  }
-
-  subSorter(data, {field, type}) {
-    let nField = field;
-    let nType = type;
-    if (field !== 'name' && field !== 'number') {
-      nField = 'name';
-      nType = 'asc';
-    }
-    const isAsc = nType === 'asc';
-    const sorter = (a, b) => this.compareObjects(a, b, [nField], isAsc);
-    return data.slice().sort(sorter);
-  }
-
   addIds(data, property) {
     for (let i = 0; i < data.length; i++) {
       data[i].id = this.idCounter();
@@ -102,19 +44,7 @@ export class UnigridExample4 extends React.Component {
   }
 
   clickHandler(nField) {
-    return () => {
-      const box = this.unigrid.state;
-      let {field, type} = box;
-      if (field === nField) {
-        type = type === 'asc' ? 'desc' : 'asc';
-      } else {
-        field = nField;
-        type = 'asc';
-      }
-      box.field = field;
-      box.type = type;
-      this.unigrid.setState(box);
-    }
+    return () => this.unigrid.sortByField(nField);
   }
 
   render() {
@@ -137,7 +67,7 @@ export class UnigridExample4 extends React.Component {
             rowAs: 'header'
           },
           {
-            process: this.topSorter.bind(this),
+            process: UnigridSortable.getFieldSorter(),
             select: 'all',
             $do: [
               {
@@ -164,7 +94,7 @@ export class UnigridExample4 extends React.Component {
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
-                    process: this.subSorter.bind(this),
+                    process: UnigridSortable.getAllowedFieldSorter(['name', 'number'], 'name', 'asc'),
                     select: 'all',
                     cells: [{as: 'empty', colSpan: 3}, 'name', 'number']
                   }
