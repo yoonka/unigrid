@@ -47,6 +47,12 @@ export class UnigridFooter extends UnigridSection {
 }
 
 export default class Unigrid extends React.Component {
+  static cleanProps(props) {
+    const {condition, fromProperty, process, select, section, cells, rowAs,
+           mixIn, $do, ...other} = props;
+    return other;
+  }
+
   createChildren(cfg, data, item) {
     let acc = [];
     this.addChildren(acc, cfg, data, item);
@@ -175,20 +181,9 @@ export default class Unigrid extends React.Component {
     return React.createElement(getComponent(section), other);
   }
 
-  cleanProps(props) {
-    const {condition, fromProperty, process, select, section, cells, rowAs,
-           mixIn, $do, ...other} = props;
-    return other;
-  }
-
   render() {
     let table = this.props.table;
     const children = this.createChildren(table, this.props.data, undefined);
-    return React.createElement('table', this.cleanProps(table), children);
+    return React.createElement('table', Unigrid.cleanProps(table), children);
   }
 }
-
-export {UnigridRow} from 'src/UnigridRow';
-export {UnigridEmptyCell,
-        UnigridTextCell,
-        UnigridNumberCell} from 'src/UnigridCells';

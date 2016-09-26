@@ -24,31 +24,12 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import React from 'react';
-import {cleanCellProps} from 'src/helpers';
+export {UnigridRow} from 'src/UnigridRow';
+export {cleanCellProps} from 'src/helpers';
+export {UnigridEmptyCell,
+        UnigridTextCell,
+        UnigridNumberCell} from 'src/UnigridCells';
 
-export class UnigridEmptyCell extends React.Component {
-  render() {
-    const cleaned = cleanCellProps(this.props);
-    const Tx = this.props.rowAs === "header" ? 'th' : 'td';
-    return (<Tx {...cleaned} />);
-  }
-}
-
-export class UnigridTextCell extends React.Component {
-  render() {
-    const p = this.props;
-    const cleaned = cleanCellProps(p);
-    const Tx = p.rowAs === "header" ? 'th' : 'td';
-    return (<Tx {...cleaned} >{p.cell}</Tx>);
-  }
-}
-
-export class UnigridNumberCell extends React.Component {
-  render() {
-    const p = this.props;
-    const cleaned = cleanCellProps(p);
-    const Tx = p.rowAs === "header" ? 'th' : 'td';
-    return (<Tx {...cleaned} >{p.cell.toString()}</Tx>);
-  }
-}
+import Unigrid from 'src/Unigrid';
+import UnigridSortable from 'src/UnigridSortable';
+export {Unigrid, UnigridSortable};

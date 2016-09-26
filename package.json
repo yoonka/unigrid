@@ -1,10 +1,10 @@
 {
   "name": "unigrid",
   "description": "A React component that implements a configurable table composed of lower-level multipurpose reusable components.",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "unigrid.js",
   "scripts": {
-    "jspm_build": "jspm build src/Unigrid unigrid.js --externals react --format cjs"
+    "jspm_build": "jspm build src/index unigrid.js --externals react --format cjs"
   },
   "jspm": {
     "name": "unigrid",

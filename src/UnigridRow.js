@@ -31,21 +31,26 @@ import {UnigridEmptyCell,
 
 export class UnigridRow extends React.Component {
 
-  mkProps(item, cell, rowAs, mixIn) {
-    const tCell = typeof(cell);
-    // create a shallow copy to avoid mutating props
-    let props = tCell === 'object' ? Object.assign({}, cell) : {};
+  mkProps(oCell, item, rowAs, mixIn) {
+    let cell = undefined;
+    let props = Object.assign({}, mixIn);
 
-    if (item !== undefined) {
-      Object.assign(props, {item: item});
+    // create a shallow copy to avoid mutating props
+    if (typeof(oCell) === 'object') {
+      Object.assign(props, oCell);
+    } else {
+      cell = oCell;
     }
-    if (tCell !== 'object' && cell !== undefined) {
+
+    if (cell !== undefined) {
       Object.assign(props, {show: cell});
     }
-    if (rowAs !== undefined) {
+    if (!props.hasOwnProperty('item') && item !== undefined) {
+      Object.assign(props, {item: item});
+    }
+    if (!props.hasOwnProperty('rowAs') && rowAs !== undefined) {
       Object.assign(props, {rowAs: rowAs});
     }
-    Object.assign(props, mixIn);
     return props;
   }
 
@@ -92,12 +97,12 @@ export class UnigridRow extends React.Component {
     return undefined;
   }
 
-  getCell(item, cell, rowAs, mixIn) {
+  getCell(cell, item, rowAs, mixIn) {
     if (cell === null) {
-      return ['empty', this.mkProps(item, undefined, rowAs, mixIn)];
+      return ['empty', this.mkProps(undefined, item, rowAs, mixIn)];
     }
 
-    let cellProps = this.mkProps(item, cell, rowAs, mixIn);
+    let cellProps = this.mkProps(cell, item, rowAs, mixIn);
 
     if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
       Object.assign(cellProps, {cell: this.applyFormatter(cellProps)});
@@ -110,8 +115,8 @@ export class UnigridRow extends React.Component {
     return [typeof(cellProps.cell), cellProps];
   }
 
-  createAndProcessCell(item, cell, rowAs, mixIn) {
-    let [type, props] = this.getCell(item, cell, rowAs, mixIn);
+  createAndProcessCell(cell, item, rowAs, mixIn) {
+    let [type, props] = this.getCell(cell, item, rowAs, mixIn);
     let binds = props.bindToCell || [];
     if (typeof(binds) === 'string') {
       binds = [binds];
@@ -141,7 +146,7 @@ export class UnigridRow extends React.Component {
     let cfgMixIn = cfg.mixIn;
     let arr = [];
     for (let i = 0; i < elems.length; i++) {
-      arr.push(this.createAndProcessCell(cfg.item, elems[i], cfg.rowAs, cfgMixIn));
+      arr.push(this.createAndProcessCell(elems[i], cfg.item, cfg.rowAs, cfgMixIn));
     }
 
     let {cells, rowAs, mixIn, item, cellTypes, ...nProps} = cfg;

@@ -6,6 +6,44 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 
+var _slicedToArray = (function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+})();
+
 var _extends = Object.assign || function (target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i];
@@ -19,21 +57,6 @@ var _extends = Object.assign || function (target) {
 
   return target;
 };
-
-var _defineProperty = (function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-})
 
 var _objectWithoutProperties = (function (obj, keys) {
   var target = {};
@@ -95,43 +118,41 @@ var _inherits = (function (subClass, superClass) {
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 })
 
-var _slicedToArray = (function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
 
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
 
-    return _arr;
-  }
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-  return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if (Symbol.iterator in Object(arr)) {
-      return sliceIterator(arr, i);
-    } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
-    }
-  };
-})();
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var cleanCellProps = function cleanCellProps(props) {
+  var cell = props.cell;
+  var item = props.item;
+  var rowAs = props.rowAs;
+
+  var other = _objectWithoutProperties(props, ["cell", "item", "rowAs"]);
+
+  return other;
+};
 
 var UnigridEmptyCell = function (_React$Component) {
   _inherits(UnigridEmptyCell, _React$Component);
@@ -145,8 +166,9 @@ var UnigridEmptyCell = function (_React$Component) {
   _createClass(UnigridEmptyCell, [{
     key: 'render',
     value: function render() {
+      var cleaned = cleanCellProps(this.props);
       var Tx = this.props.rowAs === "header" ? 'th' : 'td';
-      return React.createElement(Tx, this.props);
+      return React.createElement(Tx, cleaned);
     }
   }]);
 
@@ -166,10 +188,11 @@ var UnigridTextCell = function (_React$Component2) {
     key: 'render',
     value: function render() {
       var p = this.props;
+      var cleaned = cleanCellProps(p);
       var Tx = p.rowAs === "header" ? 'th' : 'td';
       return React.createElement(
         Tx,
-        p,
+        cleaned,
         p.cell
       );
     }
@@ -191,10 +214,11 @@ var UnigridNumberCell = function (_React$Component3) {
     key: 'render',
     value: function render() {
       var p = this.props;
+      var cleaned = cleanCellProps(p);
       var Tx = p.rowAs === "header" ? 'th' : 'td';
       return React.createElement(
         Tx,
-        p,
+        cleaned,
         p.cell.toString()
       );
     }
@@ -214,21 +238,26 @@ var UnigridRow = function (_React$Component) {
 
   _createClass(UnigridRow, [{
     key: 'mkProps',
-    value: function mkProps(item, cell, rowAs, mixIn) {
-      var tCell = typeof cell;
-      // create a shallow copy to avoid mutating props
-      var props = tCell === 'object' ? Object.assign({}, cell) : {};
+    value: function mkProps(oCell, item, rowAs, mixIn) {
+      var cell = undefined;
+      var props = Object.assign({}, mixIn);
 
-      if (item !== undefined) {
-        Object.assign(props, { item: item });
+      // create a shallow copy to avoid mutating props
+      if (typeof oCell === 'object') {
+        Object.assign(props, oCell);
+      } else {
+        cell = oCell;
       }
-      if (tCell !== 'object' && cell !== undefined) {
+
+      if (cell !== undefined) {
         Object.assign(props, { show: cell });
       }
-      if (rowAs !== undefined) {
+      if (!props.hasOwnProperty('item') && item !== undefined) {
+        Object.assign(props, { item: item });
+      }
+      if (!props.hasOwnProperty('rowAs') && rowAs !== undefined) {
         Object.assign(props, { rowAs: rowAs });
       }
-      Object.assign(props, mixIn);
       return props;
     }
   }, {
@@ -287,12 +316,12 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'getCell',
-    value: function getCell(item, cell, rowAs, mixIn) {
+    value: function getCell(cell, item, rowAs, mixIn) {
       if (cell === null) {
-        return ['empty', this.mkProps(item, undefined, rowAs, mixIn)];
+        return ['empty', this.mkProps(undefined, item, rowAs, mixIn)];
       }
 
-      var cellProps = this.mkProps(item, cell, rowAs, mixIn);
+      var cellProps = this.mkProps(cell, item, rowAs, mixIn);
 
       if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
         Object.assign(cellProps, { cell: this.applyFormatter(cellProps) });
@@ -306,8 +335,8 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'createAndProcessCell',
-    value: function createAndProcessCell(item, cell, rowAs, mixIn) {
-      var _getCell = this.getCell(item, cell, rowAs, mixIn);
+    value: function createAndProcessCell(cell, item, rowAs, mixIn) {
+      var _getCell = this.getCell(cell, item, rowAs, mixIn);
 
       var _getCell2 = _slicedToArray(_getCell, 2);
 
@@ -349,7 +378,7 @@ var UnigridRow = function (_React$Component) {
       var cfgMixIn = cfg.mixIn;
       var arr = [];
       for (var i = 0; i < elems.length; i++) {
-        arr.push(this.createAndProcessCell(cfg.item, elems[i], cfg.rowAs, cfgMixIn));
+        arr.push(this.createAndProcessCell(elems[i], cfg.item, cfg.rowAs, cfgMixIn));
       }
 
       var cells = cfg.cells;
@@ -366,6 +395,21 @@ var UnigridRow = function (_React$Component) {
 
   return UnigridRow;
 }(React.Component);
+
+var _defineProperty = (function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+})
 
 var UnigridSection = function (_React$Component) {
   _inherits(UnigridSection, _React$Component);
@@ -660,6 +704,13 @@ var Unigrid = function (_React$Component2) {
       return React.createElement(getComponent(section), other);
     }
   }, {
+    key: 'render',
+    value: function render() {
+      var table = this.props.table;
+      var children = this.createChildren(table, this.props.data, undefined);
+      return React.createElement('table', Unigrid.cleanProps(table), children);
+    }
+  }], [{
     key: 'cleanProps',
     value: function cleanProps(props) {
       var condition = props.condition;
@@ -676,23 +727,139 @@ var Unigrid = function (_React$Component2) {
 
       return other;
     }
-  }, {
-    key: 'render',
-    value: function render() {
-      var table = this.props.table;
-      var children = this.createChildren(table, this.props.data, undefined);
-      return React.createElement('table', this.cleanProps(table), children);
-    }
   }]);
 
   return Unigrid;
 }(React.Component);
 
-exports.UnigridHeader = UnigridHeader;
-exports.UnigridSegment = UnigridSegment;
-exports.UnigridFooter = UnigridFooter;
-exports['default'] = Unigrid;
+var UnigridSortable = function (_React$Component) {
+  _inherits(UnigridSortable, _React$Component);
+
+  function UnigridSortable(props) {
+    _classCallCheck(this, UnigridSortable);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSortable).call(this, props));
+
+    _this.state = _this.props.hasOwnProperty('box') ? _this.props.box : undefined;
+    return _this;
+  }
+
+  _createClass(UnigridSortable, [{
+    key: 'sortByField',
+    value: function sortByField(nField) {
+      var box = this.state;
+      var field = box.field;
+      var type = box.type;
+
+      if (field === nField) {
+        type = type === 'asc' ? 'desc' : 'asc';
+      } else {
+        field = nField;
+        type = 'asc';
+      }
+      box.field = field;
+      box.type = type;
+      this.setState(box);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return React.createElement(Unigrid, _extends({}, this.props, { box: this.state }));
+    }
+  }], [{
+    key: 'compareString',
+    value: function compareString(a, b) {
+      var la = a.toLowerCase();
+      var lb = b.toLowerCase();
+
+      if (la < lb) return -1;
+      if (la > lb) return 1;
+      return 0;
+    }
+  }, {
+    key: 'compareAttributes',
+    value: function compareAttributes(oAttrA, oAttrB) {
+      var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
+      var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
+
+      var aType = typeof attrA;
+      var bType = typeof attrB;
+
+      if (aType !== bType) return 0;
+
+      if (aType === 'string') {
+        var retVal = this.compareString(attrA, attrB);
+        if (retVal !== 0) return retVal;
+      } else if (aType === 'number') {
+        var _retVal = attrA - attrB;
+        if (_retVal !== 0) return _retVal;
+      }
+      return 0;
+    }
+  }, {
+    key: 'compareObjects',
+    value: function compareObjects(a, b, attrs, isAsc) {
+      for (var i = 0; i < attrs.length; i++) {
+        var retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
+        if (retVal === 0) {
+          continue;
+        } else {
+          return isAsc ? retVal : -retVal;
+        }
+      }
+      return 0;
+    }
+  }, {
+    key: 'fieldSorter',
+    value: function fieldSorter(data, _ref) {
+      var _this2 = this;
+
+      var field = _ref.field;
+      var type = _ref.type;
+
+      var isAsc = type === 'asc';
+      var sorter = function sorter(a, b) {
+        return _this2.compareObjects(a, b, [field], isAsc);
+      };
+      return data.slice().sort(sorter);
+    }
+  }, {
+    key: 'allowedFieldSorter',
+    value: function allowedFieldSorter(data, _ref2, allowed, defField, defType) {
+      var field = _ref2.field;
+      var type = _ref2.type;
+
+      var nField = field;
+      var nType = type;
+      if (allowed.indexOf(field) < 0) {
+        nField = defField;
+        nType = defType;
+      }
+      return this.fieldSorter(data, { field: nField, type: nType });
+    }
+  }, {
+    key: 'getFieldSorter',
+    value: function getFieldSorter() {
+      return this.fieldSorter.bind(this);
+    }
+  }, {
+    key: 'getAllowedFieldSorter',
+    value: function getAllowedFieldSorter(allowed, defField, defType) {
+      var _this3 = this;
+
+      return function (data, box) {
+        return _this3.allowedFieldSorter(data, box, allowed, defField, defType);
+      };
+    }
+  }]);
+
+  return UnigridSortable;
+}(React.Component);
+
+exports.Unigrid = Unigrid;
+exports.UnigridSortable = UnigridSortable;
 exports.UnigridRow = UnigridRow;
+exports.cleanCellProps = cleanCellProps;
 exports.UnigridEmptyCell = UnigridEmptyCell;
 exports.UnigridTextCell = UnigridTextCell;
 exports.UnigridNumberCell = UnigridNumberCell;
