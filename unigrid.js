@@ -214,18 +214,22 @@ var UnigridRow = function (_React$Component) {
 
   _createClass(UnigridRow, [{
     key: 'mkProps',
-    value: function mkProps(cell, item, value, rowAs, mixIn) {
+    value: function mkProps(item, cell, rowAs, mixIn) {
+      var tCell = typeof cell;
+      // create a shallow copy to avoid mutating props
+      var props = tCell === 'object' ? Object.assign({}, cell) : {};
+
       if (item !== undefined) {
-        Object.assign(cell, { item: item });
+        Object.assign(props, { item: item });
       }
-      if (value !== undefined) {
-        Object.assign(cell, { cell: value });
+      if (tCell !== 'object' && cell !== undefined) {
+        Object.assign(props, { show: cell });
       }
       if (rowAs !== undefined) {
-        Object.assign(cell, { rowAs: rowAs });
+        Object.assign(props, { rowAs: rowAs });
       }
-      Object.assign(cell, mixIn);
-      return cell;
+      Object.assign(props, mixIn);
+      return props;
     }
   }, {
     key: 'createCellForType',
@@ -254,60 +258,51 @@ var UnigridRow = function (_React$Component) {
           return React.createElement(UnigridEmptyCell, nProps);
       }
 
-      // 'error' type
-      return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + nProps.cell }));
+      // 'undefined' type
+      return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + JSON.stringify(oProps) }));
     }
   }, {
-    key: 'getItemValue',
-    value: function getItemValue(item, cell) {
-      var property = cell.show;
+    key: 'propertyFormatter',
+    value: function propertyFormatter(cellProps) {
+      var property = cellProps.show;
 
-      if (typeof property === 'function') {
-        var fakeCell = Object.assign({ item: item }, cell);
-        return property.apply(fakeCell, arguments);
+      return property && cellProps.item.hasOwnProperty(property) ? cellProps.item[property] : undefined;
+    }
+  }, {
+    key: 'functionFormatter',
+    value: function functionFormatter(cellProps) {
+      return cellProps.show(cellProps);
+    }
+  }, {
+    key: 'applyFormatter',
+    value: function applyFormatter(cellProps) {
+      var tShow = typeof cellProps.show;
+      switch (tShow) {
+        case 'string':
+          return this.propertyFormatter(cellProps);
+        case 'function':
+          return this.functionFormatter(cellProps);
       }
-
-      return property && item.hasOwnProperty(property) ? item[property] : undefined;
+      return undefined;
     }
   }, {
     key: 'getCell',
     value: function getCell(item, cell, rowAs, mixIn) {
-      var tCell = typeof cell;
-
-      if (tCell === 'string' || tCell === 'function') {
-        var _value = this.getItemValue(item, { show: cell });
-        if (_value !== undefined) {
-          return [typeof _value, this.mkProps({}, item, _value, rowAs, mixIn)];
-        } else {
-          return ['error', this.mkProps({}, item, cell, rowAs, mixIn)];
-        }
-      }
       if (cell === null) {
-        return ['empty', this.mkProps({}, item, undefined, rowAs, mixIn)];
-      }
-      if (tCell !== 'object') {
-        return ['error', this.mkProps({}, item, cell.toString(), rowAs, mixIn)];
+        return ['empty', this.mkProps(item, undefined, rowAs, mixIn)];
       }
 
-      var value = this.getItemValue(item, cell);
+      var cellProps = this.mkProps(item, cell, rowAs, mixIn);
 
-      // create a shallow copy to avoid modifying the cell config (which props is based on)
-      var nProps = Object.assign({}, cell);
-      nProps = this.mkProps(nProps, item, value, rowAs, mixIn);
-
-      if (nProps.hasOwnProperty('using')) {
-        return [nProps.using, nProps];
-      }
-      if (nProps.hasOwnProperty('as')) {
-        return [nProps.as, nProps];
+      if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
+        Object.assign(cellProps, { cell: this.applyFormatter(cellProps) });
       }
 
-      if (value !== undefined) {
-        return [typeof value, nProps];
+      if (cellProps.hasOwnProperty('as')) {
+        return [cellProps.as, cellProps];
       }
 
-      Object.assign(nProps, { cell: JSON.stringify(cell) });
-      return ['error', nProps];
+      return [typeof cellProps.cell, cellProps];
     }
   }, {
     key: 'createAndProcessCell',
@@ -569,44 +564,58 @@ var Unigrid = function (_React$Component2) {
         return;
       }
 
-      if (cfg.hasOwnProperty('select')) {
+      if (cfg.hasOwnProperty('process')) {
         var _condition = cfg.condition;
         var _fromProperty = cfg.fromProperty;
+        var process = cfg.process;
+
+        var _nCfg = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'process']);
+
+        this.addChildren(acc, _nCfg, cfg.process(data, this.props.box), undefined);
+        return;
+      }
+
+      if (cfg.hasOwnProperty('select')) {
+        var _condition2 = cfg.condition;
+        var _fromProperty2 = cfg.fromProperty;
+        var _process = cfg.process;
         var select = cfg.select;
 
-        var _nCfg = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'select']);
+        var _nCfg2 = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'process', 'select']);
 
-        this.executeSelect(acc, cfg.select, _nCfg, data);
+        this.executeSelect(acc, cfg.select, _nCfg2, data);
         return;
       }
 
       if (cfg.hasOwnProperty('section')) {
-        var _condition2 = cfg.condition;
-        var _fromProperty2 = cfg.fromProperty;
+        var _condition3 = cfg.condition;
+        var _fromProperty3 = cfg.fromProperty;
+        var _process2 = cfg.process;
         var _select = cfg.select;
         var section = cfg.section;
 
-        var _nCfg2 = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'select', 'section']);
+        var _nCfg3 = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
-        acc.push(this.createSection(cfg.section, _nCfg2, data, item));
+        acc.push(this.createSection(cfg.section, _nCfg3, data, item));
         return;
       }
 
       if (cfg.hasOwnProperty('cells')) {
-        var _condition3 = cfg.condition;
-        var _fromProperty3 = cfg.fromProperty;
+        var _condition4 = cfg.condition;
+        var _fromProperty4 = cfg.fromProperty;
+        var _process3 = cfg.process;
         var _select2 = cfg.select;
         var _section = cfg.section;
 
-        var _nCfg3 = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'select', 'section']);
+        var _nCfg4 = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
         var cTypes = this.props.cellTypes;
-        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg3, { item: item, cellTypes: cTypes })));
+        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { item: item, cellTypes: cTypes })));
       }
 
-      if (cfg.hasOwnProperty('show')) {
-        for (var i = 0; i < cfg.show.length; i++) {
-          this.addChildren(acc, cfg.show[i], data, item);
+      if (cfg.hasOwnProperty('$do')) {
+        for (var i = 0; i < cfg.$do.length; i++) {
+          this.addChildren(acc, cfg.$do[i], data, item);
         }
       }
     }
@@ -641,11 +650,11 @@ var Unigrid = function (_React$Component2) {
 
       var children = this.createChildren(cfg, data, item);
       var cells = cfg.cells;
-      var show = cfg.show;
+      var $do = cfg.$do;
       var rowAs = cfg.rowAs;
       var mixIn = cfg.mixIn;
 
-      var other = _objectWithoutProperties(cfg, ['cells', 'show', 'rowAs', 'mixIn']);
+      var other = _objectWithoutProperties(cfg, ['cells', '$do', 'rowAs', 'mixIn']);
 
       Object.assign(other, { children: children });
       return React.createElement(getComponent(section), other);
@@ -655,14 +664,15 @@ var Unigrid = function (_React$Component2) {
     value: function cleanProps(props) {
       var condition = props.condition;
       var fromProperty = props.fromProperty;
+      var process = props.process;
       var select = props.select;
       var section = props.section;
       var cells = props.cells;
-      var show = props.show;
       var rowAs = props.rowAs;
       var mixIn = props.mixIn;
+      var $do = props.$do;
 
-      var other = _objectWithoutProperties(props, ['condition', 'fromProperty', 'select', 'section', 'cells', 'show', 'rowAs', 'mixIn']);
+      var other = _objectWithoutProperties(props, ['condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do']);
 
       return other;
     }
@@ -681,7 +691,7 @@ var Unigrid = function (_React$Component2) {
 exports.UnigridHeader = UnigridHeader;
 exports.UnigridSegment = UnigridSegment;
 exports.UnigridFooter = UnigridFooter;
-exports.Unigrid = Unigrid;
+exports['default'] = Unigrid;
 exports.UnigridRow = UnigridRow;
 exports.UnigridEmptyCell = UnigridEmptyCell;
 exports.UnigridTextCell = UnigridTextCell;
