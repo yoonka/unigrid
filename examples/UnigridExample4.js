@@ -48,8 +48,15 @@ export class UnigridExample4 extends React.Component {
   }
 
   render() {
-    const columnToFields = (column) =>
-          column === 'name' || column === 'number' ? [column] : ['name'];
+    const ucFormatter = (attr) =>
+          (props) => props.item[attr].toUpperCase();
+
+    const columnToFields = (column) => {
+      if (column === 'name') {
+        return [ucFormatter('name')];
+      }
+      return column === 'number' ? [column] : ['name'];
+    }
 
     const props = {
       data: tableData,
@@ -89,7 +96,7 @@ export class UnigridExample4 extends React.Component {
                   },
                   {
                     className: 'some-row-class',
-                    cells: ['agent', 'date', 'street', 'name',
+                    cells: ['agent', 'date', 'street', ucFormatter('name'),
                             {show: 'number',
                              as: 'string',
                              className: 'number-cell'}]

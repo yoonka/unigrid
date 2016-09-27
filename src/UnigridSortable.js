@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import Unigrid from 'src/Unigrid';
+import {applyFormatter} from 'src/helpers';
 
 export default class UnigridSortable extends React.Component {
   constructor(props) {
@@ -63,7 +64,9 @@ export default class UnigridSortable extends React.Component {
 
   static compareObjects(a, b, attrs, isAsc) {
     for (let i = 0; i < attrs.length; i++) {
-      const retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
+      const aVal = applyFormatter({show: attrs[i], item: a});
+      const bVal = applyFormatter({show: attrs[i], item: b});
+      const retVal = this.compareAttributes(aVal, bVal);
       if (retVal === 0) {
         continue;
       } else {
@@ -73,11 +76,13 @@ export default class UnigridSortable extends React.Component {
     return 0;
   }
 
-  // columnToFilds - returns the list of fields in the 'item' by which the input
-  //   'data' should be sorted.
+  // fields - The list of fields in the 'item' by which the input 'data'
+  //   should be sorted. If it's a function then it will be called, with the
+  //   selected column as its argument, to obtain the list of fields.
   // defOrder - default order if 'box.order' isn't defined.
-  static sorter(data, box, columnToFields = (col) => [col], defOrder = 'asc') {
-    const nColumns = columnToFields(box.column) || [];
+  static sorter(data, box, fields = (col) => [col], defOrder = 'asc') {
+    const nColumns = typeof fields === 'function' ?
+          fields(box.column) || [] : fields;
     const isAsc = (box.order || defOrder) === 'asc';
     const comparer = (a, b) => this.compareObjects(a, b, nColumns, isAsc);
     return data.slice().sort(comparer);

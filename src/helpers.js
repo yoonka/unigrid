@@ -28,3 +28,21 @@ export const cleanCellProps = (props) => {
   const {cell, item, rowAs, ...other} = props;
   return other;
 };
+
+export const applyFormatter = (props) => {
+  const propertyFormatter = (props) => {
+    let property = props.show;
+
+    return property && props.item.hasOwnProperty(property) ?
+      props.item[property] : undefined;
+  };
+
+  const functionFormatter = (props) => props.show(props);
+
+  let tShow = typeof(props.show);
+  switch(tShow) {
+  case 'string': return propertyFormatter(props);
+  case 'function': return functionFormatter(props);
+  }
+  return undefined;
+}

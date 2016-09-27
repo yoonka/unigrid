@@ -28,6 +28,7 @@ import React from 'react';
 import {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';
+import {applyFormatter} from 'src/helpers';
 
 export class UnigridRow extends React.Component {
 
@@ -77,26 +78,6 @@ export class UnigridRow extends React.Component {
     return (<UnigridTextCell {...nProps} cell={"Error: " + JSON.stringify(oProps)} />);
   }
 
-  propertyFormatter(cellProps) {
-    let property = cellProps.show;
-
-    return property && cellProps.item.hasOwnProperty(property) ?
-      cellProps.item[property] : undefined;
-  }
-
-  functionFormatter(cellProps) {
-    return cellProps.show(cellProps);
-  }
-
-  applyFormatter(cellProps) {
-    let tShow = typeof(cellProps.show);
-    switch(tShow) {
-    case 'string': return this.propertyFormatter(cellProps);
-    case 'function': return this.functionFormatter(cellProps);
-    }
-    return undefined;
-  }
-
   getCell(cell, item, rowAs, mixIn) {
     if (cell === null) {
       return ['empty', this.mkProps(undefined, item, rowAs, mixIn)];
@@ -105,7 +86,7 @@ export class UnigridRow extends React.Component {
     let cellProps = this.mkProps(cell, item, rowAs, mixIn);
 
     if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
-      Object.assign(cellProps, {cell: this.applyFormatter(cellProps)});
+      Object.assign(cellProps, {cell: applyFormatter(cellProps)});
     }
 
     if (cellProps.hasOwnProperty('as')) {

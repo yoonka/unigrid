@@ -149,9 +149,30 @@ var cleanCellProps = function cleanCellProps(props) {
   var item = props.item;
   var rowAs = props.rowAs;
 
-  var other = _objectWithoutProperties(props, ["cell", "item", "rowAs"]);
+  var other = _objectWithoutProperties(props, ['cell', 'item', 'rowAs']);
 
   return other;
+};
+
+var applyFormatter = function applyFormatter(props) {
+  var propertyFormatter = function propertyFormatter(props) {
+    var property = props.show;
+
+    return property && props.item.hasOwnProperty(property) ? props.item[property] : undefined;
+  };
+
+  var functionFormatter = function functionFormatter(props) {
+    return props.show(props);
+  };
+
+  var tShow = typeof props.show;
+  switch (tShow) {
+    case 'string':
+      return propertyFormatter(props);
+    case 'function':
+      return functionFormatter(props);
+  }
+  return undefined;
 };
 
 var UnigridEmptyCell = function (_React$Component) {
@@ -291,30 +312,6 @@ var UnigridRow = function (_React$Component) {
       return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + JSON.stringify(oProps) }));
     }
   }, {
-    key: 'propertyFormatter',
-    value: function propertyFormatter(cellProps) {
-      var property = cellProps.show;
-
-      return property && cellProps.item.hasOwnProperty(property) ? cellProps.item[property] : undefined;
-    }
-  }, {
-    key: 'functionFormatter',
-    value: function functionFormatter(cellProps) {
-      return cellProps.show(cellProps);
-    }
-  }, {
-    key: 'applyFormatter',
-    value: function applyFormatter(cellProps) {
-      var tShow = typeof cellProps.show;
-      switch (tShow) {
-        case 'string':
-          return this.propertyFormatter(cellProps);
-        case 'function':
-          return this.functionFormatter(cellProps);
-      }
-      return undefined;
-    }
-  }, {
     key: 'getCell',
     value: function getCell(cell, item, rowAs, mixIn) {
       if (cell === null) {
@@ -324,7 +321,7 @@ var UnigridRow = function (_React$Component) {
       var cellProps = this.mkProps(cell, item, rowAs, mixIn);
 
       if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
-        Object.assign(cellProps, { cell: this.applyFormatter(cellProps) });
+        Object.assign(cellProps, { cell: applyFormatter(cellProps) });
       }
 
       if (cellProps.hasOwnProperty('as')) {
@@ -857,7 +854,9 @@ var UnigridSortable = function (_React$Component) {
     key: 'compareObjects',
     value: function compareObjects(a, b, attrs, isAsc) {
       for (var i = 0; i < attrs.length; i++) {
-        var retVal = this.compareAttributes(a[attrs[i]], b[attrs[i]]);
+        var aVal = applyFormatter({ show: attrs[i], item: a });
+        var bVal = applyFormatter({ show: attrs[i], item: b });
+        var retVal = this.compareAttributes(aVal, bVal);
         if (retVal === 0) {
           continue;
         } else {
@@ -867,8 +866,9 @@ var UnigridSortable = function (_React$Component) {
       return 0;
     }
 
-    // columnToFilds - returns the list of fields in the 'item' by which the input
-    //   'data' should be sorted.
+    // fields - The list of fields in the 'item' by which the input 'data'
+    //   should be sorted. If it's a function then it will be called, with the
+    //   selected column as its argument, to obtain the list of fields.
     // defOrder - default order if 'box.order' isn't defined.
 
   }, {
@@ -876,12 +876,12 @@ var UnigridSortable = function (_React$Component) {
     value: function sorter(data, box) {
       var _this2 = this;
 
-      var columnToFields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
+      var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
         return [col];
       } : arguments[2];
       var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
 
-      var nColumns = columnToFields(box.column) || [];
+      var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
       var isAsc = (box.order || defOrder) === 'asc';
       var comparer = function comparer(a, b) {
         return _this2.compareObjects(a, b, nColumns, isAsc);
