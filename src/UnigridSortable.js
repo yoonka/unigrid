@@ -73,46 +73,86 @@ export default class UnigridSortable extends React.Component {
     return 0;
   }
 
-  static fieldSorter(data, {field, type}) {
-    const isAsc = type === 'asc';
-    const sorter = (a, b) => this.compareObjects(a, b, [field], isAsc);
-    return data.slice().sort(sorter);
+  // columnToFilds - returns the list of fields in the 'item' by which the input
+  //   'data' should be sorted.
+  // defOrder - default order if 'box.order' isn't defined.
+  static sorter(data, box, columnToFields = (col) => [col], defOrder = 'asc') {
+    const nColumns = columnToFields(box.column) || [];
+    const isAsc = (box.order || defOrder) === 'asc';
+    const comparer = (a, b) => this.compareObjects(a, b, nColumns, isAsc);
+    return data.slice().sort(comparer);
   }
 
-  static allowedFieldSorter(data, {field, type}, allowed, defField, defType) {
-    let nField = field;
-    let nType = type;
-    if (allowed.indexOf(field) < 0) {
-      nField = defField;
-      nType = defType;
-    }
-    return this.fieldSorter(data, {field: nField, type: nType});
-  }
-
-  static getFieldSorter() {
-    return this.fieldSorter.bind(this);
-  }
-
-  static getAllowedFieldSorter(allowed, defField, defType) {
+  static getSorter(colToFields, defOrder) {
     return (data, box) =>
-      this.allowedFieldSorter(data, box, allowed, defField, defType);
+      this.sorter(data, box, colToFields, defOrder);
   }
 
-  sortByField(nField) {
-    const box = this.state;
-    let {field, type} = box;
-    if (field === nField) {
-      type = type === 'asc' ? 'desc' : 'asc';
-    } else {
-      field = nField;
-      type = 'asc';
-    }
-    box.field = field;
-    box.type = type;
+  getBox() {
+    return this.state || this.props.box || {};
+  }
+
+  setBox(box) {
     this.setState(box);
   }
 
+  // 'column' is used to track a change in sorting order. This name is supplied
+  //   to the sorter function, so if it's a name of a field in the data item
+  //   the default columnToFields mapper function can be used.
+  // 'order' is the order to be used when sorting. Its behaviour depends on
+  //     values supplied to this function in previous calls (if there were any).
+  //   Valid values are: undefined, 'alter', 'old:alter',
+  //     'asc', 'desc', 'new:asc' and 'new:desc'.
+  //   If undefined is supplied then 'new:asc' is used as default.
+  //   Value 'alter' means that subsequnt calls will alternate the order
+  //     ('asc' to 'desc' and 'desc' to 'asc').
+  //   Value 'old:alter' is similar to 'alter' but it will alternate only if the
+  //     supplied 'column' value is the same as supplied in the previous call.
+  //     If a new 'column' is supplied then it will leave the order unchanged.
+  //   Value 'asc' or 'desc' will unconditionally sort in ascending or
+  //     descending order.
+  //   Values 'new:asc' and 'new:desc' mean that the order (ascending or
+  //     descending) is to be used only if a new 'column' is supplied,
+  //     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
+  // The first argument can be a function to override this with a new behaviour.
+  sort(column, order) {
+    const alternate = (o) => o === 'asc' ? 'desc' : 'asc';
+    let box = this.getBox();
+    if (typeof(column) === 'function') {
+      box = column(box, order);
+    } else {
+      const nOrder = order || 'new:asc';
+      let {column: bColumn, order: bOrder} = box;
+      const isNew = !bColumn || bColumn !== column;
+      bColumn = isNew ? column : bColumn;
+
+      switch(nOrder) {
+      case 'alter':
+        bOrder = alternate(bOrder);
+        break;
+      case 'old:alter':
+        bOrder = isNew ? bOrder : alternate(bOrder);
+        break;
+      case 'asc':
+        bOrder = 'asc';
+        break;
+      case 'desc':
+        bOrder = 'desc';
+        break;
+      case 'new:asc':
+        bOrder = isNew ? 'asc' : alternate(bOrder);
+        break;
+      case 'new:desc':
+        bOrder = isNew ? 'desc' : alternate(bOrder);
+        break;
+      }
+
+      box = Object.assign({}, box, {column: bColumn, order: bOrder});
+    }
+    this.setBox(box);
+  }
+
   render() {
-    return (<Unigrid {...this.props} box={this.state} />);
+    return (<Unigrid {...this.props} box={this.getBox()} />);
   }
 }

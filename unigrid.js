@@ -745,26 +745,83 @@ var UnigridSortable = function (_React$Component) {
   }
 
   _createClass(UnigridSortable, [{
-    key: 'sortByField',
-    value: function sortByField(nField) {
-      var box = this.state;
-      var field = box.field;
-      var type = box.type;
-
-      if (field === nField) {
-        type = type === 'asc' ? 'desc' : 'asc';
-      } else {
-        field = nField;
-        type = 'asc';
-      }
-      box.field = field;
-      box.type = type;
+    key: 'getBox',
+    value: function getBox() {
+      return this.state || this.props.box || {};
+    }
+  }, {
+    key: 'setBox',
+    value: function setBox(box) {
       this.setState(box);
+    }
+
+    // 'column' is used to track a change in sorting order. This name is supplied
+    //   to the sorter function, so if it's a name of a field in the data item
+    //   the default columnToFields mapper function can be used.
+    // 'order' is the order to be used when sorting. Its behaviour depends on
+    //     values supplied to this function in previous calls (if there were any).
+    //   Valid values are: undefined, 'alter', 'old:alter',
+    //     'asc', 'desc', 'new:asc' and 'new:desc'.
+    //   If undefined is supplied then 'new:asc' is used as default.
+    //   Value 'alter' means that subsequnt calls will alternate the order
+    //     ('asc' to 'desc' and 'desc' to 'asc').
+    //   Value 'old:alter' is similar to 'alter' but it will alternate only if the
+    //     supplied 'column' value is the same as supplied in the previous call.
+    //     If a new 'column' is supplied then it will leave the order unchanged.
+    //   Value 'asc' or 'desc' will unconditionally sort in ascending or
+    //     descending order.
+    //   Values 'new:asc' and 'new:desc' mean that the order (ascending or
+    //     descending) is to be used only if a new 'column' is supplied,
+    //     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
+    // The first argument can be a function to override this with a new behaviour.
+
+  }, {
+    key: 'sort',
+    value: function sort(column, order) {
+      var alternate = function alternate(o) {
+        return o === 'asc' ? 'desc' : 'asc';
+      };
+      var box = this.getBox();
+      if (typeof column === 'function') {
+        box = column(box, order);
+      } else {
+        var nOrder = order || 'new:asc';
+        var _box = box;
+        var bColumn = _box.column;
+        var bOrder = _box.order;
+
+        var isNew = !bColumn || bColumn !== column;
+        bColumn = isNew ? column : bColumn;
+
+        switch (nOrder) {
+          case 'alter':
+            bOrder = alternate(bOrder);
+            break;
+          case 'old:alter':
+            bOrder = isNew ? bOrder : alternate(bOrder);
+            break;
+          case 'asc':
+            bOrder = 'asc';
+            break;
+          case 'desc':
+            bOrder = 'desc';
+            break;
+          case 'new:asc':
+            bOrder = isNew ? 'asc' : alternate(bOrder);
+            break;
+          case 'new:desc':
+            bOrder = isNew ? 'desc' : alternate(bOrder);
+            break;
+        }
+
+        box = Object.assign({}, box, { column: bColumn, order: bOrder });
+      }
+      this.setBox(box);
     }
   }, {
     key: 'render',
     value: function render() {
-      return React.createElement(Unigrid, _extends({}, this.props, { box: this.state }));
+      return React.createElement(Unigrid, _extends({}, this.props, { box: this.getBox() }));
     }
   }], [{
     key: 'compareString',
@@ -809,46 +866,35 @@ var UnigridSortable = function (_React$Component) {
       }
       return 0;
     }
+
+    // columnToFilds - returns the list of fields in the 'item' by which the input
+    //   'data' should be sorted.
+    // defOrder - default order if 'box.order' isn't defined.
+
   }, {
-    key: 'fieldSorter',
-    value: function fieldSorter(data, _ref) {
+    key: 'sorter',
+    value: function sorter(data, box) {
       var _this2 = this;
 
-      var field = _ref.field;
-      var type = _ref.type;
+      var columnToFields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
+        return [col];
+      } : arguments[2];
+      var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
 
-      var isAsc = type === 'asc';
-      var sorter = function sorter(a, b) {
-        return _this2.compareObjects(a, b, [field], isAsc);
+      var nColumns = columnToFields(box.column) || [];
+      var isAsc = (box.order || defOrder) === 'asc';
+      var comparer = function comparer(a, b) {
+        return _this2.compareObjects(a, b, nColumns, isAsc);
       };
-      return data.slice().sort(sorter);
+      return data.slice().sort(comparer);
     }
   }, {
-    key: 'allowedFieldSorter',
-    value: function allowedFieldSorter(data, _ref2, allowed, defField, defType) {
-      var field = _ref2.field;
-      var type = _ref2.type;
-
-      var nField = field;
-      var nType = type;
-      if (allowed.indexOf(field) < 0) {
-        nField = defField;
-        nType = defType;
-      }
-      return this.fieldSorter(data, { field: nField, type: nType });
-    }
-  }, {
-    key: 'getFieldSorter',
-    value: function getFieldSorter() {
-      return this.fieldSorter.bind(this);
-    }
-  }, {
-    key: 'getAllowedFieldSorter',
-    value: function getAllowedFieldSorter(allowed, defField, defType) {
+    key: 'getSorter',
+    value: function getSorter(colToFields, defOrder) {
       var _this3 = this;
 
       return function (data, box) {
-        return _this3.allowedFieldSorter(data, box, allowed, defField, defType);
+        return _this3.sorter(data, box, colToFields, defOrder);
       };
     }
   }]);

@@ -43,14 +43,17 @@ export class UnigridExample4 extends React.Component {
     }
   }
 
-  clickHandler(nField) {
-    return () => this.unigrid.sortByField(nField);
+  clickHandler(field) {
+    return () => this.unigrid.sort(field);
   }
 
   render() {
+    const columnToFields = (column) =>
+          column === 'name' || column === 'number' ? [column] : ['name'];
+
     const props = {
       data: tableData,
-      box: {field: 'agent', type: 'asc'},
+      box: {column: 'agent', order: 'asc'},
       table: {
         className: 'unigrid-main-class',
         $do: [
@@ -67,7 +70,7 @@ export class UnigridExample4 extends React.Component {
             rowAs: 'header'
           },
           {
-            process: UnigridSortable.getFieldSorter(),
+            process: UnigridSortable.getSorter(),
             select: 'all',
             $do: [
               {
@@ -94,7 +97,7 @@ export class UnigridExample4 extends React.Component {
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
-                    process: UnigridSortable.getAllowedFieldSorter(['name', 'number'], 'name', 'asc'),
+                    process: UnigridSortable.getSorter(columnToFields),
                     select: 'all',
                     cells: [{as: 'empty', colSpan: 3}, 'name', 'number']
                   }
