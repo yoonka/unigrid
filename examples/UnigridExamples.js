@@ -29,6 +29,8 @@ import {UnigridExample1} from 'examples/UnigridExample1';
 import {UnigridExample2} from 'examples/UnigridExample2';
 import {UnigridExample3} from 'examples/UnigridExample3';
 import {UnigridExample4} from 'examples/UnigridExample4';
+import {UnigridExample5} from 'examples/UnigridExample5';
+import {UnigridExample6} from 'examples/UnigridExample6';
 
 export class UnigridExamples extends React.Component {
   render() {
@@ -42,6 +44,10 @@ export class UnigridExamples extends React.Component {
       <UnigridExample3 />
       <hr />
       <UnigridExample4 />
+      <hr />
+      <UnigridExample5 />
+      <hr />
+      <UnigridExample6 />
       <hr />
       </div>
     );

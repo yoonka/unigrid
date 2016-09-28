@@ -24,13 +24,26 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-export {cleanCellProps,
-        getSorter,
-        sort} from 'src/helpers';
-export {UnigridEmptyCell,
-        UnigridTextCell,
-        UnigridNumberCell} from 'src/UnigridCells';
+import React from 'react';
 
-import Unigrid from 'src/Unigrid';
-import UnigridRow from 'src/UnigridRow';
-export {Unigrid, UnigridRow};
+export class UnigridPart extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}
+
+export class UnigridSection extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}
+
+export class UnigridRowN extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}
+

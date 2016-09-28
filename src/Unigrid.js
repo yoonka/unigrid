@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {UnigridRow} from 'src/UnigridRow';
+import UnigridRow from 'src/UnigridRow';
 
 class UnigridSection extends React.Component {
   makeElement(name) {
@@ -195,8 +195,11 @@ export default class Unigrid extends React.Component {
   }
 
   render() {
-    let table = this.props.table;
-    const children = this.createChildren(table, this.props.data, undefined);
-    return React.createElement('table', Unigrid.cleanProps(table), children);
+    const table = this.props.table;
+    const children = table ?
+      this.createChildren(table, this.props.data, undefined)
+      : this.props.children;
+    const props = table ? Unigrid.cleanProps(table) : {};
+    return React.createElement('table', props, children);
   }
 }

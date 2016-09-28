@@ -30,7 +30,7 @@ import {UnigridEmptyCell,
         UnigridNumberCell} from 'src/UnigridCells';
 import {applyFormatter} from 'src/helpers';
 
-export class UnigridRow extends React.Component {
+export default class UnigridRow extends React.Component {
 
   mkProps(oCell, item, rowAs, mixIn) {
     let cell = undefined;

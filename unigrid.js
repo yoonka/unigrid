@@ -6,58 +6,6 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 
-var _slicedToArray = (function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
-
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
-
-    return _arr;
-  }
-
-  return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if (Symbol.iterator in Object(arr)) {
-      return sliceIterator(arr, i);
-    } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
-    }
-  };
-})();
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
 var _objectWithoutProperties = (function (obj, keys) {
   var target = {};
 
@@ -68,54 +16,6 @@ var _objectWithoutProperties = (function (obj, keys) {
   }
 
   return target;
-})
-
-var _classCallCheck = (function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-})
-
-var _createClass = (function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-})();
-
-var _possibleConstructorReturn = (function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-})
-
-var _inherits = (function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 })
 
 /*
@@ -174,6 +74,181 @@ var applyFormatter = function applyFormatter(props) {
   }
   return undefined;
 };
+
+var getSorter = function getSorter(colToFields, defOrder) {
+  var compareString = function compareString(a, b) {
+    var la = a.toLowerCase();
+    var lb = b.toLowerCase();
+
+    if (la < lb) return -1;
+    if (la > lb) return 1;
+    return 0;
+  };
+
+  var compareAttributes = function compareAttributes(oAttrA, oAttrB) {
+    var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
+    var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
+
+    var aType = typeof attrA;
+    var bType = typeof attrB;
+
+    if (aType !== bType) return 0;
+
+    if (aType === 'string') {
+      var retVal = compareString(attrA, attrB);
+      if (retVal !== 0) return retVal;
+    } else if (aType === 'number') {
+      var _retVal = attrA - attrB;
+      if (_retVal !== 0) return _retVal;
+    }
+    return 0;
+  };
+
+  var compareObjects = function compareObjects(a, b, attrs, isAsc) {
+    for (var i = 0; i < attrs.length; i++) {
+      var aVal = applyFormatter({ show: attrs[i], item: a });
+      var bVal = applyFormatter({ show: attrs[i], item: b });
+      var retVal = compareAttributes(aVal, bVal);
+      if (retVal === 0) {
+        continue;
+      } else {
+        return isAsc ? retVal : -retVal;
+      }
+    }
+    return 0;
+  };
+
+  // fields - The list of fields in the 'item' by which the input 'data'
+  //   should be sorted. If it's a function then it will be called, with the
+  //   selected column as its argument, to obtain the list of fields.
+  // defOrder - default order if 'box.order' isn't defined.
+  var sorter = function sorter(data, box) {
+    var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
+      return [col];
+    } : arguments[2];
+    var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
+
+    var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
+    var isAsc = (box.order || defOrder) === 'asc';
+    var comparer = function comparer(a, b) {
+      return compareObjects(a, b, nColumns, isAsc);
+    };
+    return data.slice().sort(comparer);
+  };
+
+  return function (data, box) {
+    return sorter(data, box, colToFields, defOrder);
+  };
+};
+
+// 'column' is used to track a change in sorting order. This name is supplied
+//   to the sorter function, so if it's a name of a field in the data item
+//   the default columnToFields mapper function can be used.
+// 'order' is the order to be used when sorting. Its behaviour depends on
+//     values supplied to this function in previous calls (if there were any).
+//   Valid values are: undefined, 'alter', 'old:alter',
+//     'asc', 'desc', 'new:asc' and 'new:desc'.
+//   If undefined is supplied then 'new:asc' is used as default.
+//   Value 'alter' means that subsequnt calls will alternate the order
+//     ('asc' to 'desc' and 'desc' to 'asc').
+//   Value 'old:alter' is similar to 'alter' but it will alternate only if the
+//     supplied 'column' value is the same as supplied in the previous call.
+//     If a new 'column' is supplied then it will leave the order unchanged.
+//   Value 'asc' or 'desc' will unconditionally sort in ascending or
+//     descending order.
+//   Values 'new:asc' and 'new:desc' mean that the order (ascending or
+//     descending) is to be used only if a new 'column' is supplied,
+//     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
+// The first argument can be a function to override this with a new behaviour.
+var sort = function sort(unigrid, column, order) {
+  var alternate = function alternate(o) {
+    return o === 'asc' ? 'desc' : 'asc';
+  };
+  var box = unigrid.getBox();
+  if (typeof column === 'function') {
+    box = column(box, order);
+  } else {
+    var nOrder = order || 'new:asc';
+    var _box = box;
+    var bColumn = _box.column;
+    var bOrder = _box.order;
+
+    var isNew = !bColumn || bColumn !== column;
+    bColumn = isNew ? column : bColumn;
+
+    switch (nOrder) {
+      case 'alter':
+        bOrder = alternate(bOrder);
+        break;
+      case 'old:alter':
+        bOrder = isNew ? bOrder : alternate(bOrder);
+        break;
+      case 'asc':
+        bOrder = 'asc';
+        break;
+      case 'desc':
+        bOrder = 'desc';
+        break;
+      case 'new:asc':
+        bOrder = isNew ? 'asc' : alternate(bOrder);
+        break;
+      case 'new:desc':
+        bOrder = isNew ? 'desc' : alternate(bOrder);
+        break;
+    }
+
+    box = Object.assign({}, box, { column: bColumn, order: bOrder });
+  }
+  unigrid.setBox(box);
+};
+
+var _classCallCheck = (function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+})
+
+var _createClass = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+})();
+
+var _possibleConstructorReturn = (function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+})
+
+var _inherits = (function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+})
 
 var UnigridEmptyCell = function (_React$Component) {
   _inherits(UnigridEmptyCell, _React$Component);
@@ -247,6 +322,73 @@ var UnigridNumberCell = function (_React$Component3) {
 
   return UnigridNumberCell;
 }(React.Component);
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+var _defineProperty = (function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+})
+
+var _slicedToArray = (function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+})();
 
 var UnigridRow = function (_React$Component) {
   _inherits(UnigridRow, _React$Component);
@@ -392,21 +534,6 @@ var UnigridRow = function (_React$Component) {
 
   return UnigridRow;
 }(React.Component);
-
-var _defineProperty = (function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-})
 
 var UnigridSection = function (_React$Component) {
   _inherits(UnigridSection, _React$Component);
@@ -736,8 +863,9 @@ var Unigrid = function (_React$Component2) {
     key: 'render',
     value: function render() {
       var table = this.props.table;
-      var children = this.createChildren(table, this.props.data, undefined);
-      return React.createElement('table', Unigrid.cleanProps(table), children);
+      var children = table ? this.createChildren(table, this.props.data, undefined) : this.props.children;
+      var props = table ? Unigrid.cleanProps(table) : {};
+      return React.createElement('table', props, children);
     }
   }]);
 
@@ -747,6 +875,8 @@ var Unigrid = function (_React$Component2) {
 exports.Unigrid = Unigrid;
 exports.UnigridRow = UnigridRow;
 exports.cleanCellProps = cleanCellProps;
+exports.getSorter = getSorter;
+exports.sort = sort;
 exports.UnigridEmptyCell = UnigridEmptyCell;
 exports.UnigridTextCell = UnigridTextCell;
 exports.UnigridNumberCell = UnigridNumberCell;
