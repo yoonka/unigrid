@@ -53,6 +53,11 @@ export default class Unigrid extends React.Component {
     return other;
   }
 
+  constructor(props) {
+    super(props);
+    this.state = this.props.hasOwnProperty('box') ? this.props.box : undefined;
+  }
+
   createChildren(cfg, data, item) {
     let acc = [];
     this.addChildren(acc, cfg, data, item);
@@ -123,7 +128,7 @@ export default class Unigrid extends React.Component {
 
     if (cfg.hasOwnProperty('process')) {
       const {condition, fromProperty, process, ...nCfg} = cfg;
-      this.addChildren(acc, nCfg, cfg.process(data, this.props.box), undefined);
+      this.addChildren(acc, nCfg, cfg.process(data, this.state), undefined);
       return;
     }
 
@@ -179,6 +184,14 @@ export default class Unigrid extends React.Component {
     const {cells, $do, rowAs, mixIn, ...other} = cfg;
     Object.assign(other, {children: children});
     return React.createElement(getComponent(section), other);
+  }
+
+  getBox() {
+    return this.state || this.props.box || {};
+  }
+
+  setBox(box) {
+    this.setState(box);
   }
 
   render() {

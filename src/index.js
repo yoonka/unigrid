@@ -31,5 +31,4 @@ export {UnigridEmptyCell,
         UnigridNumberCell} from 'src/UnigridCells';
 
 import Unigrid from 'src/Unigrid';
-import UnigridSortable from 'src/UnigridSortable';
-export {Unigrid, UnigridSortable};
+export {Unigrid};

@@ -25,8 +25,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import UnigridSortable from 'src/UnigridSortable';
+import Unigrid from 'src/Unigrid';
 import tableData from '/json/tableResp1.json!';
+import {getSorter, sort} from 'src/helpers';
 
 export class UnigridExample4 extends React.Component {
   constructor() {
@@ -44,7 +45,7 @@ export class UnigridExample4 extends React.Component {
   }
 
   clickHandler(field) {
-    return () => this.unigrid.sort(field);
+    return () => sort(this.unigrid, field);
   }
 
   render() {
@@ -77,7 +78,7 @@ export class UnigridExample4 extends React.Component {
             rowAs: 'header'
           },
           {
-            process: UnigridSortable.getSorter(),
+            process: getSorter(),
             select: 'all',
             $do: [
               {
@@ -104,7 +105,7 @@ export class UnigridExample4 extends React.Component {
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
                     fromProperty: 'list',
-                    process: UnigridSortable.getSorter(columnToFields),
+                    process: getSorter(columnToFields),
                     select: 'all',
                     cells: [{as: 'empty', colSpan: 3}, 'name', 'number']
                   }
@@ -129,7 +130,7 @@ export class UnigridExample4 extends React.Component {
     return (
       <div>
       <p>Sortable Multitable</p>
-      <UnigridSortable {...props} ref={(ref) => {this.unigrid = ref;}} />
+      <Unigrid {...props} ref={(ref) => {this.unigrid = ref;}} />
       </div>
     );
   }

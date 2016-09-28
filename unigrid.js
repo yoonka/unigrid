@@ -492,10 +492,32 @@ var UnigridFooter = function (_UnigridSection3) {
 var Unigrid = function (_React$Component2) {
   _inherits(Unigrid, _React$Component2);
 
-  function Unigrid() {
+  _createClass(Unigrid, null, [{
+    key: 'cleanProps',
+    value: function cleanProps(props) {
+      var condition = props.condition;
+      var fromProperty = props.fromProperty;
+      var process = props.process;
+      var select = props.select;
+      var section = props.section;
+      var cells = props.cells;
+      var rowAs = props.rowAs;
+      var mixIn = props.mixIn;
+      var $do = props.$do;
+
+      var other = _objectWithoutProperties(props, ['condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do']);
+
+      return other;
+    }
+  }]);
+
+  function Unigrid(props) {
     _classCallCheck(this, Unigrid);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).apply(this, arguments));
+    var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).call(this, props));
+
+    _this5.state = _this5.props.hasOwnProperty('box') ? _this5.props.box : undefined;
+    return _this5;
   }
 
   _createClass(Unigrid, [{
@@ -612,7 +634,7 @@ var Unigrid = function (_React$Component2) {
 
         var _nCfg = _objectWithoutProperties(cfg, ['condition', 'fromProperty', 'process']);
 
-        this.addChildren(acc, _nCfg, cfg.process(data, this.props.box), undefined);
+        this.addChildren(acc, _nCfg, cfg.process(data, this.state), undefined);
         return;
       }
 
@@ -701,47 +723,6 @@ var Unigrid = function (_React$Component2) {
       return React.createElement(getComponent(section), other);
     }
   }, {
-    key: 'render',
-    value: function render() {
-      var table = this.props.table;
-      var children = this.createChildren(table, this.props.data, undefined);
-      return React.createElement('table', Unigrid.cleanProps(table), children);
-    }
-  }], [{
-    key: 'cleanProps',
-    value: function cleanProps(props) {
-      var condition = props.condition;
-      var fromProperty = props.fromProperty;
-      var process = props.process;
-      var select = props.select;
-      var section = props.section;
-      var cells = props.cells;
-      var rowAs = props.rowAs;
-      var mixIn = props.mixIn;
-      var $do = props.$do;
-
-      var other = _objectWithoutProperties(props, ['condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do']);
-
-      return other;
-    }
-  }]);
-
-  return Unigrid;
-}(React.Component);
-
-var UnigridSortable = function (_React$Component) {
-  _inherits(UnigridSortable, _React$Component);
-
-  function UnigridSortable(props) {
-    _classCallCheck(this, UnigridSortable);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSortable).call(this, props));
-
-    _this.state = _this.props.hasOwnProperty('box') ? _this.props.box : undefined;
-    return _this;
-  }
-
-  _createClass(UnigridSortable, [{
     key: 'getBox',
     value: function getBox() {
       return this.state || this.props.box || {};
@@ -751,159 +732,19 @@ var UnigridSortable = function (_React$Component) {
     value: function setBox(box) {
       this.setState(box);
     }
-
-    // 'column' is used to track a change in sorting order. This name is supplied
-    //   to the sorter function, so if it's a name of a field in the data item
-    //   the default columnToFields mapper function can be used.
-    // 'order' is the order to be used when sorting. Its behaviour depends on
-    //     values supplied to this function in previous calls (if there were any).
-    //   Valid values are: undefined, 'alter', 'old:alter',
-    //     'asc', 'desc', 'new:asc' and 'new:desc'.
-    //   If undefined is supplied then 'new:asc' is used as default.
-    //   Value 'alter' means that subsequnt calls will alternate the order
-    //     ('asc' to 'desc' and 'desc' to 'asc').
-    //   Value 'old:alter' is similar to 'alter' but it will alternate only if the
-    //     supplied 'column' value is the same as supplied in the previous call.
-    //     If a new 'column' is supplied then it will leave the order unchanged.
-    //   Value 'asc' or 'desc' will unconditionally sort in ascending or
-    //     descending order.
-    //   Values 'new:asc' and 'new:desc' mean that the order (ascending or
-    //     descending) is to be used only if a new 'column' is supplied,
-    //     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
-    // The first argument can be a function to override this with a new behaviour.
-
-  }, {
-    key: 'sort',
-    value: function sort(column, order) {
-      var alternate = function alternate(o) {
-        return o === 'asc' ? 'desc' : 'asc';
-      };
-      var box = this.getBox();
-      if (typeof column === 'function') {
-        box = column(box, order);
-      } else {
-        var nOrder = order || 'new:asc';
-        var _box = box;
-        var bColumn = _box.column;
-        var bOrder = _box.order;
-
-        var isNew = !bColumn || bColumn !== column;
-        bColumn = isNew ? column : bColumn;
-
-        switch (nOrder) {
-          case 'alter':
-            bOrder = alternate(bOrder);
-            break;
-          case 'old:alter':
-            bOrder = isNew ? bOrder : alternate(bOrder);
-            break;
-          case 'asc':
-            bOrder = 'asc';
-            break;
-          case 'desc':
-            bOrder = 'desc';
-            break;
-          case 'new:asc':
-            bOrder = isNew ? 'asc' : alternate(bOrder);
-            break;
-          case 'new:desc':
-            bOrder = isNew ? 'desc' : alternate(bOrder);
-            break;
-        }
-
-        box = Object.assign({}, box, { column: bColumn, order: bOrder });
-      }
-      this.setBox(box);
-    }
   }, {
     key: 'render',
     value: function render() {
-      return React.createElement(Unigrid, _extends({}, this.props, { box: this.getBox() }));
-    }
-  }], [{
-    key: 'compareString',
-    value: function compareString(a, b) {
-      var la = a.toLowerCase();
-      var lb = b.toLowerCase();
-
-      if (la < lb) return -1;
-      if (la > lb) return 1;
-      return 0;
-    }
-  }, {
-    key: 'compareAttributes',
-    value: function compareAttributes(oAttrA, oAttrB) {
-      var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
-      var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
-
-      var aType = typeof attrA;
-      var bType = typeof attrB;
-
-      if (aType !== bType) return 0;
-
-      if (aType === 'string') {
-        var retVal = this.compareString(attrA, attrB);
-        if (retVal !== 0) return retVal;
-      } else if (aType === 'number') {
-        var _retVal = attrA - attrB;
-        if (_retVal !== 0) return _retVal;
-      }
-      return 0;
-    }
-  }, {
-    key: 'compareObjects',
-    value: function compareObjects(a, b, attrs, isAsc) {
-      for (var i = 0; i < attrs.length; i++) {
-        var aVal = applyFormatter({ show: attrs[i], item: a });
-        var bVal = applyFormatter({ show: attrs[i], item: b });
-        var retVal = this.compareAttributes(aVal, bVal);
-        if (retVal === 0) {
-          continue;
-        } else {
-          return isAsc ? retVal : -retVal;
-        }
-      }
-      return 0;
-    }
-
-    // fields - The list of fields in the 'item' by which the input 'data'
-    //   should be sorted. If it's a function then it will be called, with the
-    //   selected column as its argument, to obtain the list of fields.
-    // defOrder - default order if 'box.order' isn't defined.
-
-  }, {
-    key: 'sorter',
-    value: function sorter(data, box) {
-      var _this2 = this;
-
-      var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
-        return [col];
-      } : arguments[2];
-      var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
-
-      var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
-      var isAsc = (box.order || defOrder) === 'asc';
-      var comparer = function comparer(a, b) {
-        return _this2.compareObjects(a, b, nColumns, isAsc);
-      };
-      return data.slice().sort(comparer);
-    }
-  }, {
-    key: 'getSorter',
-    value: function getSorter(colToFields, defOrder) {
-      var _this3 = this;
-
-      return function (data, box) {
-        return _this3.sorter(data, box, colToFields, defOrder);
-      };
+      var table = this.props.table;
+      var children = this.createChildren(table, this.props.data, undefined);
+      return React.createElement('table', Unigrid.cleanProps(table), children);
     }
   }]);
 
-  return UnigridSortable;
+  return Unigrid;
 }(React.Component);
 
 exports.Unigrid = Unigrid;
-exports.UnigridSortable = UnigridSortable;
 exports.UnigridRow = UnigridRow;
 exports.cleanCellProps = cleanCellProps;
 exports.UnigridEmptyCell = UnigridEmptyCell;
