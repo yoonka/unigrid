@@ -28,13 +28,13 @@ import React from 'react';
 import {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';
-import {isDefined, applyFormatter} from 'src/helpers';
+import {isDefined, applyFormatter, tryAmend} from 'src/helpers';
 
 export default class UnigridRow extends React.Component {
 
-  mkProps(oCell, item, rowAs, mixIn) {
+  mkProps(oCell, item, rowAs, mixIn, addProp) {
     let cell = undefined;
-    let props = Object.assign({}, mixIn);
+    let props = Object.assign({}, addProp, mixIn);
 
     // create a shallow copy to avoid mutating props
     if (typeof(oCell) === 'object') {
@@ -79,16 +79,19 @@ export default class UnigridRow extends React.Component {
     );
   }
 
-  getCell(cell, item, rowAs, mixIn) {
+  getCell(cell, item, rowAs, mixIn, addProp) {
     if (cell === null) {
-      return ['empty', this.mkProps(undefined, item, rowAs, mixIn)];
+      let props = this.mkProps(undefined, item, rowAs, mixIn, addProp);
+      return ['empty', tryAmend(props, item, 'cell', 'cell')];
     }
 
-    let cellProps = this.mkProps(cell, item, rowAs, mixIn);
+    let cellProps = this.mkProps(cell, item, rowAs, mixIn, addProp);
 
     if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
       Object.assign(cellProps, {cell: applyFormatter(cellProps)});
     }
+
+    cellProps = tryAmend(cellProps, item, 'cell', 'cell');
 
     if (isDefined(cellProps, 'as')) {
       return [cellProps.as, cellProps];
@@ -97,8 +100,8 @@ export default class UnigridRow extends React.Component {
     return [typeof(cellProps.cell), cellProps];
   }
 
-  createAndProcessCell(cell, item, rowAs, mixIn) {
-    let [type, props] = this.getCell(cell, item, rowAs, mixIn);
+  createAndProcessCell(cell, item, rowAs, mixIn, addProp) {
+    let [type, props] = this.getCell(cell, item, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
     if (typeof(binds) === 'string') {
       binds = [binds];
@@ -127,11 +130,14 @@ export default class UnigridRow extends React.Component {
     let elems = cfg.cells || [];
     let cfgMixIn = cfg.mixIn;
     let arr = [];
-    for (let i = 0; i < elems.length; i++) {
-      arr.push(this.createAndProcessCell(elems[i], cfg.item, cfg.rowAs, cfgMixIn));
+    const addProp = isDefined(cfg, 'treeAmend') ?
+          {treeAmend: cfg.treeAmend} : undefined;
+    for (let i of elems) {
+      arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfgMixIn, addProp));
     }
 
-    let {cells, rowAs, mixIn, item, cellTypes, $do, ...nProps} = cfg;
+    let {amend, treeAmend, cells, rowAs, mixIn, item, cellTypes, $do,
+         ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
 }

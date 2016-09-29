@@ -26,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import UnigridRow from 'src/UnigridRow';
-import {isDefined} from 'src/helpers';
+import {isDefined, makeIterator, tryAmend} from 'src/helpers';
 
 class UnigridSection extends React.Component {
   makeElement(name) {
@@ -49,8 +49,8 @@ export class UnigridFooter extends UnigridSection {
 
 export default class Unigrid extends React.Component {
   static cleanProps(props) {
-    const {condition, fromProperty, process, select, amend, section, cells,
-           rowAs, mixIn, $do, ...other} = props;
+    const {amend, treeAmend, condition, fromProperty, process, select, section,
+           cells, rowAs, mixIn, $do, ...other} = props;
     return other;
   }
 
@@ -74,92 +74,70 @@ export default class Unigrid extends React.Component {
   }
 
   executeSelect(acc, select, cfg, data) {
-    let it = {[Symbol.iterator]: () => this.makeIterator(data, select)};
+    let it = {[Symbol.iterator]: () => makeIterator(data, select)};
     for (let i of it) {
       this.addRows(acc, cfg, data, i);
     }
   }
 
-  makeIterator(data, select) {
-    switch (typeof(select)) {
-    case 'number': return this.makeNumberIterator(data, select);
-    case 'string': return this.makeStringIterator(data, select);
-    }
-  }
-
-  makeNumberIterator(data, select) {
-    var delivered = false;
-    return {
-      next: function() {
-        if (!delivered && select >=0 && select < data.length) {
-          delivered = true;
-          return {value: data[select], done: false};
-        }
-        return {done: true};
-      }
-    }
-  }
-
-  makeStringIterator(data, select) {
-    if (select === 'all') {
-      return this.makeAllIterator(data);
-    }
-  }
-
-  makeAllIterator(data) {
-    var nextIndex = 0;
-    return {
-      next: function() {
-        return nextIndex < data.length ?
-          {value: data[nextIndex++], done: false} : {done: true};
-      }
-    }
-  }
-
   addRows(acc, cfg, data, item) {
-    if (isDefined(cfg, 'condition')) {
-      if (this.shouldSkip(cfg.condition, item)) return;
+    function prepAmend(iCfg, iItem, expr) {
+      if (isDefined(iCfg, expr)) {
+        const aCfg = tryAmend(iCfg, iItem, expr);
+        if (isDefined(aCfg, expr)) {
+          return aCfg;
+        }
+      }
+      return false;
     }
 
-    if (isDefined(cfg, 'fromProperty')) {
-      const {condition, fromProperty, ...nCfg} = cfg;
-      this.addChildren(acc, nCfg, item[cfg.fromProperty], undefined);
+    let aCfg = prepAmend(cfg, item, 'condition');
+    if (aCfg) {
+      if (this.shouldSkip(aCfg.condition, item)) return;
+    }
+
+    aCfg = prepAmend(cfg, item, 'fromProperty');
+    if (aCfg) {
+      const {condition, fromProperty, ...nCfg} = aCfg;
+      this.addChildren(acc, nCfg, item[aCfg.fromProperty], undefined);
       return;
     }
 
-    if (isDefined(cfg, 'process')) {
-      const {condition, fromProperty, process, ...nCfg} = cfg;
-      this.addChildren(acc, nCfg, cfg.process(data, this.state), undefined);
+    aCfg = prepAmend(cfg, item, 'process');
+    if (aCfg) {
+      const {condition, fromProperty, process, ...nCfg} = aCfg;
+      this.addChildren(acc, nCfg, aCfg.process(data, this.state), undefined);
       return;
     }
 
-    if (isDefined(cfg, 'select')) {
-      const {condition, fromProperty, process, select, ...nCfg} = cfg;
-      this.executeSelect(acc, cfg.select, nCfg, data);
+    aCfg = prepAmend(cfg, item, 'select');
+    if (aCfg) {
+      const {condition, fromProperty, process, select, ...nCfg} = aCfg;
+      this.executeSelect(acc, aCfg.select, nCfg, data);
       return;
     }
 
-    if (isDefined(cfg, 'amend')) {
-      const {condition, fromProperty, process, select, amend, ...nCfg} = cfg;
-      this.addRows(acc, cfg.amend(nCfg, item), data, item);
+    aCfg = prepAmend(cfg, item, 'section');
+    if (aCfg) {
+      const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
+      acc.push(this.createSection(aCfg.section, nCfg, data, item));
       return;
     }
 
-    if (isDefined(cfg, 'section')) {
-      const {condition, fromProperty, process, select, amend, section, ...nCfg} = cfg;
-      acc.push(this.createSection(cfg.section, nCfg, data, item));
-      return;
-    }
-
-    if (isDefined(cfg, 'cells')) {
-      const {condition, fromProperty, process, select, amend, section, ...nCfg} = cfg;
+    aCfg = prepAmend(cfg, item, 'cells');
+    if (aCfg) {
+      const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
       const cTypes = this.props.cellTypes
       acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} />);
     }
 
-    if (isDefined(cfg, '$do')) {
-      for (let i = 0; i < cfg.$do.length; i++) {
-        this.addChildren(acc, cfg.$do[i], data, item);
+    aCfg = prepAmend(cfg, item, '$do');
+    if (aCfg) {
+      const addProp = isDefined(aCfg, 'treeAmend') ?
+            {treeAmend: aCfg.treeAmend} : undefined;
+      for (let i of aCfg.$do) {
+        let nCfg = addProp ? Object.assign({}, addProp, i) : i;
+        this.addChildren(acc, nCfg, data, item);
       }
     }
   }
@@ -188,9 +166,9 @@ export default class Unigrid extends React.Component {
     }
 
     let children = this.createChildren(cfg, data, item);
-    const {cells, $do, rowAs, mixIn, ...other} = cfg;
-    Object.assign(other, {children: children});
-    return React.createElement(getComponent(section), other);
+    const props = Unigrid.cleanProps(cfg);
+    Object.assign(props, {children: children});
+    return React.createElement(getComponent(section), props);
   }
 
   getBox() {

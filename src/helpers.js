@@ -24,17 +24,62 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// *** Utility functions ***
+
 export const isDefined = (obj, prop) => {
   var undefined; // really undefined
   return obj.hasOwnProperty(prop) && obj[prop] !== undefined;
 };
 
 export const cleanCellProps = (props) => {
-  const {cell, item, rowAs, ...other} = props;
+  const {cell, item, rowAs, amend, treeAmend, ...other} = props;
   return other;
 };
 
-export const applyFormatter = (props) => {
+// *** Data iterators ***
+
+
+export const makeIterator = (pData, pSelect) => {
+
+  function makeAllIterator(data) {
+    var nextIndex = 0;
+    return {
+      next: function() {
+        return nextIndex < data.length ?
+          {value: data[nextIndex++], done: false} : {done: true};
+      }
+    }
+  }
+
+  function makeStringIterator(data, select) {
+    if (select === 'all') {
+      return makeAllIterator(data);
+    }
+  }
+
+  function makeNumberIterator(data, select) {
+    var delivered = false;
+    return {
+      next: function() {
+        if (!delivered && select >=0 && select < data.length) {
+          delivered = true;
+          return {value: data[select], done: false};
+        }
+        return {done: true};
+      }
+    }
+  }
+
+  switch (typeof(pSelect)) {
+  case 'number': return makeNumberIterator(pData, pSelect);
+  case 'string': return makeStringIterator(pData, pSelect);
+  }
+  return undefined;
+};
+
+// *** Processing expression objects ***
+
+export const applyFormatter = (pProps) => {
   const propertyFormatter = (props) => {
     return isDefined(props, 'show') && isDefined(props.item, props.show) ?
       props.item[props.show] : undefined;
@@ -42,13 +87,42 @@ export const applyFormatter = (props) => {
 
   const functionFormatter = (props) => props.show(props);
 
-  let tShow = typeof(props.show);
+  let tShow = typeof(pProps.show);
   switch(tShow) {
-  case 'string': return propertyFormatter(props);
-  case 'function': return functionFormatter(props);
+  case 'string': return propertyFormatter(pProps);
+  case 'function': return functionFormatter(pProps);
   }
   return undefined;
 };
+
+export const tryAmend = (pCfg, pItem, pExpr, pDef = 'cells') => {
+
+  function applyAmend(cfg, item, fun) {
+    const retObj = fun(cfg, item);
+    return Object.assign({}, cfg, retObj /*fun(cfg, item)*/);
+  }
+
+  function amend(cfg, expr, item, how) {
+    if (typeof(how) === 'function') {
+      // if 'how' isn't an object then the default is to amend for 'cells'
+      if (expr === pDef) {
+        return applyAmend(cfg, item, how);
+      }
+    } else if (isDefined(how, expr)) {
+      return applyAmend(cfg, item, how[expr]);
+    }
+    return cfg;
+  }
+
+  if (isDefined(pCfg, 'amend')) {
+    return amend(pCfg, pExpr, pItem, pCfg.amend);
+  } else if (isDefined(pCfg, 'treeAmend')) {
+    return amend(pCfg, pExpr, pItem, pCfg.treeAmend);
+  }
+  return pCfg;
+}
+
+// *** Sorting functions ***
 
 export const getSorter = (colToFields, defOrder) => {
   const compareString = (a, b) => {

@@ -26,8 +26,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 export {isDefined,
         cleanCellProps,
+        makeIterator,
+        applyFormatter,
+        tryAmend,
         getSorter,
         sort} from 'src/helpers';
+
 export {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';

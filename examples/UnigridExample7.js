@@ -40,8 +40,31 @@ export class UnigridExample7 extends React.Component {
   }
 
   render() {
+    const chStyleY = (cfg, item) => {
+      this.isColorB = !this.isColorB;
+      return {style: {backgroundColor: '#ffcc00'}}
+    };
+
+    const chStyleG = (cfg, item) => {
+      this.isColorB = !this.isColorB;
+      return {style: {backgroundColor: '#55ff55'}}
+    };
+
+    const chStyleR = (cfg, item) => {
+      const isColorR = this.isColorR ? false : true;
+      this.isColorR = isColorR;
+      return isColorR ? {style: {backgroundColor: '#ff5555'}} : undefined;
+    };
+
+    const chStyleB = (cfg, item) => {
+      const isColorB = this.isColorB ? false : true;
+      this.isColorB = isColorB;
+      return isColorB ? {style: {backgroundColor: '#4455ff'}} : undefined;
+    };
+
     const table = {
       className: 'unigrid',
+      treeAmend: {cells: chStyleR, cell: chStyleB},
       $do: [
         {
           section: 'header', className: 'unigrid-header',
@@ -61,19 +84,20 @@ export class UnigridExample7 extends React.Component {
             {
               process: getSorter(),
               select: 'all',
+              amend: chStyleY,
               cells: ['a', 'b', 'c', 'd', 'e'],
               $do: [
                 {
                   fromProperty: 'l2',
                   process: getSorter(),
                   select: 'all',
-                  cells: ['a', 'b', 'c', 'd', 'e'],
+                  cells: ['a', {amend: chStyleY, show: 'b'}, 'c', 'd', 'e'],
                   $do: [
                     {
                       fromProperty: 'l3',
                       process: getSorter(),
                       select: 'all',
-                      cells: ['a', 'b', 'c', 'd', 'e'],
+                      cells: ['a', 'b', 'c', {show: 'd', amend: {cell: chStyleG}}, 'e'],
                     }
                   ]
                 }
