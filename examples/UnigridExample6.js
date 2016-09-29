@@ -28,7 +28,7 @@ import React from 'react';
 import Unigrid from 'src/Unigrid';
 import {UnigridPart, UnigridSection, UnigridRowN} from 'src/UnigridParts';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
-import tableData from '/json/tableResp1.json!';
+import tableData from './json/tableResp1.json!';
 
 export class UnigridExample6 extends React.Component {
   constructor() {

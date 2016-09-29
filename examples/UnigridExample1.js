@@ -27,7 +27,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import React from 'react';
 import Unigrid from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
-import tableData from '/json/tableResp1.json!';
+import tableData from './json/tableResp1.json!';
+import {isDefined} from 'src/helpers';
 
 export class UnigridExample1 extends React.Component {
   constructor() {
@@ -38,7 +39,7 @@ export class UnigridExample1 extends React.Component {
   addIds(data, property) {
     for (let i = 0; i < data.length; i++) {
       data[i].id = this.idCounter();
-      if (data[i].hasOwnProperty(property)) {
+      if (isDefined(data[i], property)) {
         this.addIds(data[i][property], property);
       }
     }

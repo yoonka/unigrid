@@ -24,6 +24,11 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+export const isDefined = (obj, prop) => {
+  var undefined; // really undefined
+  return obj.hasOwnProperty(prop) && obj[prop] !== undefined;
+};
+
 export const cleanCellProps = (props) => {
   const {cell, item, rowAs, ...other} = props;
   return other;
@@ -31,10 +36,8 @@ export const cleanCellProps = (props) => {
 
 export const applyFormatter = (props) => {
   const propertyFormatter = (props) => {
-    let property = props.show;
-
-    return property && props.item.hasOwnProperty(property) ?
-      props.item[property] : undefined;
+    return isDefined(props, 'show') && isDefined(props.item, props.show) ?
+      props.item[props.show] : undefined;
   };
 
   const functionFormatter = (props) => props.show(props);

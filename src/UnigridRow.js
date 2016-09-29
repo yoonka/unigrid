@@ -28,7 +28,7 @@ import React from 'react';
 import {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';
-import {applyFormatter} from 'src/helpers';
+import {isDefined, applyFormatter} from 'src/helpers';
 
 export default class UnigridRow extends React.Component {
 
@@ -46,10 +46,10 @@ export default class UnigridRow extends React.Component {
     if (cell !== undefined) {
       Object.assign(props, {show: cell});
     }
-    if (!props.hasOwnProperty('item') && item !== undefined) {
+    if (!isDefined(props, 'item') && item !== undefined) {
       Object.assign(props, {item: item});
     }
-    if (!props.hasOwnProperty('rowAs') && rowAs !== undefined) {
+    if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
       Object.assign(props, {rowAs: rowAs});
     }
     return props;
@@ -62,9 +62,8 @@ export default class UnigridRow extends React.Component {
       return React.createElement(type, nProps);
     }
 
-    if (this.props.hasOwnProperty('cellTypes')
-        && this.props.cellTypes
-        && this.props.cellTypes.hasOwnProperty(type)) {
+    if (isDefined(this.props, 'cellTypes')
+      && isDefined(this.props.cellTypes, type)) {
       return React.createElement(this.props.cellTypes[type], nProps);
     }
 
@@ -75,7 +74,9 @@ export default class UnigridRow extends React.Component {
     }
 
     // 'undefined' type
-    return (<UnigridTextCell {...nProps} cell={"Error: " + JSON.stringify(oProps)} />);
+    return (
+      <UnigridTextCell {...nProps} cell={"Error: " + JSON.stringify(oProps)} />
+    );
   }
 
   getCell(cell, item, rowAs, mixIn) {
@@ -85,11 +86,11 @@ export default class UnigridRow extends React.Component {
 
     let cellProps = this.mkProps(cell, item, rowAs, mixIn);
 
-    if (!cellProps.hasOwnProperty('cell') && cellProps.hasOwnProperty('show')) {
+    if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
       Object.assign(cellProps, {cell: applyFormatter(cellProps)});
     }
 
-    if (cellProps.hasOwnProperty('as')) {
+    if (isDefined(cellProps, 'as')) {
       return [cellProps.as, cellProps];
     }
 
@@ -130,7 +131,7 @@ export default class UnigridRow extends React.Component {
       arr.push(this.createAndProcessCell(elems[i], cfg.item, cfg.rowAs, cfgMixIn));
     }
 
-    let {cells, rowAs, mixIn, item, cellTypes, ...nProps} = cfg;
+    let {cells, rowAs, mixIn, item, cellTypes, $do, ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
 }

@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import UnigridRow from 'src/UnigridRow';
+import {isDefined} from 'src/helpers';
 
 class UnigridSection extends React.Component {
   makeElement(name) {
@@ -48,14 +49,14 @@ export class UnigridFooter extends UnigridSection {
 
 export default class Unigrid extends React.Component {
   static cleanProps(props) {
-    const {condition, fromProperty, process, select, section, cells, rowAs,
-           mixIn, $do, ...other} = props;
+    const {condition, fromProperty, process, select, amend, section, cells,
+           rowAs, mixIn, $do, ...other} = props;
     return other;
   }
 
   constructor(props) {
     super(props);
-    this.state = this.props.hasOwnProperty('box') ? this.props.box : undefined;
+    this.state = isDefined(this.props, 'box') ? this.props.box : undefined;
   }
 
   createChildren(cfg, data, item) {
@@ -116,41 +117,47 @@ export default class Unigrid extends React.Component {
   }
 
   addRows(acc, cfg, data, item) {
-    if (cfg.hasOwnProperty('condition')) {
+    if (isDefined(cfg, 'condition')) {
       if (this.shouldSkip(cfg.condition, item)) return;
     }
 
-    if (cfg.hasOwnProperty('fromProperty')) {
+    if (isDefined(cfg, 'fromProperty')) {
       const {condition, fromProperty, ...nCfg} = cfg;
       this.addChildren(acc, nCfg, item[cfg.fromProperty], undefined);
       return;
     }
 
-    if (cfg.hasOwnProperty('process')) {
+    if (isDefined(cfg, 'process')) {
       const {condition, fromProperty, process, ...nCfg} = cfg;
       this.addChildren(acc, nCfg, cfg.process(data, this.state), undefined);
       return;
     }
 
-    if (cfg.hasOwnProperty('select')) {
+    if (isDefined(cfg, 'select')) {
       const {condition, fromProperty, process, select, ...nCfg} = cfg;
       this.executeSelect(acc, cfg.select, nCfg, data);
       return;
     }
 
-    if (cfg.hasOwnProperty('section')) {
-      const {condition, fromProperty, process, select, section, ...nCfg} = cfg;
+    if (isDefined(cfg, 'amend')) {
+      const {condition, fromProperty, process, select, amend, ...nCfg} = cfg;
+      this.addRows(acc, cfg.amend(nCfg, item), data, item);
+      return;
+    }
+
+    if (isDefined(cfg, 'section')) {
+      const {condition, fromProperty, process, select, amend, section, ...nCfg} = cfg;
       acc.push(this.createSection(cfg.section, nCfg, data, item));
       return;
     }
 
-    if (cfg.hasOwnProperty('cells')) {
-      const {condition, fromProperty, process, select, section, ...nCfg} = cfg;
+    if (isDefined(cfg, 'cells')) {
+      const {condition, fromProperty, process, select, amend, section, ...nCfg} = cfg;
       const cTypes = this.props.cellTypes
       acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} />);
     }
 
-    if (cfg.hasOwnProperty('$do')) {
+    if (isDefined(cfg, '$do')) {
       for (let i = 0; i < cfg.$do.length; i++) {
         this.addChildren(acc, cfg.$do[i], data, item);
       }
@@ -158,10 +165,10 @@ export default class Unigrid extends React.Component {
   }
 
   shouldSkip(condition, item) {
-    if (condition.hasOwnProperty('ifDoes')) {
+    if (isDefined(condition, 'ifDoes')) {
       if (condition.ifDoes === 'exist') {
-        if (condition.hasOwnProperty('property')) {
-          if (!item.hasOwnProperty(condition.property)) {
+        if (isDefined(condition, 'property')) {
+          if (!isDefined(item, condition.property)) {
             return true;
           }
         }
