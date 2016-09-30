@@ -28,7 +28,7 @@ import React from 'react';
 import Unigrid from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
-import {isDefined, addIds} from 'src/helpers';
+import {isDefined, idMaker, addIds} from 'src/helpers';
 
 export class UnigridExample1 extends React.Component {
   handleClick() {
@@ -44,6 +44,9 @@ export class UnigridExample1 extends React.Component {
   }
 
   render() {
+    const idCounter = idMaker();
+    const mkKey = () => idCounter.next().value;
+
     const props = {
       data: tableData,
       table: {
@@ -60,7 +63,10 @@ export class UnigridExample1 extends React.Component {
                   'hStreet',
                   {show: 'hName', as: 'string', className: 'name-header-cell'},
                   'hNumber'
-                ], rowAs: 'header'}
+                ],
+                rowAs: 'header',
+                mixIn: {makeKey: mkKey, bindToCell: ['makeKey']}
+              }
             ]
           },
           {
@@ -82,7 +88,8 @@ export class UnigridExample1 extends React.Component {
                           {show: this.showFun},
                           this.showFun2,
                           'hNumber'],
-                        rowAs: 'header'
+                        rowAs: 'header',
+                        mixIn: {makeKey: mkKey}
                       }
                     ]
                   },
@@ -95,18 +102,22 @@ export class UnigridExample1 extends React.Component {
                           {cell: 'category2'},
                           {as: 'empty', colSpan: 3},
                           'hNumber'],
-                        rowAs: 'header'
+                        rowAs: 'header',
+                        mixIn: {makeKey: mkKey}
                       }
                     ]
                   },
                   {
                     className: 'some-row-class',
-                    cells: ['agent', 'date', 'street', 'name',
-                            {show: 'number',
-                             as: 'string',
-                             className: 'number-cell',
-                             onClick: this.handleClick,
-                             bindToCell: ['onClick']}]
+                    cells: [
+                      'agent', 'date', 'street', 'name',
+                      {show: 'number',
+                       as: 'string',
+                       className: 'number-cell',
+                       onClick: this.handleClick,
+                       bindToCell: 'onClick'
+                      }],
+                    mixIn: {makeKey: mkKey}
                   },
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
@@ -115,7 +126,11 @@ export class UnigridExample1 extends React.Component {
                     $do: [
                       {
                         cells: [{as: 'empty', colSpan: 3}, 'name', 'number'],
-                        mixIn: {onClick: this.handleClick, bindToCell: 'onClick'}
+                        mixIn: {
+                          makeKey: mkKey,
+                          onClick: this.handleClick,
+                          bindToCell: 'onClick'
+                        }
                       }
                     ]
                   }
@@ -130,8 +145,8 @@ export class UnigridExample1 extends React.Component {
               {
                 select: 0,
                 $do: [
-                  {cells: [null, null, null, 'fSum', 'fTotal']},
-                  {cells: [null, null, null, 'sum', 'total']}
+                  {cells: [null, null, null, 'fSum', 'fTotal'], mixIn: {makeKey: mkKey}},
+                  {cells: [null, null, null, 'sum', 'total'], mixIn: {makeKey: mkKey}}
                 ]
               }
             ]

@@ -32,28 +32,31 @@ export const isDefined = (obj, prop) => {
 };
 
 export const cleanCellProps = (props) => {
-  const {cell, item, rowAs, amend, treeAmend, ...other} = props;
+  const {cell, item, rowAs, makeKey, amend, treeAmend, ...other} = props;
   return other;
 };
 
-export const addIds = (pData, pProperty) => {
-  function* idMaker() {
-    let index = 0;
-    while (true) yield index++;
-  }
+export const idMaker = function* () {
+  let index = 0;
+  while (true) yield index++;
+}
 
+export const addIds = (pData, pLists) => {
   let idCounter = idMaker();
+  const nLists = pLists.constructor === Array ? pLists : [pLists];
 
-  function addInProp(data, property) {
-    for (let i = 0; i < data.length; i++) {
-      data[i].id = idCounter.next().value;
-      if (isDefined(data[i], property)) {
-        addInProp(data[i][property], property);
+  function addInProp(data, lists) {
+    for (let i of data) {
+      i.id = idCounter.next().value;
+      for (let j of lists) {
+        if (isDefined(i, j)) {
+          addInProp(i[j], lists);
+        }
       }
     }
   }
 
-  addInProp(pData, pProperty);
+  addInProp(pData, nLists);
 }
 
 // *** Data iterators ***

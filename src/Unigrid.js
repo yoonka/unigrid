@@ -49,8 +49,8 @@ export class UnigridFooter extends UnigridSection {
 
 export default class Unigrid extends React.Component {
   static cleanProps(props) {
-    const {amend, treeAmend, condition, fromProperty, process, select, section,
-           cells, rowAs, mixIn, $do, ...other} = props;
+    const {amend, treeAmend, makeKey, condition, fromProperty, process, select,
+           section, cells, rowAs, mixIn, $do, ...other} = props;
     return other;
   }
 

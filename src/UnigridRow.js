@@ -61,11 +61,16 @@ export default class UnigridRow extends React.Component {
     if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
       Object.assign(props, {rowAs: rowAs});
     }
+
+    if (isDefined(props, 'makeKey') && typeof(props.makeKey) === 'function') {
+      props.key = props.makeKey(props);
+    }
+
     return props;
   }
 
   createCellForType(type, oProps) {
-    let {show, using, as, bindToCell, ...nProps} = oProps;
+    let {show, using, as, bindToCell, makeKey, ...nProps} = oProps;
 
     if (typeof(type) !== 'string') {
       return React.createElement(type, nProps);
