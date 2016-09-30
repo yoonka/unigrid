@@ -26,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import Unigrid from 'src/Unigrid';
-import {UnigridPart} from 'src/UnigridParts';
+import {UnigridPart, UnigridCells, UnigridCell} from 'src/UnigridParts';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
 
@@ -53,14 +53,13 @@ export class UnigridExample5 extends React.Component {
         <Unigrid data={tableData} cellTypes={cellTypes}>
           <UnigridPart className={'unigrid-main-class'}>
             <UnigridPart section={'header'} className={'unigrid-header'}>
-              <UnigridPart rowAs={'header'} cells={[
-                  {show: 'hAgent', as: UnigridTextCell},
-                  'hDate',
-                  'hStreet',
-                  {show: 'hName', as: 'string', className: 'name-header-cell'},
-                  'hNumber'
-                ]}
-              />
+              <UnigridCells rowAs={'header'}>
+                <UnigridTextCell show={'hAgent'} />
+                <UnigridCell show={'hDate'} />
+                <UnigridCell show={'hStreet'} />
+                <UnigridCell show={'hName'} as={'string'} className={'name-header-cell'} />
+                <UnigridCell show={'hNumber'} />
+              </UnigridCells>
             </UnigridPart>
           </UnigridPart>
           <UnigridPart select={'all'}>
@@ -68,39 +67,40 @@ export class UnigridExample5 extends React.Component {
               <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={0}>
-                <UnigridPart rowAs={'header'} cells={[
-                    'hCategory',
-                    {as: 'empty', colSpan: 3},
-                    'hNumber'
-                  ]}
-                />
+                <UnigridCells rowAs={'header'}>
+                  <UnigridCell show={'hCategory'} />
+                  <UnigridEmptyCell colSpan={3} />
+                  <UnigridCell show={'hNumber'} />
+                </UnigridCells>
               </UnigridPart>
               <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}>
-                <UnigridPart rowAs={'header'} cells={[
-                    {cell: 'category2'},
-                    {as: 'empty', colSpan: 3},
-                    'hNumber'
-                  ]}
-                />
+                <UnigridCells rowAs={'header'}>
+                  <UnigridCell cell={'category2'} />
+                  <UnigridEmptyCell colSpan={3} />
+                  <UnigridCell show={'hNumber'} />
+                </UnigridCells>
               </UnigridPart>
-              <UnigridPart className={'some-row-class'}
-                cells={['agent', 'date', 'street', 'name',
-                  {show: 'number',
-                  as: 'string',
-                  className: 'number-cell',
-                  onClick: this.handleClick,
-                  bindToCell: ['onClick']}
-                ]}
-              />
+              <UnigridCells className={'some-row-class'}>
+                <UnigridCell show={'agent'} />
+                <UnigridCell sohw={'date'} />
+                <UnigridCell show={'street'} />
+                <UnigridCell show={'name'} />
+                <UnigridCell show={'number'} as={'string'}
+                             className={'number-cell'}
+                             onClick={this.handleClick}
+                             bindToCell={['onClick']}
+                />
+              </UnigridCells>
               <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={'all'}
               >
-                <UnigridPart
-                  cells={[{as: 'empty', colSpan: 3}, 'name', 'number']}
-                  mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}
-                />
+                <UnigridCells mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}>
+                  <UnigridEmptyCell colSpan={3} />
+                  <UnigridCell show={'name'} />
+                  <UnigridCell show={'number'} />
+                </UnigridCells>
               </UnigridPart>
             </UnigridPart>
           </UnigridPart>

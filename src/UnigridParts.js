@@ -40,10 +40,16 @@ export class UnigridSection extends React.Component {
   }
 }
 
-export class UnigridRowN extends React.Component {
+export class UnigridCells extends React.Component {
   render() {
     // Dummy rendering for now
     return (<div>{this.props.children}</div>);
   }
 }
 
+export class UnigridCell extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}

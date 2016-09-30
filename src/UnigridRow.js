@@ -36,9 +36,18 @@ export default class UnigridRow extends React.Component {
     let cell = undefined;
     let props = Object.assign({}, addProp, mixIn);
 
+    // Special case for deep merging 'cell'
+    const cellMixIn = isDefined(props, 'cell') &&
+          typeof(props.cell === 'object') ? props.cell : false;
+
     // create a shallow copy to avoid mutating props
     if (typeof(oCell) === 'object') {
       Object.assign(props, oCell);
+      // Re-merge the 'cell' objects from oCell and mixIn
+      if (cellMixIn && isDefined(oCell, 'cell')
+          && typeof(oCell.cell) === 'object') {
+        props.cell = Object.assign({}, cellMixIn, oCell.cell);
+      }
     } else {
       cell = oCell;
     }

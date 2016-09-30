@@ -36,6 +36,26 @@ export const cleanCellProps = (props) => {
   return other;
 };
 
+export const addIds = (pData, pProperty) => {
+  function* idMaker() {
+    let index = 0;
+    while (true) yield index++;
+  }
+
+  let idCounter = idMaker();
+
+  function addInProp(data, property) {
+    for (let i = 0; i < data.length; i++) {
+      data[i].id = idCounter.next().value;
+      if (isDefined(data[i], property)) {
+        addInProp(data[i][property], property);
+      }
+    }
+  }
+
+  addInProp(pData, pProperty);
+}
+
 // *** Data iterators ***
 
 

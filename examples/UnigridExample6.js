@@ -26,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import Unigrid from 'src/Unigrid';
-import {UnigridPart, UnigridSection, UnigridRowN} from 'src/UnigridParts';
+import {UnigridPart, UnigridSection, UnigridCells} from 'src/UnigridParts';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
 
@@ -53,7 +53,7 @@ export class UnigridExample6 extends React.Component {
         <Unigrid data={tableData} cellTypes={cellTypes}>
           <UnigridPart className={'unigrid-main-class'}>
             <UnigridSection section={'header'} className={'unigrid-header'}>
-              <UnigridRowN rowAs={'header'} cells={[
+              <UnigridCells rowAs={'header'} cells={[
                   {show: 'hAgent', as: UnigridTextCell},
                   'hDate',
                   'hStreet',
@@ -65,7 +65,7 @@ export class UnigridExample6 extends React.Component {
           </UnigridPart>
           <UnigridPart select={'all'}>
             <UnigridSection section={'body'} className={'unigrid-segment'}>
-              <UnigridRowN condition={{ifDoes: 'exist', property: 'list'}}
+              <UnigridCells condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 rowAs={'header'}
                 cells={[
@@ -74,7 +74,7 @@ export class UnigridExample6 extends React.Component {
                   'hNumber'
                 ]}
               />
-              <UnigridRowN condition={{ifDoes: 'exist', property: 'list'}}
+              <UnigridCells condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 rowAs={'header'}
                 cells={[
@@ -83,7 +83,7 @@ export class UnigridExample6 extends React.Component {
                   'hNumber'
                 ]}
               />
-              <UnigridRowN className={'some-row-class'}
+              <UnigridCells className={'some-row-class'}
                 cells={['agent', 'date', 'street', 'name',
                   {show: 'number',
                   as: 'string',
@@ -96,7 +96,7 @@ export class UnigridExample6 extends React.Component {
                 fromProperty={'list'}
                 select={'all'}
               >
-                <UnigridRowN
+                <UnigridCells
                   cells={[{as: 'empty', colSpan: 3}, 'name', 'number']}
                   mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}
                 />
@@ -104,8 +104,8 @@ export class UnigridExample6 extends React.Component {
             </UnigridSection>
           </UnigridPart>
           <UnigridSection section={'footer'} className={'unigrid-footer'}>
-            <UnigridRowN cells={[null, null, null, 'fSum', 'fTotal']} />
-            <UnigridRowN cells={[null, null, null, 'sum', 'total']} />
+            <UnigridCells cells={[null, null, null, 'fSum', 'fTotal']} />
+            <UnigridCells cells={[null, null, null, 'sum', 'total']} />
           </UnigridSection>
         </Unigrid>
       </div>

@@ -28,23 +28,9 @@ import React from 'react';
 import Unigrid from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
-import {isDefined} from 'src/helpers';
+import {isDefined, addIds} from 'src/helpers';
 
 export class UnigridExample1 extends React.Component {
-  constructor() {
-    super();
-    this.idCounter = () => {var counter = 0; return () => counter += 1;}
-  }
-
-  addIds(data, property) {
-    for (let i = 0; i < data.length; i++) {
-      data[i].id = this.idCounter();
-      if (isDefined(data[i], property)) {
-        this.addIds(data[i][property], property);
-      }
-    }
-  }
-
   handleClick() {
     console.log(this.props.item);
   }
@@ -158,7 +144,7 @@ export class UnigridExample1 extends React.Component {
       }
     };
 
-    this.addIds(props.data, 'list');
+    addIds(props.data, 'list');
 
     return (
       <div>
