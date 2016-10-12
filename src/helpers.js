@@ -32,7 +32,7 @@ export const isDefined = (obj, prop) => {
 };
 
 export const cleanCellProps = (props) => {
-  const {cell, item, rowAs, makeKey, amend, treeAmend, ...other} = props;
+  const {cell, show, item, rowAs, makeKey, amend, treeAmend, ...other} = props;
   return other;
 };
 
@@ -41,169 +41,126 @@ export const idMaker = function* () {
   while (true) yield index++;
 }
 
+function _addInProp(data, lists, idCounter) {
+  for (let i of data) {
+    i.id = idCounter.next().value;
+    for (let j of lists) {
+      if (isDefined(i, j)) {
+        _addInProp(i[j], lists, idCounter);
+      }
+    }
+  }
+}
+
 export const addIds = (pData, pLists) => {
   let idCounter = idMaker();
   const nLists = pLists.constructor === Array ? pLists : [pLists];
 
-  function addInProp(data, lists) {
-    for (let i of data) {
-      i.id = idCounter.next().value;
-      for (let j of lists) {
-        if (isDefined(i, j)) {
-          addInProp(i[j], lists);
-        }
-      }
-    }
-  }
-
-  addInProp(pData, nLists);
+  _addInProp(pData, nLists, idCounter);
 }
-
-// *** Data iterators ***
-
-
-export const makeIterator = (pData, pSelect) => {
-
-  function makeAllIterator(data) {
-    var nextIndex = 0;
-    return {
-      next: function() {
-        return nextIndex < data.length ?
-          {value: data[nextIndex++], done: false} : {done: true};
-      }
-    }
-  }
-
-  function makeStringIterator(data, select) {
-    if (select === 'all') {
-      return makeAllIterator(data);
-    }
-  }
-
-  function makeNumberIterator(data, select) {
-    var delivered = false;
-    return {
-      next: function() {
-        if (!delivered && select >=0 && select < data.length) {
-          delivered = true;
-          return {value: data[select], done: false};
-        }
-        return {done: true};
-      }
-    }
-  }
-
-  switch (typeof(pSelect)) {
-  case 'number': return makeNumberIterator(pData, pSelect);
-  case 'string': return makeStringIterator(pData, pSelect);
-  }
-  return undefined;
-};
 
 // *** Processing expression objects ***
 
+const _propertyFormatter = (props) => {
+  return isDefined(props, 'show') && isDefined(props.item, props.show) ?
+    props.item[props.show] : undefined;
+};
+
+const _functionFormatter = (props) => props.show(props);
+
 export const applyFormatter = (pProps) => {
-  const propertyFormatter = (props) => {
-    return isDefined(props, 'show') && isDefined(props.item, props.show) ?
-      props.item[props.show] : undefined;
-  };
-
-  const functionFormatter = (props) => props.show(props);
-
   let tShow = typeof(pProps.show);
   switch(tShow) {
-  case 'string': return propertyFormatter(pProps);
-  case 'function': return functionFormatter(pProps);
+  case 'string': return _propertyFormatter(pProps);
+  case 'function': return _functionFormatter(pProps);
   }
   return undefined;
 };
 
-export const tryAmend = (pCfg, pItem, pExpr, pDef = 'cells') => {
+function _applyAmend(cfg, item, fun) {
+  return Object.assign({}, cfg, fun(cfg, item));
+}
 
-  function applyAmend(cfg, item, fun) {
-    const retObj = fun(cfg, item);
-    return Object.assign({}, cfg, retObj /*fun(cfg, item)*/);
-  }
-
-  function amend(cfg, expr, item, how) {
-    if (typeof(how) === 'function') {
-      // if 'how' isn't an object then the default is to amend for 'cells'
-      if (expr === pDef) {
-        return applyAmend(cfg, item, how);
-      }
-    } else if (isDefined(how, expr)) {
-      return applyAmend(cfg, item, how[expr]);
+function _amend(cfg, expr, item, how, def) {
+  if (typeof(how) === 'function') {
+    // if 'how' isn't an object then the default is to amend for 'cells'
+    if (expr === def) {
+      return _applyAmend(cfg, item, how);
     }
-    return cfg;
+  } else if (isDefined(how, expr)) {
+    return _applyAmend(cfg, item, how[expr]);
   }
+  return cfg;
+}
 
+export const tryAmend = (pCfg, pItem, pExpr, pDef = 'cells') => {
   if (isDefined(pCfg, 'amend')) {
-    return amend(pCfg, pExpr, pItem, pCfg.amend);
+    return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
-    return amend(pCfg, pExpr, pItem, pCfg.treeAmend);
+    return _amend(pCfg, pExpr, pItem, pCfg.treeAmend, pDef);
   }
   return pCfg;
 }
 
 // *** Sorting functions ***
 
+const _compareString = (a, b) => {
+  const la = a.toLowerCase();
+  const lb = b.toLowerCase();
+
+  if (la < lb) return -1;
+  if (la > lb) return 1;
+  return 0;
+}
+
+const _compareAttributes = (oAttrA, oAttrB) => {
+  const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
+  const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
+
+  const aType = typeof attrA;
+  const bType = typeof attrB;
+
+  if (aType !== bType) return 0;
+
+  if (aType === 'string') {
+    const retVal = _compareString(attrA, attrB);
+    if(retVal !== 0) return retVal;
+  } else if (aType === 'number') {
+    const retVal = attrA - attrB;
+    if (retVal !== 0) return retVal;
+  }
+  return 0;
+}
+
+const _compareObjects = (a, b, attrs, isAsc) => {
+  for (let i = 0; i < attrs.length; i++) {
+    const aVal = applyFormatter({show: attrs[i], item: a});
+    const bVal = applyFormatter({show: attrs[i], item: b});
+    const retVal = _compareAttributes(aVal, bVal);
+    if (retVal === 0) {
+      continue;
+    } else {
+      return isAsc ? retVal : -retVal;
+    }
+  }
+  return 0;
+}
+
+// fields - The list of fields in the 'item' by which the input 'data'
+//   should be sorted. If it's a function then it will be called, with the
+//   selected column as its argument, to obtain the list of fields.
+// defOrder - default order if 'box.order' isn't defined.
+const _sorter = (data, box, fields = (col) => [col], defOrder = 'asc') => {
+  const nColumns = typeof fields === 'function' ?
+        fields(box.column) || [] : fields;
+  const isAsc = (box.order || defOrder) === 'asc';
+  const comparer = (a, b) => _compareObjects(a, b, nColumns, isAsc);
+  return data.slice().sort(comparer);
+}
+
 export const getSorter = (colToFields, defOrder) => {
-  const compareString = (a, b) => {
-    const la = a.toLowerCase();
-    const lb = b.toLowerCase();
-
-    if (la < lb) return -1;
-    if (la > lb) return 1;
-    return 0;
-  }
-
-  const compareAttributes = (oAttrA, oAttrB) => {
-    const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
-    const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
-
-    const aType = typeof attrA;
-    const bType = typeof attrB;
-
-    if (aType !== bType) return 0;
-
-    if (aType === 'string') {
-      const retVal = compareString(attrA, attrB);
-      if(retVal !== 0) return retVal;
-    } else if (aType === 'number') {
-      const retVal = attrA - attrB;
-      if (retVal !== 0) return retVal;
-    }
-    return 0;
-  }
-
-  const compareObjects = (a, b, attrs, isAsc) => {
-    for (let i = 0; i < attrs.length; i++) {
-      const aVal = applyFormatter({show: attrs[i], item: a});
-      const bVal = applyFormatter({show: attrs[i], item: b});
-      const retVal = compareAttributes(aVal, bVal);
-      if (retVal === 0) {
-        continue;
-      } else {
-        return isAsc ? retVal : -retVal;
-      }
-    }
-    return 0;
-  }
-
-  // fields - The list of fields in the 'item' by which the input 'data'
-  //   should be sorted. If it's a function then it will be called, with the
-  //   selected column as its argument, to obtain the list of fields.
-  // defOrder - default order if 'box.order' isn't defined.
-  const sorter = (data, box, fields = (col) => [col], defOrder = 'asc') => {
-    const nColumns = typeof fields === 'function' ?
-          fields(box.column) || [] : fields;
-    const isAsc = (box.order || defOrder) === 'asc';
-    const comparer = (a, b) => compareObjects(a, b, nColumns, isAsc);
-    return data.slice().sort(comparer);
-  }
-
   return (data, box) =>
-    sorter(data, box, colToFields, defOrder);
+    _sorter(data, box, colToFields, defOrder);
 };
 
 // 'column' is used to track a change in sorting order. This name is supplied

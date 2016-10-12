@@ -86,10 +86,11 @@ export class UnigridExample5 extends React.Component {
                 <UnigridCell sohw={'date'} />
                 <UnigridCell show={'street'} />
                 <UnigridCell show={'name'} />
-                <UnigridCell show={'number'} as={'string'}
-                             className={'number-cell'}
-                             onClick={this.handleClick}
-                             bindToCell={['onClick']}
+                <UnigridCell
+                  show={'number'} as={'string'}
+                  className={'number-cell'}
+                  onClick={this.handleClick}
+                  bindToCell={['onClick']}
                 />
               </UnigridCells>
               <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}

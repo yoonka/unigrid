@@ -26,7 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import React from 'react';
 import UnigridRow from 'src/UnigridRow';
-import {isDefined, makeIterator, tryAmend} from 'src/helpers';
+import {isDefined, tryAmend} from 'src/helpers';
+import {getIterator} from 'src/iterators';
 
 class UnigridSection extends React.Component {
   makeElement(name) {
@@ -67,15 +68,14 @@ export default class Unigrid extends React.Component {
 
   addChildren(acc, cfg, data, item) {
     if (item === undefined) {
-      this.executeSelect(acc, 0, cfg, data);
+      this.executeSelect(acc, 'first', cfg, data);
     } else {
       this.addRows(acc, cfg, data, item);
     }
   }
 
   executeSelect(acc, select, cfg, data) {
-    let it = {[Symbol.iterator]: () => makeIterator(data, select)};
-    for (let i of it) {
+    for (let i of getIterator(data, select)) {
       this.addRows(acc, cfg, data, i);
     }
   }

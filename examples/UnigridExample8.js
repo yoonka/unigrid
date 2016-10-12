@@ -24,20 +24,28 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-export {isDefined,
-        cleanCellProps,
-        applyFormatter,
-        tryAmend,
-        getSorter,
-        sort} from 'src/helpers';
-
-export {isIterable,
-        getIterator} from 'src/iterators';
-
-export {UnigridEmptyCell,
-        UnigridTextCell,
-        UnigridNumberCell} from 'src/UnigridCells';
-
+import React from 'react';
 import Unigrid from 'src/Unigrid';
-import UnigridRow from 'src/UnigridRow';
-export {Unigrid, UnigridRow};
+import tableData from './json/tableResp4.json!';
+
+export class UnigridExample8 extends React.Component {
+  render() {
+
+    const table = {
+      section: 'body',
+      cells: ['a', 'b', 'c', 'd', 'e']
+    };
+
+    return (
+      <div>
+      <p>Simplest grid</p>
+      <Unigrid
+        data={tableData}
+        section={'body'}
+        table={table}
+        cells={['a', 'b', 'c', 'd', 'e']}
+      />
+      </div>
+    );
+  }
+}

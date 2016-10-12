@@ -1,8 +1,17 @@
 {
   "name": "unigrid",
   "description": "A React component that implements a configurable table composed of lower-level multipurpose reusable components.",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "main": "unigrid.js",
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yoonka/unigrid.git"
+  },
+  "author": {
+    "name": "Grzegorz Junka",
+    "url": "http://gjunka.com"
+  },
   "scripts": {
     "jspm_build": "jspm build src/index unigrid.js --externals react --format cjs"
   },
@@ -80,5 +89,8 @@
         "format": "cjs"
       }
     }
+  },
+  "devDependencies": {
+    "jspm": "^0.17.0-beta.29"
   }
 }

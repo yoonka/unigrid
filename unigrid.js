@@ -694,13 +694,14 @@ var isDefined = function isDefined(obj, prop) {
 
 var cleanCellProps = function cleanCellProps(props) {
   var cell = props.cell;
+  var show = props.show;
   var item = props.item;
   var rowAs = props.rowAs;
   var makeKey = props.makeKey;
   var amend = props.amend;
   var treeAmend = props.treeAmend;
 
-  var other = _objectWithoutProperties(props, ['cell', 'item', 'rowAs', 'makeKey', 'amend', 'treeAmend']);
+  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'rowAs', 'makeKey', 'amend', 'treeAmend']);
 
   return other;
 };
@@ -714,7 +715,7 @@ var idMaker = _regeneratorRuntime.mark(function idMaker() {
           index = 0;
 
         case 1:
-          if (!true) {}
+          
 
           _context.next = 4;
           return index++;
@@ -731,162 +732,174 @@ var idMaker = _regeneratorRuntime.mark(function idMaker() {
   }, idMaker, this);
 });
 
-// *** Data iterators ***
+function _addInProp(data, lists, idCounter) {
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
 
-var makeIterator = function makeIterator(pData, pSelect) {
+  try {
+    for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var i = _step.value;
 
-  function makeAllIterator(data) {
-    var nextIndex = 0;
-    return {
-      next: function next() {
-        return nextIndex < data.length ? { value: data[nextIndex++], done: false } : { done: true };
+      i.id = idCounter.next().value;
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = lists[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var j = _step2.value;
+
+          if (isDefined(i, j)) {
+            _addInProp(i[j], lists, idCounter);
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
       }
-    };
-  }
-
-  function makeStringIterator(data, select) {
-    if (select === 'all') {
-      return makeAllIterator(data);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
     }
   }
+}
 
-  function makeNumberIterator(data, select) {
-    var delivered = false;
-    return {
-      next: function next() {
-        if (!delivered && select >= 0 && select < data.length) {
-          delivered = true;
-          return { value: data[select], done: false };
-        }
-        return { done: true };
-      }
-    };
-  }
 
-  switch (typeof pSelect) {
-    case 'number':
-      return makeNumberIterator(pData, pSelect);
-    case 'string':
-      return makeStringIterator(pData, pSelect);
-  }
-  return undefined;
-};
 
 // *** Processing expression objects ***
 
+var _propertyFormatter = function _propertyFormatter(props) {
+  return isDefined(props, 'show') && isDefined(props.item, props.show) ? props.item[props.show] : undefined;
+};
+
+var _functionFormatter = function _functionFormatter(props) {
+  return props.show(props);
+};
+
 var applyFormatter = function applyFormatter(pProps) {
-  var propertyFormatter = function propertyFormatter(props) {
-    return isDefined(props, 'show') && isDefined(props.item, props.show) ? props.item[props.show] : undefined;
-  };
-
-  var functionFormatter = function functionFormatter(props) {
-    return props.show(props);
-  };
-
   var tShow = typeof pProps.show;
   switch (tShow) {
     case 'string':
-      return propertyFormatter(pProps);
+      return _propertyFormatter(pProps);
     case 'function':
-      return functionFormatter(pProps);
+      return _functionFormatter(pProps);
   }
   return undefined;
 };
+
+function _applyAmend(cfg, item, fun) {
+  return Object.assign({}, cfg, fun(cfg, item));
+}
+
+function _amend(cfg, expr, item, how, def) {
+  if (typeof how === 'function') {
+    // if 'how' isn't an object then the default is to amend for 'cells'
+    if (expr === def) {
+      return _applyAmend(cfg, item, how);
+    }
+  } else if (isDefined(how, expr)) {
+    return _applyAmend(cfg, item, how[expr]);
+  }
+  return cfg;
+}
 
 var tryAmend = function tryAmend(pCfg, pItem, pExpr) {
   var pDef = arguments.length <= 3 || arguments[3] === undefined ? 'cells' : arguments[3];
 
-
-  function applyAmend(cfg, item, fun) {
-    var retObj = fun(cfg, item);
-    return Object.assign({}, cfg, retObj /*fun(cfg, item)*/);
-  }
-
-  function amend(cfg, expr, item, how) {
-    if (typeof how === 'function') {
-      // if 'how' isn't an object then the default is to amend for 'cells'
-      if (expr === pDef) {
-        return applyAmend(cfg, item, how);
-      }
-    } else if (isDefined(how, expr)) {
-      return applyAmend(cfg, item, how[expr]);
-    }
-    return cfg;
-  }
-
   if (isDefined(pCfg, 'amend')) {
-    return amend(pCfg, pExpr, pItem, pCfg.amend);
+    return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
-    return amend(pCfg, pExpr, pItem, pCfg.treeAmend);
+    return _amend(pCfg, pExpr, pItem, pCfg.treeAmend, pDef);
   }
   return pCfg;
 };
 
 // *** Sorting functions ***
 
+var _compareString = function _compareString(a, b) {
+  var la = a.toLowerCase();
+  var lb = b.toLowerCase();
+
+  if (la < lb) return -1;
+  if (la > lb) return 1;
+  return 0;
+};
+
+var _compareAttributes = function _compareAttributes(oAttrA, oAttrB) {
+  var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
+  var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
+
+  var aType = typeof attrA;
+  var bType = typeof attrB;
+
+  if (aType !== bType) return 0;
+
+  if (aType === 'string') {
+    var retVal = _compareString(attrA, attrB);
+    if (retVal !== 0) return retVal;
+  } else if (aType === 'number') {
+    var _retVal = attrA - attrB;
+    if (_retVal !== 0) return _retVal;
+  }
+  return 0;
+};
+
+var _compareObjects = function _compareObjects(a, b, attrs, isAsc) {
+  for (var i = 0; i < attrs.length; i++) {
+    var aVal = applyFormatter({ show: attrs[i], item: a });
+    var bVal = applyFormatter({ show: attrs[i], item: b });
+    var retVal = _compareAttributes(aVal, bVal);
+    if (retVal === 0) {
+      continue;
+    } else {
+      return isAsc ? retVal : -retVal;
+    }
+  }
+  return 0;
+};
+
+// fields - The list of fields in the 'item' by which the input 'data'
+//   should be sorted. If it's a function then it will be called, with the
+//   selected column as its argument, to obtain the list of fields.
+// defOrder - default order if 'box.order' isn't defined.
+var _sorter = function _sorter(data, box) {
+  var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
+    return [col];
+  } : arguments[2];
+  var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
+
+  var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
+  var isAsc = (box.order || defOrder) === 'asc';
+  var comparer = function comparer(a, b) {
+    return _compareObjects(a, b, nColumns, isAsc);
+  };
+  return data.slice().sort(comparer);
+};
+
 var getSorter = function getSorter(colToFields, defOrder) {
-  var compareString = function compareString(a, b) {
-    var la = a.toLowerCase();
-    var lb = b.toLowerCase();
-
-    if (la < lb) return -1;
-    if (la > lb) return 1;
-    return 0;
-  };
-
-  var compareAttributes = function compareAttributes(oAttrA, oAttrB) {
-    var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
-    var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
-
-    var aType = typeof attrA;
-    var bType = typeof attrB;
-
-    if (aType !== bType) return 0;
-
-    if (aType === 'string') {
-      var retVal = compareString(attrA, attrB);
-      if (retVal !== 0) return retVal;
-    } else if (aType === 'number') {
-      var _retVal = attrA - attrB;
-      if (_retVal !== 0) return _retVal;
-    }
-    return 0;
-  };
-
-  var compareObjects = function compareObjects(a, b, attrs, isAsc) {
-    for (var i = 0; i < attrs.length; i++) {
-      var aVal = applyFormatter({ show: attrs[i], item: a });
-      var bVal = applyFormatter({ show: attrs[i], item: b });
-      var retVal = compareAttributes(aVal, bVal);
-      if (retVal === 0) {
-        continue;
-      } else {
-        return isAsc ? retVal : -retVal;
-      }
-    }
-    return 0;
-  };
-
-  // fields - The list of fields in the 'item' by which the input 'data'
-  //   should be sorted. If it's a function then it will be called, with the
-  //   selected column as its argument, to obtain the list of fields.
-  // defOrder - default order if 'box.order' isn't defined.
-  var sorter = function sorter(data, box) {
-    var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
-      return [col];
-    } : arguments[2];
-    var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
-
-    var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
-    var isAsc = (box.order || defOrder) === 'asc';
-    var comparer = function comparer(a, b) {
-      return compareObjects(a, b, nColumns, isAsc);
-    };
-    return data.slice().sort(comparer);
-  };
-
   return function (data, box) {
-    return sorter(data, box, colToFields, defOrder);
+    return _sorter(data, box, colToFields, defOrder);
   };
 };
 
@@ -951,6 +964,137 @@ var sort = function sort(unigrid, column, order) {
   unigrid.setBox(box);
 };
 
+var _defineProperty = (function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+})
+
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// *** Data iterators ***
+
+var isIterable = function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+};
+
+var getIterator = function getIterator(pData, pSelect) {
+  function addIterable(obj) {
+    return _defineProperty({}, Symbol.iterator, function () {
+      return obj;
+    });
+  }
+
+  function makeAllIterator(data) {
+    var nextIndex = 0;
+    var obj = {
+      next: function next() {
+        return nextIndex < data.length ? { value: data[nextIndex++], done: false } : { done: true };
+      }
+    };
+    return addIterable(obj);
+  }
+
+  function mkIterator(data, how, test) {
+    var nTest = test || function () {
+      return true;
+    };
+    var delivered = false;
+    var obj = {
+      next: function next() {
+        if (!delivered && nTest(data)) {
+          delivered = true;
+          return { value: how(data), done: false };
+        }
+        return { done: true };
+      }
+    };
+    return addIterable(obj);
+  }
+
+  function makeFirstIterator(data) {
+    return mkIterator(data, function (d) {
+      return d[Symbol.iterator]().next().value;
+    });
+  }
+
+  function makeIteratorForItem(item) {
+    return mkIterator(item, function (i) {
+      return i;
+    });
+  }
+
+  function makeNumberIterator(data, select) {
+    var test = function test(d) {
+      return select >= 0 && select < d.length;
+    };
+    return mkIterator(data, function (d) {
+      return d[select];
+    }, test);
+  }
+
+  function makeStringIterator(data, select) {
+    if (select === 'all') {
+      if (isIterable(data)) {
+        return data;
+      } else {
+        return makeAllIterator(data);
+      }
+    } else if (select === 'first') {
+      if (isIterable(data)) {
+        return makeFirstIterator(data);
+      } else {
+        return makeIteratorForItem(data);
+      }
+    }
+  }
+
+  switch (typeof pSelect) {
+    case 'number':
+      return makeNumberIterator(pData, pSelect);
+    case 'string':
+      return makeStringIterator(pData, pSelect);
+  }
+  return undefined;
+};
+
 var _classCallCheck = (function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -998,6 +1142,32 @@ var _inherits = (function (subClass, superClass) {
   });
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 })
+
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 var UnigridEmptyCell = function (_React$Component) {
   _inherits(UnigridEmptyCell, _React$Component);
@@ -1086,21 +1256,6 @@ var _extends = Object.assign || function (target) {
   return target;
 };
 
-var _defineProperty = (function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-})
-
 var _slicedToArray = (function () {
   function sliceIterator(arr, i) {
     var _arr = [];
@@ -1138,6 +1293,32 @@ var _slicedToArray = (function () {
     }
   };
 })();
+
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 var UnigridRow = function (_React$Component) {
   _inherits(UnigridRow, _React$Component);
@@ -1325,6 +1506,32 @@ var UnigridRow = function (_React$Component) {
   return UnigridRow;
 }(React.Component);
 
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 var UnigridSection = function (_React$Component) {
   _inherits(UnigridSection, _React$Component);
 
@@ -1451,7 +1658,7 @@ var Unigrid = function (_React$Component2) {
     key: 'addChildren',
     value: function addChildren(acc, cfg, data, item) {
       if (item === undefined) {
-        this.executeSelect(acc, 0, cfg, data);
+        this.executeSelect(acc, 'first', cfg, data);
       } else {
         this.addRows(acc, cfg, data, item);
       }
@@ -1459,15 +1666,12 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: 'executeSelect',
     value: function executeSelect(acc, select, cfg, data) {
-      var it = _defineProperty({}, Symbol.iterator, function () {
-        return makeIterator(data, select);
-      });
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = it[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = getIterator(data, select)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
           this.addRows(acc, cfg, data, i);
@@ -1661,16 +1865,44 @@ var Unigrid = function (_React$Component2) {
   return Unigrid;
 }(React.Component);
 
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 exports.Unigrid = Unigrid;
 exports.UnigridRow = UnigridRow;
 exports.isDefined = isDefined;
 exports.cleanCellProps = cleanCellProps;
-exports.makeIterator = makeIterator;
 exports.applyFormatter = applyFormatter;
 exports.tryAmend = tryAmend;
 exports.getSorter = getSorter;
 exports.sort = sort;
+exports.isIterable = isIterable;
+exports.getIterator = getIterator;
 exports.UnigridEmptyCell = UnigridEmptyCell;
 exports.UnigridTextCell = UnigridTextCell;
 exports.UnigridNumberCell = UnigridNumberCell;
+
 //# sourceMappingURL=unigrid.js.map
