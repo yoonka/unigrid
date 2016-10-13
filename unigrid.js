@@ -1619,6 +1619,10 @@ var Unigrid = function (_React$Component2) {
   _createClass(Unigrid, null, [{
     key: 'cleanProps',
     value: function cleanProps(props) {
+      var data = props.data;
+      var table = props.table;
+      var box = props.box;
+      var cellTypes = props.cellTypes;
       var amend = props.amend;
       var treeAmend = props.treeAmend;
       var makeKey = props.makeKey;
@@ -1631,8 +1635,9 @@ var Unigrid = function (_React$Component2) {
       var rowAs = props.rowAs;
       var mixIn = props.mixIn;
       var $do = props.$do;
+      var children = props.children;
 
-      var other = _objectWithoutProperties(props, ['amend', 'treeAmend', 'makeKey', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do']);
+      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'cellTypes', 'amend', 'treeAmend', 'makeKey', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children']);
 
       return other;
     }
@@ -1692,93 +1697,114 @@ var Unigrid = function (_React$Component2) {
       }
     }
   }, {
+    key: '_prepAmend',
+    value: function _prepAmend(iCfg, iItem, expr) {
+      if (isDefined(iCfg, expr)) {
+        var aCfg = tryAmend(iCfg, iItem, expr);
+        if (isDefined(aCfg, expr)) {
+          return aCfg;
+        }
+      }
+      return false;
+    }
+  }, {
+    key: '_appendChildren',
+    value: function _appendChildren(cfg) {
+      var childs = cfg.children || [];
+      if (childs.constructor !== Array) {
+        childs = [childs];
+      }
+      if (childs.length > 0) {
+        var dos = cfg.$do || [];
+        dos = dos.concat(childs.map(function (c) {
+          return c.props;
+        }));
+        var children = cfg.children;
+
+        var nCfg = _objectWithoutProperties(cfg, ['children']);
+
+        return Object.assign({}, nCfg, { $do: dos });
+      }
+      return cfg;
+    }
+  }, {
     key: 'addRows',
     value: function addRows(acc, cfg, data, item) {
-      function prepAmend(iCfg, iItem, expr) {
-        if (isDefined(iCfg, expr)) {
-          var _aCfg = tryAmend(iCfg, iItem, expr);
-          if (isDefined(_aCfg, expr)) {
-            return _aCfg;
-          }
-        }
-        return false;
-      }
-
-      var aCfg = prepAmend(cfg, item, 'condition');
+      var aCfg = this._prepAmend(cfg, item, 'condition');
       if (aCfg) {
         if (this.shouldSkip(aCfg.condition, item)) return;
       }
 
-      aCfg = prepAmend(cfg, item, 'fromProperty');
+      aCfg = this._prepAmend(cfg, item, 'fromProperty');
       if (aCfg) {
-        var _aCfg2 = aCfg;
-        var condition = _aCfg2.condition;
-        var fromProperty = _aCfg2.fromProperty;
+        var _aCfg = aCfg;
+        var condition = _aCfg.condition;
+        var fromProperty = _aCfg.fromProperty;
 
-        var nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty']);
+        var nCfg = _objectWithoutProperties(_aCfg, ['condition', 'fromProperty']);
 
         this.addChildren(acc, nCfg, item[aCfg.fromProperty], undefined);
         return;
       }
 
-      aCfg = prepAmend(cfg, item, 'process');
+      aCfg = this._prepAmend(cfg, item, 'process');
       if (aCfg) {
-        var _aCfg3 = aCfg;
-        var _condition = _aCfg3.condition;
-        var _fromProperty = _aCfg3.fromProperty;
-        var process = _aCfg3.process;
+        var _aCfg2 = aCfg;
+        var _condition = _aCfg2.condition;
+        var _fromProperty = _aCfg2.fromProperty;
+        var process = _aCfg2.process;
 
-        var _nCfg = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process']);
+        var _nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty', 'process']);
 
         this.addChildren(acc, _nCfg, aCfg.process(data, this.state), undefined);
         return;
       }
 
-      aCfg = prepAmend(cfg, item, 'select');
+      aCfg = this._prepAmend(cfg, item, 'select');
       if (aCfg) {
-        var _aCfg4 = aCfg;
-        var _condition2 = _aCfg4.condition;
-        var _fromProperty2 = _aCfg4.fromProperty;
-        var _process = _aCfg4.process;
-        var select = _aCfg4.select;
+        var _aCfg3 = aCfg;
+        var _condition2 = _aCfg3.condition;
+        var _fromProperty2 = _aCfg3.fromProperty;
+        var _process = _aCfg3.process;
+        var select = _aCfg3.select;
 
-        var _nCfg2 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select']);
+        var _nCfg2 = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process', 'select']);
 
         this.executeSelect(acc, aCfg.select, _nCfg2, data);
         return;
       }
 
-      aCfg = prepAmend(cfg, item, 'section');
+      aCfg = this._prepAmend(cfg, item, 'section');
       if (aCfg) {
-        var _aCfg5 = aCfg;
-        var _condition3 = _aCfg5.condition;
-        var _fromProperty3 = _aCfg5.fromProperty;
-        var _process2 = _aCfg5.process;
-        var _select = _aCfg5.select;
-        var section = _aCfg5.section;
+        var _aCfg4 = aCfg;
+        var _condition3 = _aCfg4.condition;
+        var _fromProperty3 = _aCfg4.fromProperty;
+        var _process2 = _aCfg4.process;
+        var _select = _aCfg4.select;
+        var section = _aCfg4.section;
 
-        var _nCfg3 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section']);
+        var _nCfg3 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
         acc.push(this.createSection(aCfg.section, _nCfg3, data, item));
         return;
       }
 
-      aCfg = prepAmend(cfg, item, 'cells');
+      aCfg = this._prepAmend(cfg, item, 'cells');
       if (aCfg) {
-        var _aCfg6 = aCfg;
-        var _condition4 = _aCfg6.condition;
-        var _fromProperty4 = _aCfg6.fromProperty;
-        var _process3 = _aCfg6.process;
-        var _select2 = _aCfg6.select;
-        var _section = _aCfg6.section;
+        var _aCfg5 = aCfg;
+        var _condition4 = _aCfg5.condition;
+        var _fromProperty4 = _aCfg5.fromProperty;
+        var _process3 = _aCfg5.process;
+        var _select2 = _aCfg5.select;
+        var _section = _aCfg5.section;
 
-        var _nCfg4 = _objectWithoutProperties(_aCfg6, ['condition', 'fromProperty', 'process', 'select', 'section']);
+        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
         var cTypes = this.props.cellTypes;
         acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { item: item, cellTypes: cTypes })));
       }
 
-      aCfg = prepAmend(cfg, item, '$do');
+      aCfg = this._prepAmend(this._appendChildren(cfg), item, '$do');
       if (aCfg) {
         var addProp = isDefined(aCfg, 'treeAmend') ? { treeAmend: aCfg.treeAmend } : undefined;
         var _iteratorNormalCompletion2 = true;
@@ -1790,6 +1816,11 @@ var Unigrid = function (_React$Component2) {
             var i = _step2.value;
 
             var _nCfg5 = addProp ? Object.assign({}, addProp, i) : i;
+            /*
+              // Maybe once react supports returning multiple children from a render function
+              acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
+              cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
+            */
             this.addChildren(acc, _nCfg5, data, item);
           }
         } catch (err) {
@@ -1823,24 +1854,24 @@ var Unigrid = function (_React$Component2) {
       return false;
     }
   }, {
+    key: '_getSectionComponent',
+    value: function _getSectionComponent(section) {
+      switch (section) {
+        case 'header':
+          return UnigridHeader;
+        case 'body':
+          return UnigridSegment;
+        case 'footer':
+          return UnigridFooter;
+      }
+    }
+  }, {
     key: 'createSection',
     value: function createSection(section, cfg, data, item) {
-
-      function getComponent(section) {
-        switch (section) {
-          case 'header':
-            return UnigridHeader;
-          case 'body':
-            return UnigridSegment;
-          case 'footer':
-            return UnigridFooter;
-        }
-      }
-
       var children = this.createChildren(cfg, data, item);
       var props = Unigrid.cleanProps(cfg);
       Object.assign(props, { children: children });
-      return React.createElement(getComponent(section), props);
+      return React.createElement(this._getSectionComponent(section), props);
     }
   }, {
     key: 'getBox',
@@ -1855,10 +1886,18 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: 'render',
     value: function render() {
-      var table = this.props.table;
-      var children = table ? this.createChildren(table, this.props.data, undefined) : this.props.children;
-      var props = table ? Unigrid.cleanProps(table) : {};
-      return React.createElement('table', props, children);
+      var pTable = this.props.table || {};
+      var props = Object.assign({}, pTable, this.props);
+      var table = props.table;
+      var data = props.data;
+      var box = props.box;
+      var cellTypes = props.cellTypes;
+
+      var cfg = _objectWithoutProperties(props, ['table', 'data', 'box', 'cellTypes']);
+
+      var children = this.createChildren(cfg, this.props.data, this.props.item);
+      var cleaned = Unigrid.cleanProps(props);
+      return React.createElement('table', cleaned, children);
     }
   }]);
 

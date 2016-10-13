@@ -31,20 +31,15 @@ import tableData from './json/tableResp4.json!';
 export class UnigridExample8 extends React.Component {
   render() {
 
-    const table = {
-      section: 'body',
-      cells: ['a', 'b', 'c', 'd', 'e']
-    };
-
     return (
       <div>
-      <p>Simplest grid</p>
-      <Unigrid
-        data={tableData}
-        section={'body'}
-        table={table}
-        cells={['a', 'b', 'c', 'd', 'e']}
-      />
+        <p>JSX tree rendering a flat section</p>
+        <Unigrid cells={['a', 'b']} data={tableData} section={'body'}>
+          <Unigrid cells={['c', 'd']} >
+            <Unigrid cells={['e', 'f']} />
+            <Unigrid cells={['g', 'h']} />
+          </Unigrid>
+        </Unigrid>
       </div>
     );
   }

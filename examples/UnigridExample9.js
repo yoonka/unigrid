@@ -25,39 +25,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {UnigridExample1} from 'examples/UnigridExample1';
-import {UnigridExample2} from 'examples/UnigridExample2';
-import {UnigridExample3} from 'examples/UnigridExample3';
-import {UnigridExample4} from 'examples/UnigridExample4';
-import {UnigridExample5} from 'examples/UnigridExample5';
-import {UnigridExample6} from 'examples/UnigridExample6';
-import {UnigridExample7} from 'examples/UnigridExample7';
-import {UnigridExample8} from 'examples/UnigridExample8';
-import {UnigridExample9} from 'examples/UnigridExample9';
+import Unigrid from 'src/Unigrid';
+import tableData from './json/tableResp4.json!';
 
-export class UnigridExamples extends React.Component {
+export class UnigridExample9 extends React.Component {
   render() {
+
     return (
       <div>
-      <hr />
-      <UnigridExample1 />
-      <hr />
-      <UnigridExample2 />
-      <hr />
-      <UnigridExample3 />
-      <hr />
-      <UnigridExample4 />
-      <hr />
-      <UnigridExample5 />
-      <hr />
-      <UnigridExample6 />
-      <hr />
-      <UnigridExample7 />
-      <hr />
-      <UnigridExample8 />
-      <hr />
-      <UnigridExample9 />
-      <hr />
+        <p>JSX rendering two sections</p>
+        <Unigrid data={tableData}>
+          <Unigrid section={'header'} cells={['a', 'b']}>
+            <Unigrid cells={['c', 'd']} />
+          </Unigrid>
+          <Unigrid section={'body'}>
+            <Unigrid cells={['e', 'f']} />
+            <Unigrid cells={['g', 'h']} />
+          </Unigrid>
+        </Unigrid>
       </div>
     );
   }

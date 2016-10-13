@@ -50,8 +50,9 @@ export class UnigridFooter extends UnigridSection {
 
 export default class Unigrid extends React.Component {
   static cleanProps(props) {
-    const {amend, treeAmend, makeKey, condition, fromProperty, process, select,
-           section, cells, rowAs, mixIn, $do, ...other} = props;
+    const {data, table, box, cellTypes, amend, treeAmend, makeKey, condition,
+           fromProperty, process, select, section, cells, rowAs, mixIn, $do,
+           children, ...other} = props;
     return other;
   }
 
@@ -80,63 +81,82 @@ export default class Unigrid extends React.Component {
     }
   }
 
-  addRows(acc, cfg, data, item) {
-    function prepAmend(iCfg, iItem, expr) {
-      if (isDefined(iCfg, expr)) {
-        const aCfg = tryAmend(iCfg, iItem, expr);
-        if (isDefined(aCfg, expr)) {
-          return aCfg;
-        }
+  _prepAmend(iCfg, iItem, expr) {
+    if (isDefined(iCfg, expr)) {
+      const aCfg = tryAmend(iCfg, iItem, expr);
+      if (isDefined(aCfg, expr)) {
+        return aCfg;
       }
-      return false;
     }
+    return false;
+  }
 
-    let aCfg = prepAmend(cfg, item, 'condition');
+  _appendChildren(cfg) {
+    let childs = cfg.children || [];
+    if (childs.constructor !== Array) {
+      childs = [childs];
+    }
+    if (childs.length > 0) {
+      let dos = cfg.$do || [];
+      dos = dos.concat(childs.map((c) => c.props));
+      const {children, ...nCfg} = cfg;
+      return Object.assign({}, nCfg, {$do: dos});
+    }
+    return cfg;
+  }
+
+  addRows(acc, cfg, data, item) {
+    let aCfg = this._prepAmend(cfg, item, 'condition');
     if (aCfg) {
       if (this.shouldSkip(aCfg.condition, item)) return;
     }
 
-    aCfg = prepAmend(cfg, item, 'fromProperty');
+    aCfg = this._prepAmend(cfg, item, 'fromProperty');
     if (aCfg) {
       const {condition, fromProperty, ...nCfg} = aCfg;
       this.addChildren(acc, nCfg, item[aCfg.fromProperty], undefined);
       return;
     }
 
-    aCfg = prepAmend(cfg, item, 'process');
+    aCfg = this._prepAmend(cfg, item, 'process');
     if (aCfg) {
       const {condition, fromProperty, process, ...nCfg} = aCfg;
       this.addChildren(acc, nCfg, aCfg.process(data, this.state), undefined);
       return;
     }
 
-    aCfg = prepAmend(cfg, item, 'select');
+    aCfg = this._prepAmend(cfg, item, 'select');
     if (aCfg) {
       const {condition, fromProperty, process, select, ...nCfg} = aCfg;
       this.executeSelect(acc, aCfg.select, nCfg, data);
       return;
     }
 
-    aCfg = prepAmend(cfg, item, 'section');
+    aCfg = this._prepAmend(cfg, item, 'section');
     if (aCfg) {
       const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
       acc.push(this.createSection(aCfg.section, nCfg, data, item));
       return;
     }
 
-    aCfg = prepAmend(cfg, item, 'cells');
+    aCfg = this._prepAmend(cfg, item, 'cells');
     if (aCfg) {
       const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
       const cTypes = this.props.cellTypes
       acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} />);
     }
 
-    aCfg = prepAmend(cfg, item, '$do');
+    aCfg = this._prepAmend(this._appendChildren(cfg), item, '$do');
     if (aCfg) {
       const addProp = isDefined(aCfg, 'treeAmend') ?
             {treeAmend: aCfg.treeAmend} : undefined;
       for (let i of aCfg.$do) {
         let nCfg = addProp ? Object.assign({}, addProp, i) : i;
+        /*
+          // Maybe once react supports returning multiple children from a render function
+          acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
+          cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
+        */
         this.addChildren(acc, nCfg, data, item);
       }
     }
@@ -155,20 +175,19 @@ export default class Unigrid extends React.Component {
     return false;
   }
 
-  createSection(section, cfg, data, item) {
-
-    function getComponent(section) {
-      switch (section) {
-      case 'header': return UnigridHeader;
-      case 'body':   return UnigridSegment;
-      case 'footer': return UnigridFooter;
-      }
+  _getSectionComponent(section) {
+    switch (section) {
+    case 'header': return UnigridHeader;
+    case 'body':   return UnigridSegment;
+    case 'footer': return UnigridFooter;
     }
+  }
 
+  createSection(section, cfg, data, item) {
     let children = this.createChildren(cfg, data, item);
     const props = Unigrid.cleanProps(cfg);
     Object.assign(props, {children: children});
-    return React.createElement(getComponent(section), props);
+    return React.createElement(this._getSectionComponent(section), props);
   }
 
   getBox() {
@@ -180,11 +199,11 @@ export default class Unigrid extends React.Component {
   }
 
   render() {
-    const table = this.props.table;
-    const children = table ?
-      this.createChildren(table, this.props.data, undefined)
-      : this.props.children;
-    const props = table ? Unigrid.cleanProps(table) : {};
-    return React.createElement('table', props, children);
+    const pTable = this.props.table || {};
+    const props = Object.assign({}, pTable, this.props);
+    const {table, data, box, cellTypes, ...cfg} = props;
+    const children = this.createChildren(cfg, this.props.data, this.props.item);
+    const cleaned = Unigrid.cleanProps(props);
+    return React.createElement('table', cleaned, children);
   }
 }
