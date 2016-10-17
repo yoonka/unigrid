@@ -89,18 +89,23 @@ There are two special properties which may be available in the React component i
 * **cell** - The value of the property of the _item_ object in the context specified in the cell definition as a _string_ or _show_ property of the object that defines the cell.
 
 ##Usage
-
-    git clone https://github.com/yoonka/unigrid.git
-    cd unigrid
-    sudo npm install -g jspm
-    npm install
-    jspm install
+```sh
+git clone https://github.com/yoonka/unigrid.git
+cd unigrid
+sudo npm install -g jspm
+npm install
+jspm install
+```
 
 on Windows the last line would probably be (if `node_modules\.bin` isn't in `PATH`):
 
     node_modules\.bin\jspm install
 
-Then navigate to `/examples/unigrid.html`
+Then to view the examples:
+```sh
+npm start
+```
+And navigate to [http://localhost:9000/examples/unigrid.html](http://localhost:9000/examples/unigrid.html)
 
 For npm there is a pre-compiled _cjs_ version created with command:
 
