@@ -103,7 +103,7 @@ on Windows the last line would probably be (if `node_modules\.bin` isn't in `PAT
 
 Then to view the examples:
 ```sh
-npm run
+npm start
 ```
 And navigate to [http://localhost:9000/examples/unigrid.html](http://localhost:9000/examples/unigrid.html)
 
