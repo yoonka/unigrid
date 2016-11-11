@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid from 'src/Unigrid';
+import Unigrid, {UnigridHeader, UnigridSegment} from 'src/Unigrid';
 import tableData from './json/tableResp4.json!';
 
 export class UnigridExample9 extends React.Component {
@@ -35,11 +35,13 @@ export class UnigridExample9 extends React.Component {
       <div>
         <p>JSX rendering two sections</p>
         <Unigrid data={tableData}>
-          <Unigrid section={'header'} cells={['a', 'b']}>
+          <UnigridHeader cells={['a', 'b']}>
             <Unigrid cells={['c', 'd']} />
-          </Unigrid>
-          <Unigrid section={'body'}>
+          </UnigridHeader>
+          <UnigridSegment>
             <Unigrid cells={['e', 'f']} />
+          </UnigridSegment>
+          <Unigrid section={'footer'}>
             <Unigrid cells={['g', 'h']} />
           </Unigrid>
         </Unigrid>

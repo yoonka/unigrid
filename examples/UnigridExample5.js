@@ -25,10 +25,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid from 'src/Unigrid';
-import {UnigridPart, UnigridCells, UnigridCell} from 'src/UnigridParts';
+import Unigrid, {UnigridHeader, UnigridSegment, UnigridFooter} from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
+
+export class UnigridCells extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}
+
+export class UnigridCell extends React.Component {
+  render() {
+    // Dummy rendering for now
+    return (<div>{this.props.children}</div>);
+  }
+}
 
 export class UnigridExample5 extends React.Component {
   constructor() {
@@ -51,8 +64,8 @@ export class UnigridExample5 extends React.Component {
       <div>
         <p>Multitable defined with JSX - version 1 (WIP)</p>
         <Unigrid data={tableData} cellTypes={cellTypes}>
-          <UnigridPart className={'unigrid-main-class'}>
-            <UnigridPart section={'header'} className={'unigrid-header'}>
+          <Unigrid className={'unigrid-main-class'}>
+            <UnigridHeader className={'unigrid-header'}>
               <UnigridCells rowAs={'header'}>
                 <UnigridTextCell show={'hAgent'} />
                 <UnigridCell show={'hDate'} />
@@ -60,11 +73,11 @@ export class UnigridExample5 extends React.Component {
                 <UnigridCell show={'hName'} as={'string'} className={'name-header-cell'} />
                 <UnigridCell show={'hNumber'} />
               </UnigridCells>
-            </UnigridPart>
-          </UnigridPart>
-          <UnigridPart select={'all'}>
-            <UnigridPart section={'body'} className={'unigrid-segment'}>
-              <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
+            </UnigridHeader>
+          </Unigrid>
+          <Unigrid select={'all'}>
+            <UnigridSegment className={'unigrid-segment'}>
+              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={0}>
                 <UnigridCells rowAs={'header'}>
@@ -72,15 +85,15 @@ export class UnigridExample5 extends React.Component {
                   <UnigridEmptyCell colSpan={3} />
                   <UnigridCell show={'hNumber'} />
                 </UnigridCells>
-              </UnigridPart>
-              <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
+              </Unigrid>
+              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}>
                 <UnigridCells rowAs={'header'}>
                   <UnigridCell cell={'category2'} />
                   <UnigridEmptyCell colSpan={3} />
                   <UnigridCell show={'hNumber'} />
                 </UnigridCells>
-              </UnigridPart>
+              </Unigrid>
               <UnigridCells className={'some-row-class'}>
                 <UnigridCell show={'agent'} />
                 <UnigridCell sohw={'date'} />
@@ -93,7 +106,7 @@ export class UnigridExample5 extends React.Component {
                   bindToCell={['onClick']}
                 />
               </UnigridCells>
-              <UnigridPart condition={{ifDoes: 'exist', property: 'list'}}
+              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={'all'}
               >
@@ -102,15 +115,15 @@ export class UnigridExample5 extends React.Component {
                   <UnigridCell show={'name'} />
                   <UnigridCell show={'number'} />
                 </UnigridCells>
-              </UnigridPart>
-            </UnigridPart>
-          </UnigridPart>
-          <UnigridPart section={'footer'} className={'unigrid-footer'}>
-            <UnigridPart select={0}>
-              <UnigridPart cells={[null, null, null, 'fSum', 'fTotal']} />
-              <UnigridPart cells={[null, null, null, 'sum', 'total']} />
-            </UnigridPart>
-          </UnigridPart>
+              </Unigrid>
+            </UnigridSegment>
+          </Unigrid>
+          <UnigridFooter className={'unigrid-footer'}>
+            <Unigrid select={0}>
+              <Unigrid cells={[null, null, null, 'fSum', 'fTotal']} />
+              <Unigrid cells={[null, null, null, 'sum', 'total']} />
+            </Unigrid>
+          </UnigridFooter>
         </Unigrid>
       </div>
     );

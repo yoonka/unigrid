@@ -147,10 +147,12 @@ export default class UnigridRow extends React.Component {
     const addProp = isDefined(cfg, 'treeAmend') ?
           {treeAmend: cfg.treeAmend} : undefined;
     for (let i of elems) {
-      arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfgMixIn, addProp));
+      arr.push(this.createAndProcessCell(
+        i, cfg.item, cfg.rowAs, cfgMixIn, addProp
+      ));
     }
 
-    let {amend, treeAmend, cells, rowAs, mixIn, item, cellTypes, $do,
+    let {amend, treeAmend, cells, rowAs, mixIn, data, item, cellTypes, $do,
          ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
