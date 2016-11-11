@@ -29,6 +29,8 @@ import UnigridRow from 'src/UnigridRow';
 import {isDefined, tryAmend} from 'src/helpers';
 import {getIterator} from 'src/iterators';
 
+export {UnigridRow};
+
 class UnigridSection extends React.Component {
   static _getSectionComponent(section) {
     switch (section) {
@@ -145,11 +147,11 @@ export default class Unigrid extends React.Component {
       return;
     }
 
+    const cTypes = props.cellTypes;
     aCfg = this._prepAmend(cfg, item, 'cells');
     if (aCfg) {
       const {condition, fromProperty, process, select, section,
         children, box, ...nCfg} = aCfg;
-      const cTypes = props.cellTypes;
       acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} />);
     }
 
@@ -163,7 +165,7 @@ export default class Unigrid extends React.Component {
       }
     }
 
-    const children = this._getChildren(cfg, box, data, item) || [];
+    const children = this._getChildren(cfg, box, data, item, cTypes) || [];
     for (let i of children) {
       if (this._isSupported(i)) {
         acc.push(i);
@@ -173,8 +175,8 @@ export default class Unigrid extends React.Component {
     }
   }
 
-  static _getChildren(cfg, box, data, item) {
-    let props = {box: box, data: data, item: item};
+  static _getChildren(cfg, box, data, item, cTypes) {
+    let props = {box: box, data: data, item: item, cellTypes: cTypes};
     if (isDefined(cfg, 'treeAmend')) {
       Object.assign(props, {treeAmend: cfg.treeAmend});
     }

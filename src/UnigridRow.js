@@ -73,6 +73,9 @@ export default class UnigridRow extends React.Component {
     let {show, using, as, bindToCell, makeKey, ...nProps} = oProps;
 
     if (typeof(type) !== 'string') {
+      if (isDefined(type, 'type')) {
+        return React.cloneElement(type, nProps);
+      }
       return React.createElement(type, nProps);
     }
 
@@ -152,7 +155,14 @@ export default class UnigridRow extends React.Component {
       ));
     }
 
-    let {amend, treeAmend, cells, rowAs, mixIn, data, item, cellTypes, $do,
+    const children = React.Children.map(cfg.children, (child) => {
+      const chCfg = Object.assign({}, child.props, {as: child});
+      arr.push(this.createAndProcessCell(
+        chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp
+      ));
+    });
+
+    let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
          ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }

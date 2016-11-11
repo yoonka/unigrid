@@ -25,23 +25,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid, {UnigridHeader, UnigridSegment, UnigridFooter} from 'src/Unigrid';
+import Unigrid, {UnigridHeader, UnigridSegment, UnigridFooter, UnigridRow} from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
-
-export class UnigridCells extends React.Component {
-  render() {
-    // Dummy rendering for now
-    return (<div>{this.props.children}</div>);
-  }
-}
-
-export class UnigridCell extends React.Component {
-  render() {
-    // Dummy rendering for now
-    return (<div>{this.props.children}</div>);
-  }
-}
 
 export class UnigridExample5 extends React.Component {
   constructor() {
@@ -66,57 +52,57 @@ export class UnigridExample5 extends React.Component {
         <Unigrid data={tableData} cellTypes={cellTypes}>
           <Unigrid className={'unigrid-main-class'}>
             <UnigridHeader className={'unigrid-header'}>
-              <UnigridCells rowAs={'header'}>
+              <UnigridRow rowAs={'header'}>
                 <UnigridTextCell show={'hAgent'} />
-                <UnigridCell show={'hDate'} />
-                <UnigridCell show={'hStreet'} />
-                <UnigridCell show={'hName'} as={'string'} className={'name-header-cell'} />
-                <UnigridCell show={'hNumber'} />
-              </UnigridCells>
+                <UnigridTextCell show={'hDate'} />
+                <UnigridTextCell show={'hStreet'} />
+                <UnigridTextCell show={'hName'} className={'name-header-cell'} />
+                <UnigridTextCell show={'hNumber'} />
+              </UnigridRow>
             </UnigridHeader>
           </Unigrid>
           <Unigrid select={'all'}>
-            <UnigridSegment className={'unigrid-segment'}>
+            <Unigrid section={'body'} className={'unigrid-segment'}>
               <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={0}>
-                <UnigridCells rowAs={'header'}>
-                  <UnigridCell show={'hCategory'} />
+                <UnigridRow rowAs={'header'}>
+                  <UnigridTextCell show={'hCategory'} />
                   <UnigridEmptyCell colSpan={3} />
-                  <UnigridCell show={'hNumber'} />
-                </UnigridCells>
+                  <UnigridTextCell show={'hNumber'} />
+                </UnigridRow>
               </Unigrid>
               <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}>
-                <UnigridCells rowAs={'header'}>
-                  <UnigridCell cell={'category2'} />
+                <UnigridRow rowAs={'header'}>
+                  <UnigridTextCell cell={'category2'} />
                   <UnigridEmptyCell colSpan={3} />
-                  <UnigridCell show={'hNumber'} />
-                </UnigridCells>
+                  <UnigridTextCell show={'hNumber'} />
+                </UnigridRow>
               </Unigrid>
-              <UnigridCells className={'some-row-class'}>
-                <UnigridCell show={'agent'} />
-                <UnigridCell sohw={'date'} />
-                <UnigridCell show={'street'} />
-                <UnigridCell show={'name'} />
-                <UnigridCell
-                  show={'number'} as={'string'}
+              <UnigridRow className={'some-row-class'}>
+                <UnigridTextCell show={'agent'} />
+                <UnigridTextCell show={'date'} />
+                <UnigridTextCell show={'street'} />
+                <UnigridTextCell show={'name'} />
+                <UnigridTextCell
+                  show={'number'}
                   className={'number-cell'}
                   onClick={this.handleClick}
                   bindToCell={['onClick']}
                 />
-              </UnigridCells>
+              </UnigridRow>
               <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={'all'}
               >
-                <UnigridCells mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}>
+                <UnigridRow mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}>
                   <UnigridEmptyCell colSpan={3} />
-                  <UnigridCell show={'name'} />
-                  <UnigridCell show={'number'} />
-                </UnigridCells>
+                  <UnigridTextCell show={'name'} />
+                  <UnigridTextCell show={'number'} />
+                </UnigridRow>
               </Unigrid>
-            </UnigridSegment>
+            </Unigrid>
           </Unigrid>
           <UnigridFooter className={'unigrid-footer'}>
             <Unigrid select={0}>
