@@ -13,6 +13,7 @@
     "url": "http://gjunka.com"
   },
   "scripts": {
+    "start": "babel-node bin/server.js",
     "jspm_build": "jspm build src/index unigrid.js --externals react --format cjs"
   },
   "jspm": {
@@ -91,6 +92,11 @@
     }
   },
   "devDependencies": {
-    "jspm": "^0.17.0-beta.29"
+    "babel-cli": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "ip": "^1.1.3",
+    "jspm": "^0.17.0-beta.29",
+    "koa": "^1.2.4",
+    "koa-static": "^2.0.0"
   }
 }
