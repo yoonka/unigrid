@@ -31,20 +31,6 @@ import {getSorter, sort} from 'src/helpers';
 import {isDefined} from 'src/helpers';
 
 export class UnigridExample4 extends React.Component {
-  constructor() {
-    super();
-    this.idCounter = () => {var counter = 0; return () => counter += 1;}
-  }
-
-  addIds(data, property) {
-    for (let i = 0; i < data.length; i++) {
-      data[i].id = this.idCounter();
-      if (isDefined(data[i], property)) {
-        this.addIds(data[i][property], property);
-      }
-    }
-  }
-
   clickHandler(field) {
     return () => sort(this.unigrid, field);
   }
@@ -125,8 +111,6 @@ export class UnigridExample4 extends React.Component {
         ]
       }
     };
-
-    this.addIds(props.data, 'list');
 
     return (
       <div>

@@ -697,11 +697,11 @@ var cleanCellProps = function cleanCellProps(props) {
   var show = props.show;
   var item = props.item;
   var rowAs = props.rowAs;
-  var makeKey = props.makeKey;
   var amend = props.amend;
+  var bindToCell = props.bindToCell;
   var treeAmend = props.treeAmend;
 
-  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'rowAs', 'makeKey', 'amend', 'treeAmend']);
+  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'rowAs', 'amend', 'bindToCell', 'treeAmend']);
 
   return other;
 };
@@ -731,61 +731,6 @@ var idMaker = _regeneratorRuntime.mark(function idMaker() {
     }
   }, idMaker, this);
 });
-
-function _addInProp(data, lists, idCounter) {
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var i = _step.value;
-
-      i.id = idCounter.next().value;
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = lists[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var j = _step2.value;
-
-          if (isDefined(i, j)) {
-            _addInProp(i[j], lists, idCounter);
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-}
-
-
 
 // *** Processing expression objects ***
 
@@ -889,12 +834,39 @@ var _sorter = function _sorter(data, box) {
   } : arguments[2];
   var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
 
+  var itemCounter = idMaker();
   var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
   var isAsc = (box.order || defOrder) === 'asc';
   var comparer = function comparer(a, b) {
     return _compareObjects(a, b, nColumns, isAsc);
   };
-  return data.slice().sort(comparer);
+  var arr = [];
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var i = _step.value;
+
+      arr.push(Object.assign({}, { _unigridId: itemCounter.next().value }, i));
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return arr.sort(comparer);
 };
 
 var getSorter = function getSorter(colToFields, defOrder) {
@@ -1359,10 +1331,6 @@ var UnigridRow = function (_React$Component) {
         Object.assign(props, { rowAs: rowAs });
       }
 
-      if (isDefined(props, 'makeKey') && typeof props.makeKey === 'function') {
-        props.key = props.makeKey(props);
-      }
-
       return props;
     }
   }, {
@@ -1372,11 +1340,13 @@ var UnigridRow = function (_React$Component) {
       var using = oProps.using;
       var as = oProps.as;
       var bindToCell = oProps.bindToCell;
-      var makeKey = oProps.makeKey;
 
-      var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as', 'bindToCell', 'makeKey']);
+      var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as', 'bindToCell']);
 
       if (typeof type !== 'string') {
+        if (isDefined(type, 'type')) {
+          return React.cloneElement(type, nProps);
+        }
         return React.createElement(type, nProps);
       }
 
@@ -1420,7 +1390,9 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'createAndProcessCell',
-    value: function createAndProcessCell(cell, item, rowAs, mixIn, addProp) {
+    value: function createAndProcessCell(cell, item, rowAs, mixIn, oAddProp, idCounter) {
+      var addProp = Object.assign({}, oAddProp, { key: idCounter.next().value });
+
       var _getCell = this.getCell(cell, item, rowAs, mixIn, addProp);
 
       var _getCell2 = _slicedToArray(_getCell, 2);
@@ -1458,11 +1430,15 @@ var UnigridRow = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var cfg = this.props;
       var elems = cfg.cells || [];
       var cfgMixIn = cfg.mixIn;
       var arr = [];
+      var idCounter = idMaker();
       var addProp = isDefined(cfg, 'treeAmend') ? { treeAmend: cfg.treeAmend } : undefined;
+
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -1471,7 +1447,7 @@ var UnigridRow = function (_React$Component) {
         for (var _iterator = elems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfgMixIn, addProp));
+          arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter));
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1488,16 +1464,24 @@ var UnigridRow = function (_React$Component) {
         }
       }
 
+      var children = React.Children.map(cfg.children, function (child) {
+        var chCfg = Object.assign({}, child.props, { as: child });
+        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter));
+      });
+
       var amend = cfg.amend;
       var treeAmend = cfg.treeAmend;
       var cells = cfg.cells;
       var rowAs = cfg.rowAs;
       var mixIn = cfg.mixIn;
+      var box = cfg.box;
+      var data = cfg.data;
       var item = cfg.item;
       var cellTypes = cfg.cellTypes;
       var $do = cfg.$do;
+      var sectionCounter = cfg.sectionCounter;
 
-      var nProps = _objectWithoutProperties(cfg, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'item', 'cellTypes', '$do']);
+      var nProps = _objectWithoutProperties(cfg, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter']);
 
       return React.createElement('tr', nProps, arr);
     }
@@ -1545,11 +1529,42 @@ var UnigridSection = function (_React$Component) {
     key: 'makeElement',
     value: function makeElement(name) {
       var _props = this.props;
-      var children = _props.children;
+      var unfolded = _props.unfolded;
+      var box = _props.box;
+      var sectionCounter = _props.sectionCounter;
+      var data = _props.data;
+      var item = _props.item;
 
-      var other = _objectWithoutProperties(_props, ['children']);
+      var cfg = _objectWithoutProperties(_props, ['unfolded', 'box', 'sectionCounter', 'data', 'item']);
 
-      return React.createElement(name, other, children);
+      var children = this.props.children;
+      if (!unfolded) {
+        children = Unigrid.createChildren(cfg, box, cfg, sectionCounter, data, item);
+      }
+      var cleaned = Unigrid.cleanProps(cfg);
+      return React.createElement(name, cleaned, children);
+    }
+  }], [{
+    key: '_getSectionComponent',
+    value: function _getSectionComponent(section) {
+      switch (section) {
+        case 'header':
+          return UnigridHeader;
+        case 'body':
+          return UnigridSegment;
+        case 'footer':
+          return UnigridFooter;
+      }
+    }
+  }, {
+    key: 'createSection',
+    value: function createSection(cfg, box, props, counter, section, data, item) {
+      var children = Unigrid.createChildren(cfg, box, props, counter, data, item);
+      var cleaned = Unigrid.cleanProps(cfg);
+      Object.assign(cleaned, {
+        children: children, unfolded: true, key: counter.next().value
+      });
+      return React.createElement(this._getSectionComponent(section), cleaned);
     }
   }]);
 
@@ -1616,16 +1631,52 @@ var UnigridFooter = function (_UnigridSection3) {
 var Unigrid = function (_React$Component2) {
   _inherits(Unigrid, _React$Component2);
 
-  _createClass(Unigrid, null, [{
+  function Unigrid(props) {
+    _classCallCheck(this, Unigrid);
+
+    var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).call(this, props));
+
+    _this5.state = isDefined(_this5.props, 'box') ? _this5.props.box : undefined;
+    return _this5;
+  }
+
+  _createClass(Unigrid, [{
+    key: 'getBox',
+    value: function getBox() {
+      return this.state || this.props.box || {};
+    }
+  }, {
+    key: 'setBox',
+    value: function setBox(box) {
+      this.setState(box);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var pTable = this.props.table || {};
+      var props = Object.assign({}, pTable, this.props);
+      var table = props.table;
+      var data = props.data;
+      var box = props.box;
+      var cellTypes = props.cellTypes;
+
+      var cfg = _objectWithoutProperties(props, ['table', 'data', 'box', 'cellTypes']);
+
+      var sectionCounter = idMaker();
+      var children = Unigrid.createChildren(cfg, this.state, this.props, sectionCounter, this.props.data, this.props.item);
+      var cleaned = Unigrid.cleanProps(props);
+      return React.createElement('table', cleaned, children);
+    }
+  }], [{
     key: 'cleanProps',
     value: function cleanProps(props) {
       var data = props.data;
       var table = props.table;
       var box = props.box;
+      var sectionCounter = props.sectionCounter;
       var cellTypes = props.cellTypes;
       var amend = props.amend;
       var treeAmend = props.treeAmend;
-      var makeKey = props.makeKey;
       var condition = props.condition;
       var fromProperty = props.fromProperty;
       var process = props.process;
@@ -1637,40 +1688,29 @@ var Unigrid = function (_React$Component2) {
       var $do = props.$do;
       var children = props.children;
 
-      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'cellTypes', 'amend', 'treeAmend', 'makeKey', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children']);
+      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'sectionCounter', 'cellTypes', 'amend', 'treeAmend', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children']);
 
       return other;
     }
-  }]);
-
-  function Unigrid(props) {
-    _classCallCheck(this, Unigrid);
-
-    var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).call(this, props));
-
-    _this5.state = isDefined(_this5.props, 'box') ? _this5.props.box : undefined;
-    return _this5;
-  }
-
-  _createClass(Unigrid, [{
+  }, {
     key: 'createChildren',
-    value: function createChildren(cfg, data, item) {
+    value: function createChildren(cfg, box, props, counter, data, item) {
       var acc = [];
-      this.addChildren(acc, cfg, data, item);
+      this.addChildren(cfg, box, props, counter, acc, data, item);
       return acc;
     }
   }, {
     key: 'addChildren',
-    value: function addChildren(acc, cfg, data, item) {
+    value: function addChildren(cfg, box, props, counter, acc, data, item) {
       if (item === undefined) {
-        this.executeSelect(acc, 'first', cfg, data);
+        this.executeSelect(cfg, box, props, counter, acc, 'first', data);
       } else {
-        this.addRows(acc, cfg, data, item);
+        this.addRows(cfg, box, props, counter, acc, data, item);
       }
     }
   }, {
     key: 'executeSelect',
-    value: function executeSelect(acc, select, cfg, data) {
+    value: function executeSelect(cfg, box, props, counter, acc, select, data) {
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -1679,7 +1719,7 @@ var Unigrid = function (_React$Component2) {
         for (var _iterator = getIterator(data, select)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          this.addRows(acc, cfg, data, i);
+          this.addRows(cfg, box, props, counter, acc, data, i);
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1708,28 +1748,8 @@ var Unigrid = function (_React$Component2) {
       return false;
     }
   }, {
-    key: '_appendChildren',
-    value: function _appendChildren(cfg) {
-      var childs = cfg.children || [];
-      if (childs.constructor !== Array) {
-        childs = [childs];
-      }
-      if (childs.length > 0) {
-        var dos = cfg.$do || [];
-        dos = dos.concat(childs.map(function (c) {
-          return c.props;
-        }));
-        var children = cfg.children;
-
-        var nCfg = _objectWithoutProperties(cfg, ['children']);
-
-        return Object.assign({}, nCfg, { $do: dos });
-      }
-      return cfg;
-    }
-  }, {
     key: 'addRows',
-    value: function addRows(acc, cfg, data, item) {
+    value: function addRows(cfg, box, props, counter, acc, data, item) {
       var aCfg = this._prepAmend(cfg, item, 'condition');
       if (aCfg) {
         if (this.shouldSkip(aCfg.condition, item)) return;
@@ -1743,7 +1763,7 @@ var Unigrid = function (_React$Component2) {
 
         var nCfg = _objectWithoutProperties(_aCfg, ['condition', 'fromProperty']);
 
-        this.addChildren(acc, nCfg, item[aCfg.fromProperty], undefined);
+        this.addChildren(nCfg, box, props, counter, acc, item[aCfg.fromProperty], undefined);
         return;
       }
 
@@ -1756,7 +1776,7 @@ var Unigrid = function (_React$Component2) {
 
         var _nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty', 'process']);
 
-        this.addChildren(acc, _nCfg, aCfg.process(data, this.state), undefined);
+        this.addChildren(_nCfg, box, props, counter, acc, aCfg.process(data, box), undefined);
         return;
       }
 
@@ -1770,7 +1790,7 @@ var Unigrid = function (_React$Component2) {
 
         var _nCfg2 = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process', 'select']);
 
-        this.executeSelect(acc, aCfg.select, _nCfg2, data);
+        this.executeSelect(_nCfg2, box, props, counter, acc, aCfg.select, data);
         return;
       }
 
@@ -1785,10 +1805,11 @@ var Unigrid = function (_React$Component2) {
 
         var _nCfg3 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
-        acc.push(this.createSection(aCfg.section, _nCfg3, data, item));
+        acc.push(UnigridSection.createSection(_nCfg3, box, props, counter, aCfg.section, data, item));
         return;
       }
 
+      var cTypes = props.cellTypes;
       aCfg = this._prepAmend(cfg, item, 'cells');
       if (aCfg) {
         var _aCfg5 = aCfg;
@@ -1797,14 +1818,17 @@ var Unigrid = function (_React$Component2) {
         var _process3 = _aCfg5.process;
         var _select2 = _aCfg5.select;
         var _section = _aCfg5.section;
+        var _children = _aCfg5.children;
+        var _box = _aCfg5.box;
 
-        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section']);
+        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section', 'children', 'box']);
 
-        var cTypes = this.props.cellTypes;
-        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { item: item, cellTypes: cTypes })));
+        var nId = counter.next().value;
+        var key = isDefined(item, '_unigridId') ? item._unigridId + '-' + nId : nId;
+        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { item: item, cellTypes: cTypes, key: key })));
       }
 
-      aCfg = this._prepAmend(this._appendChildren(cfg), item, '$do');
+      aCfg = this._prepAmend(cfg, item, '$do');
       if (aCfg) {
         var addProp = isDefined(aCfg, 'treeAmend') ? { treeAmend: aCfg.treeAmend } : undefined;
         var _iteratorNormalCompletion2 = true;
@@ -1816,12 +1840,7 @@ var Unigrid = function (_React$Component2) {
             var i = _step2.value;
 
             var _nCfg5 = addProp ? Object.assign({}, addProp, i) : i;
-            /*
-              // Maybe once react supports returning multiple children from a render function
-              acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
-              cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
-            */
-            this.addChildren(acc, _nCfg5, data, item);
+            this.addChildren(_nCfg5, box, props, counter, acc, data, item);
           }
         } catch (err) {
           _didIteratorError2 = true;
@@ -1838,6 +1857,64 @@ var Unigrid = function (_React$Component2) {
           }
         }
       }
+
+      var children = this._getChildren(cfg, box, counter, data, item, cTypes) || [];
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var _i = _step3.value;
+
+          if (this._isSupported(_i)) {
+            acc.push(_i);
+          } else {
+            this.addChildren(_i.props, box, props, counter, acc, data, item);
+          }
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+    }
+  }, {
+    key: '_getChildren',
+    value: function _getChildren(cfg, box, counter, data, item, cTypes) {
+      var props = {
+        box: box, data: data, item: item, cellTypes: cTypes,
+        sectionCounter: counter, key: counter.next().value
+      };
+      if (isDefined(cfg, 'treeAmend')) {
+        Object.assign(props, { treeAmend: cfg.treeAmend });
+      }
+      return React.Children.map(cfg.children, function (child) {
+        return React.cloneElement(child, props);
+      });
+    }
+  }, {
+    key: '_isSupported',
+    value: function _isSupported(elem) {
+      var name = elem.type.name;
+      /*
+      // Maybe once react supports returning multiple children from a render function
+      acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
+      cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
+      */
+      if (name === 'Unigrid') {
+        return false;
+      }
+      return true;
     }
   }, {
     key: 'shouldSkip',
@@ -1852,52 +1929,6 @@ var Unigrid = function (_React$Component2) {
         }
       }
       return false;
-    }
-  }, {
-    key: '_getSectionComponent',
-    value: function _getSectionComponent(section) {
-      switch (section) {
-        case 'header':
-          return UnigridHeader;
-        case 'body':
-          return UnigridSegment;
-        case 'footer':
-          return UnigridFooter;
-      }
-    }
-  }, {
-    key: 'createSection',
-    value: function createSection(section, cfg, data, item) {
-      var children = this.createChildren(cfg, data, item);
-      var props = Unigrid.cleanProps(cfg);
-      Object.assign(props, { children: children });
-      return React.createElement(this._getSectionComponent(section), props);
-    }
-  }, {
-    key: 'getBox',
-    value: function getBox() {
-      return this.state || this.props.box || {};
-    }
-  }, {
-    key: 'setBox',
-    value: function setBox(box) {
-      this.setState(box);
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var pTable = this.props.table || {};
-      var props = Object.assign({}, pTable, this.props);
-      var table = props.table;
-      var data = props.data;
-      var box = props.box;
-      var cellTypes = props.cellTypes;
-
-      var cfg = _objectWithoutProperties(props, ['table', 'data', 'box', 'cellTypes']);
-
-      var children = this.createChildren(cfg, this.props.data, this.props.item);
-      var cleaned = Unigrid.cleanProps(props);
-      return React.createElement('table', cleaned, children);
     }
   }]);
 

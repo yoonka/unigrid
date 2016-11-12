@@ -62,7 +62,7 @@ export class UnigridExample5 extends React.Component {
             </UnigridHeader>
           </Unigrid>
           <Unigrid select={'all'}>
-            <Unigrid section={'body'} className={'unigrid-segment'}>
+            <UnigridSegment className={'unigrid-segment'}>
               <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}
                 select={0}>
@@ -102,7 +102,7 @@ export class UnigridExample5 extends React.Component {
                   <UnigridTextCell show={'number'} />
                 </UnigridRow>
               </Unigrid>
-            </Unigrid>
+            </UnigridSegment>
           </Unigrid>
           <UnigridFooter className={'unigrid-footer'}>
             <Unigrid select={0}>

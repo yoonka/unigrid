@@ -51,7 +51,7 @@ export class UnigridExample6 extends React.Component {
         <p>Multitable defined with JSX - version 2 (WIP)</p>
         <Unigrid data={tableData} cellTypes={cellTypes}>
           <Unigrid className={'unigrid-main-class'}>
-            <Unigrid className={'unigrid-header'}>
+            <Unigrid section={'header'} className={'unigrid-header'}>
               <Unigrid rowAs={'header'} cells={[
                   {show: 'hAgent', as: UnigridTextCell},
                   'hDate',

@@ -28,7 +28,7 @@ import React from 'react';
 import Unigrid from 'src/Unigrid';
 import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
-import {isDefined, idMaker, addIds} from 'src/helpers';
+import {isDefined, idMaker} from 'src/helpers';
 
 export class UnigridExample1 extends React.Component {
   handleClick() {
@@ -64,8 +64,7 @@ export class UnigridExample1 extends React.Component {
                   {show: 'hName', as: 'string', className: 'name-header-cell'},
                   'hNumber'
                 ],
-                rowAs: 'header',
-                mixIn: {makeKey: mkKey, bindToCell: ['makeKey']}
+                rowAs: 'header'
               }
             ]
           },
@@ -88,8 +87,7 @@ export class UnigridExample1 extends React.Component {
                           {show: this.showFun},
                           this.showFun2,
                           'hNumber'],
-                        rowAs: 'header',
-                        mixIn: {makeKey: mkKey}
+                        rowAs: 'header'
                       }
                     ]
                   },
@@ -102,8 +100,7 @@ export class UnigridExample1 extends React.Component {
                           {cell: 'category2'},
                           {as: 'empty', colSpan: 3},
                           'hNumber'],
-                        rowAs: 'header',
-                        mixIn: {makeKey: mkKey}
+                        rowAs: 'header'
                       }
                     ]
                   },
@@ -116,8 +113,7 @@ export class UnigridExample1 extends React.Component {
                        className: 'number-cell',
                        onClick: this.handleClick,
                        bindToCell: 'onClick'
-                      }],
-                    mixIn: {makeKey: mkKey}
+                      }]
                   },
                   {
                     condition: {ifDoes: 'exist', property: 'list'},
@@ -127,7 +123,6 @@ export class UnigridExample1 extends React.Component {
                       {
                         cells: [{as: 'empty', colSpan: 3}, 'name', 'number'],
                         mixIn: {
-                          makeKey: mkKey,
                           onClick: this.handleClick,
                           bindToCell: 'onClick'
                         }
@@ -145,8 +140,8 @@ export class UnigridExample1 extends React.Component {
               {
                 select: 0,
                 $do: [
-                  {cells: [null, null, null, 'fSum', 'fTotal'], mixIn: {makeKey: mkKey}},
-                  {cells: [null, null, null, 'sum', 'total'], mixIn: {makeKey: mkKey}}
+                  {cells: [null, null, null, 'fSum', 'fTotal']},
+                  {cells: [null, null, null, 'sum', 'total']}
                 ]
               }
             ]
@@ -158,8 +153,6 @@ export class UnigridExample1 extends React.Component {
         string: UnigridTextCell
       }
     };
-
-    addIds(props.data, 'list');
 
     return (
       <div>

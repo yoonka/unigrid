@@ -28,7 +28,7 @@ import React from 'react';
 import {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';
-import {isDefined, applyFormatter, tryAmend} from 'src/helpers';
+import {isDefined, applyFormatter, tryAmend, idMaker} from 'src/helpers';
 
 export default class UnigridRow extends React.Component {
 
@@ -62,15 +62,11 @@ export default class UnigridRow extends React.Component {
       Object.assign(props, {rowAs: rowAs});
     }
 
-    if (isDefined(props, 'makeKey') && typeof(props.makeKey) === 'function') {
-      props.key = props.makeKey(props);
-    }
-
     return props;
   }
 
   createCellForType(type, oProps) {
-    let {show, using, as, bindToCell, makeKey, ...nProps} = oProps;
+    let {show, using, as, bindToCell, ...nProps} = oProps;
 
     if (typeof(type) !== 'string') {
       if (isDefined(type, 'type')) {
@@ -117,7 +113,8 @@ export default class UnigridRow extends React.Component {
     return [typeof(cellProps.cell), cellProps];
   }
 
-  createAndProcessCell(cell, item, rowAs, mixIn, addProp) {
+  createAndProcessCell(cell, item, rowAs, mixIn, oAddProp, idCounter) {
+    const addProp = Object.assign({}, oAddProp, {key: idCounter.next().value});
     let [type, props] = this.getCell(cell, item, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
     if (typeof(binds) === 'string') {
@@ -143,27 +140,29 @@ export default class UnigridRow extends React.Component {
   }
 
   render() {
-    let cfg = this.props;
-    let elems = cfg.cells || [];
-    let cfgMixIn = cfg.mixIn;
-    let arr = [];
-    const addProp = isDefined(cfg, 'treeAmend') ?
-          {treeAmend: cfg.treeAmend} : undefined;
+    const cfg = this.props;
+    const elems = cfg.cells || [];
+    const cfgMixIn = cfg.mixIn;
+    const arr = [];
+    const idCounter = idMaker();
+    let addProp = isDefined(cfg, 'treeAmend') ?
+        {treeAmend: cfg.treeAmend} : undefined;
+
     for (let i of elems) {
       arr.push(this.createAndProcessCell(
-        i, cfg.item, cfg.rowAs, cfgMixIn, addProp
+        i, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter
       ));
     }
 
     const children = React.Children.map(cfg.children, (child) => {
       const chCfg = Object.assign({}, child.props, {as: child});
       arr.push(this.createAndProcessCell(
-        chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp
+        chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter
       ));
     });
 
     let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
-         ...nProps} = cfg;
+         sectionCounter, ...nProps} = cfg;
     return React.createElement('tr', nProps, arr);
   }
 }

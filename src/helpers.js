@@ -32,31 +32,14 @@ export const isDefined = (obj, prop) => {
 };
 
 export const cleanCellProps = (props) => {
-  const {cell, show, item, rowAs, makeKey, amend, treeAmend, ...other} = props;
+  const {cell, show, item, rowAs, amend, bindToCell, treeAmend,
+         ...other} = props;
   return other;
 };
 
 export const idMaker = function* () {
   let index = 0;
   while (true) yield index++;
-}
-
-function _addInProp(data, lists, idCounter) {
-  for (let i of data) {
-    i.id = idCounter.next().value;
-    for (let j of lists) {
-      if (isDefined(i, j)) {
-        _addInProp(i[j], lists, idCounter);
-      }
-    }
-  }
-}
-
-export const addIds = (pData, pLists) => {
-  let idCounter = idMaker();
-  const nLists = pLists.constructor === Array ? pLists : [pLists];
-
-  _addInProp(pData, nLists, idCounter);
 }
 
 // *** Processing expression objects ***
@@ -151,11 +134,16 @@ const _compareObjects = (a, b, attrs, isAsc) => {
 //   selected column as its argument, to obtain the list of fields.
 // defOrder - default order if 'box.order' isn't defined.
 const _sorter = (data, box, fields = (col) => [col], defOrder = 'asc') => {
+  const itemCounter = idMaker();
   const nColumns = typeof fields === 'function' ?
         fields(box.column) || [] : fields;
   const isAsc = (box.order || defOrder) === 'asc';
   const comparer = (a, b) => _compareObjects(a, b, nColumns, isAsc);
-  return data.slice().sort(comparer);
+  const arr = [];
+  for (const i of data) {
+    arr.push(Object.assign({}, {_unigridId: itemCounter.next().value}, i));
+  }
+  return arr.sort(comparer);
 }
 
 export const getSorter = (colToFields, defOrder) => {
