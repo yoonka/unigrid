@@ -1963,6 +1963,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 exports.Unigrid = Unigrid;
 exports.UnigridRow = UnigridRow;
+exports.UnigridHeader = UnigridHeader;
+exports.UnigridSegment = UnigridSegment;
+exports.UnigridFooter = UnigridFooter;
 exports.isDefined = isDefined;
 exports.cleanCellProps = cleanCellProps;
 exports.applyFormatter = applyFormatter;

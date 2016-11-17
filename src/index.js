@@ -38,6 +38,15 @@ export {UnigridEmptyCell,
         UnigridTextCell,
         UnigridNumberCell} from 'src/UnigridCells';
 
-import Unigrid from 'src/Unigrid';
+import Unigrid, {
+  UnigridHeader,
+  UnigridSegment,
+  UnigridFooter} from 'src/Unigrid';
 import UnigridRow from 'src/UnigridRow';
-export {Unigrid, UnigridRow};
+export {
+  Unigrid,
+  UnigridRow,
+  UnigridHeader,
+  UnigridSegment,
+  UnigridFooter
+};

@@ -1,7 +1,7 @@
 {
   "name": "unigrid",
   "description": "A React component that implements a configurable table composed of lower-level multipurpose reusable components.",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "main": "unigrid.js",
   "license": "BSD-2-Clause",
   "repository": {
