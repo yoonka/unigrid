@@ -1968,6 +1968,7 @@ exports.UnigridSegment = UnigridSegment;
 exports.UnigridFooter = UnigridFooter;
 exports.isDefined = isDefined;
 exports.cleanCellProps = cleanCellProps;
+exports.idMaker = idMaker;
 exports.applyFormatter = applyFormatter;
 exports.tryAmend = tryAmend;
 exports.getSorter = getSorter;
