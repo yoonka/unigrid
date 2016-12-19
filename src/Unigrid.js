@@ -79,6 +79,10 @@ export default class Unigrid extends React.Component {
     this.state = isDefined(this.props, 'box') ? this.props.box : undefined;
   }
 
+  static isUnigrid() {
+    return true;
+  }
+
   static cleanProps(props) {
     const {data, table, box, sectionCounter, cellTypes, amend, treeAmend,
            condition, fromProperty, process, select, section, cells,
@@ -194,16 +198,13 @@ export default class Unigrid extends React.Component {
   }
 
   static _isSupported(elem) {
-    const name = elem.type.name;
+    const isUnigrid = elem.type && elem.type.isUnigrid && elem.type.isUnigrid();
     /*
     // Maybe once react supports returning multiple children from a render function
     acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
     cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
     */
-    if (name === 'Unigrid') {
-      return false;
-    }
-    return true;
+    return !isUnigrid;
   }
 
   static shouldSkip(condition, item) {

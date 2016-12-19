@@ -1668,6 +1668,11 @@ var Unigrid = function (_React$Component2) {
       return React.createElement('table', cleaned, children);
     }
   }], [{
+    key: 'isUnigrid',
+    value: function isUnigrid() {
+      return true;
+    }
+  }, {
     key: 'cleanProps',
     value: function cleanProps(props) {
       var data = props.data;
@@ -1905,16 +1910,13 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: '_isSupported',
     value: function _isSupported(elem) {
-      var name = elem.type.name;
+      var isUnigrid = elem.type && elem.type.isUnigrid && elem.type.isUnigrid();
       /*
       // Maybe once react supports returning multiple children from a render function
       acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
       cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
       */
-      if (name === 'Unigrid') {
-        return false;
-      }
-      return true;
+      return !isUnigrid;
     }
   }, {
     key: 'shouldSkip',
