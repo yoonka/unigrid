@@ -273,18 +273,10 @@ export default class Unigrid extends React.Component {
   render() {
     const pTable = this.props.table || {};
     const props = Object.assign({}, pTable, this.props);
-    const {table, data, box, cellTypes, ...cfg} = props;
-
-    if (NODE_ENV !== 'production') {
-      if (!data || typeof(data) !== 'object') {
-        throw new Error('The "data" prop supplied to Unigrid is invalid. It should be either an object or an array.');
-      }
-    }
-
+    const {table, data, item, box, cellTypes, ...cfg} = props;
     const sectionCounter = idMaker();
     const children = Unigrid.createChildren(
-      cfg, this.state, this.props, sectionCounter,
-      this.props.data, this.props.item);
+      cfg, this.state, this.props, sectionCounter, data, item);
     const cleaned = Unigrid.cleanProps(props);
     return React.createElement('table', cleaned, children);
   }

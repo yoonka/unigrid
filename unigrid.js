@@ -1656,19 +1656,14 @@ var Unigrid = function (_React$Component2) {
       var props = Object.assign({}, pTable, this.props);
       var table = props.table;
       var data = props.data;
+      var item = props.item;
       var box = props.box;
       var cellTypes = props.cellTypes;
 
-      var cfg = _objectWithoutProperties(props, ['table', 'data', 'box', 'cellTypes']);
-
-      if (NODE_ENV !== 'production') {
-        if (!data || typeof data !== 'object') {
-          throw new Error('The "data" prop supplied to Unigrid is invalid. It should be either an object or an array.');
-        }
-      }
+      var cfg = _objectWithoutProperties(props, ['table', 'data', 'item', 'box', 'cellTypes']);
 
       var sectionCounter = idMaker();
-      var children = Unigrid.createChildren(cfg, this.state, this.props, sectionCounter, this.props.data, this.props.item);
+      var children = Unigrid.createChildren(cfg, this.state, this.props, sectionCounter, data, item);
       var cleaned = Unigrid.cleanProps(props);
       return React.createElement('table', cleaned, children);
     }
