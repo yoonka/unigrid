@@ -41,8 +41,8 @@ export class UnigridExample2 extends React.Component {
 
     return (
       <div>
-      <p>Compact definition</p>
-      <Unigrid data={tableData} table={table} />
+        <p>Example 2 : Compact definition (no JSX)</p>
+        <Unigrid data={tableData} table={table} />
       </div>
     );
   }

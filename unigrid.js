@@ -759,19 +759,16 @@ function _applyAmend(cfg, item, fun) {
 
 function _amend(cfg, expr, item, how, def) {
   if (typeof how === 'function') {
-    // if 'how' isn't an object then the default is to amend for 'cells'
-    if (expr === def) {
+    if (expr === def || !expr) {
       return _applyAmend(cfg, item, how);
     }
-  } else if (isDefined(how, expr)) {
+  } else if (expr && isDefined(how, expr)) {
     return _applyAmend(cfg, item, how[expr]);
   }
   return cfg;
 }
 
-var tryAmend = function tryAmend(pCfg, pItem, pExpr) {
-  var pDef = arguments.length <= 3 || arguments[3] === undefined ? 'cells' : arguments[3];
-
+var tryAmend = function tryAmend(pCfg, pItem, pExpr, pDef) {
   if (isDefined(pCfg, 'amend')) {
     return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
@@ -1401,9 +1398,7 @@ var UnigridRow = function (_React$Component) {
       var props = _getCell2[1];
 
       var binds = props.bindToCell || [];
-      if (typeof binds === 'string') {
-        binds = [binds];
-      }
+      binds = typeof binds === 'string' ? [binds] : binds;
       var toAdd = [];
 
       var _loop = function _loop(i) {
@@ -1428,16 +1423,63 @@ var UnigridRow = function (_React$Component) {
       return component;
     }
   }, {
+    key: 'processBindToRow',
+    value: function processBindToRow(props, children) {
+      var binds = props.bindToRow || [];
+      binds = typeof binds === 'string' ? [binds] : binds;
+      var toAdd = [];
+
+      var _loop2 = function _loop2(i) {
+        var funName = binds[i];
+        var oldFun = props[funName];
+        if (oldFun !== undefined) {
+          var newFun = function newFun() {
+            //console.log('exec intern', this);
+            return oldFun.apply(this.unigridRow, arguments);
+          };
+          //console.log('poxy function', props, newFun);
+          toAdd.push(newFun);
+          props[funName] = newFun.bind(newFun);
+        }
+      };
+
+      for (var i = 0; i < binds.length; i++) {
+        _loop2(i);
+      }
+
+      var amend = props.amend;
+      var treeAmend = props.treeAmend;
+      var cells = props.cells;
+      var rowAs = props.rowAs;
+      var mixIn = props.mixIn;
+      var box = props.box;
+      var data = props.data;
+      var item = props.item;
+      var cellTypes = props.cellTypes;
+      var $do = props.$do;
+      var sectionCounter = props.sectionCounter;
+      var bindToRow = props.bindToRow;
+
+      var nProps = _objectWithoutProperties(props, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter', 'bindToRow']);
+
+      var component = React.createElement('tr', nProps, children);
+      for (var _i2 = 0; _i2 < toAdd.length; _i2++) {
+        toAdd[_i2].unigridRow = component;
+      }
+      return component;
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
 
-      var cfg = this.props;
-      var elems = cfg.cells || [];
-      var cfgMixIn = cfg.mixIn;
+      var oCfg = this.props;
+      var elems = oCfg.cells || [];
       var arr = [];
       var idCounter = idMaker();
-      var addProp = isDefined(cfg, 'treeAmend') ? { treeAmend: cfg.treeAmend } : undefined;
+      var addProp = isDefined(oCfg, 'treeAmend') ? { treeAmend: oCfg.treeAmend } : undefined;
+
+      var cfg = tryAmend(oCfg, oCfg.item);
 
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -1447,7 +1489,7 @@ var UnigridRow = function (_React$Component) {
         for (var _iterator = elems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter));
+          arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter));
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1466,24 +1508,10 @@ var UnigridRow = function (_React$Component) {
 
       var children = React.Children.map(cfg.children, function (child) {
         var chCfg = Object.assign({}, child.props, { as: child });
-        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter));
+        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter));
       });
 
-      var amend = cfg.amend;
-      var treeAmend = cfg.treeAmend;
-      var cells = cfg.cells;
-      var rowAs = cfg.rowAs;
-      var mixIn = cfg.mixIn;
-      var box = cfg.box;
-      var data = cfg.data;
-      var item = cfg.item;
-      var cellTypes = cfg.cellTypes;
-      var $do = cfg.$do;
-      var sectionCounter = cfg.sectionCounter;
-
-      var nProps = _objectWithoutProperties(cfg, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter']);
-
-      return React.createElement('tr', nProps, arr);
+      return this.processBindToRow(cfg, arr);
     }
   }]);
 

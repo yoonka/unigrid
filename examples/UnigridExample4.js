@@ -114,8 +114,8 @@ export class UnigridExample4 extends React.Component {
 
     return (
       <div>
-      <p>Sortable Multitable</p>
-      <Unigrid {...props} ref={(ref) => {this.unigrid = ref;}} />
+        <p>Example 4 : Sortable Multitable (no JSX)</p>
+        <Unigrid {...props} ref={(ref) => {this.unigrid = ref;}} />
       </div>
     );
   }

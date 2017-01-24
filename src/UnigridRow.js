@@ -112,17 +112,15 @@ export default class UnigridRow extends React.Component {
 
     return [typeof(cellProps.cell), cellProps];
   }
-
+  
   createAndProcessCell(cell, item, rowAs, mixIn, oAddProp, idCounter) {
     const addProp = Object.assign({}, oAddProp, {key: idCounter.next().value});
     let [type, props] = this.getCell(cell, item, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
-    if (typeof(binds) === 'string') {
-      binds = [binds];
-    }
+    binds = typeof(binds) === 'string' ? [binds] : binds;
     let toAdd = [];
     for (let i = 0; i < binds.length; i++) {
-      let funName = binds[i];
+    let funName = binds[i];
       let oldFun = props[funName];
       if (oldFun !== undefined) {
         let newFun = function() {
@@ -139,30 +137,57 @@ export default class UnigridRow extends React.Component {
     return component;
   }
 
+  processBindToRow(props, children) {
+    let binds = props.bindToRow || [];
+    binds = typeof(binds) === 'string' ? [binds] : binds;
+    let toAdd = [];
+    for (let i = 0; i < binds.length; i++) {
+      let funName = binds[i];
+      let oldFun = props[funName];
+      if (oldFun !== undefined) {
+        let newFun = function() {
+          //console.log('exec intern', this);
+          return oldFun.apply(this.unigridRow, arguments);
+        }
+        //console.log('poxy function', props, newFun);
+        toAdd.push(newFun);
+        props[funName] = newFun.bind(newFun);
+      }
+    }
+
+    let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
+         sectionCounter, bindToRow, ...nProps} = props;
+
+    let component = React.createElement('tr', nProps, children);
+    for (let i = 0; i < toAdd.length; i++) {
+      toAdd[i].unigridRow = component;
+    }
+    return component;
+  }
+
   render() {
-    const cfg = this.props;
-    const elems = cfg.cells || [];
-    const cfgMixIn = cfg.mixIn;
+    const oCfg = this.props;
+    const elems = oCfg.cells || [];
     const arr = [];
     const idCounter = idMaker();
-    let addProp = isDefined(cfg, 'treeAmend') ?
-        {treeAmend: cfg.treeAmend} : undefined;
+    let addProp = isDefined(oCfg, 'treeAmend') ?
+        {treeAmend: oCfg.treeAmend} : undefined;
+
+    let cfg = tryAmend(oCfg, oCfg.item);
 
     for (let i of elems) {
       arr.push(this.createAndProcessCell(
-        i, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter
+        i, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter
       ));
     }
 
     const children = React.Children.map(cfg.children, (child) => {
       const chCfg = Object.assign({}, child.props, {as: child});
       arr.push(this.createAndProcessCell(
-        chCfg, cfg.item, cfg.rowAs, cfgMixIn, addProp, idCounter
+        chCfg, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter
       ));
     });
 
-    let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
-         sectionCounter, ...nProps} = cfg;
-    return React.createElement('tr', nProps, arr);
+    return this.processBindToRow(cfg, arr);
   }
 }

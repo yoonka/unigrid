@@ -33,7 +33,7 @@ export class UnigridExample8 extends React.Component {
 
     return (
       <div>
-        <p>JSX tree rendering a flat section</p>
+        <p>Example 8 : Tree rendering a flat section (JSX - generic components)</p>
         <Unigrid cells={['a', 'b']} data={tableData} section={'body'}>
           <Unigrid cells={['c', 'd']} >
             <Unigrid cells={['e', 'f']} />

@@ -156,8 +156,8 @@ export class UnigridExample1 extends React.Component {
 
     return (
       <div>
-      <p>Multitable</p>
-      <Unigrid {...props} />
+        <p>Example 1 : Multitable (no JSX)</p>
+        <Unigrid {...props} />
       </div>
     );
   }

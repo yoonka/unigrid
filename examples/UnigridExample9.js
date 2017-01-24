@@ -25,21 +25,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid, {UnigridHeader, UnigridSegment} from 'src/Unigrid';
-import tableData from './json/tableResp4.json!';
+import tableData from './json/tableResp5.json!';
+import Unigrid, {UnigridHeader, UnigridSegment, UnigridRow} from 'src/Unigrid';
+import {UnigridTextCell} from 'src/UnigridCells';
 
 export class UnigridExample9 extends React.Component {
   render() {
 
+    const formatA = (cfg, item) => item.a === "apple" ? {style: {backgroundColor: '#ff5555'}} : undefined;
+
+    const handleClick = function() {
+      console.log('handleClick', this);
+    };
+
     return (
       <div>
-        <p>JSX rendering two sections</p>
+        <p>Example 9 : Mixed definition table (JSX/noJSX - mixed components)</p>
         <Unigrid data={tableData}>
           <UnigridHeader cells={['a', 'b']}>
             <Unigrid cells={['c', 'd']} />
           </UnigridHeader>
           <UnigridSegment>
             <Unigrid cells={['e', 'f']} />
+          </UnigridSegment>
+          <UnigridSegment select={'all'}>
+            <UnigridRow amend={formatA} onClick={handleClick} bindToRow={'onClick'}>
+              <UnigridTextCell show="a" />
+              <UnigridTextCell show="b" />
+            </UnigridRow>
           </UnigridSegment>
           <Unigrid section={'footer'}>
             <Unigrid cells={['g', 'h']} />

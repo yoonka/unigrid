@@ -47,8 +47,8 @@ export class UnigridExample3 extends React.Component {
 
     return (
       <div>
-      <p>Custom cell</p>
-      <Unigrid data={tableData} table={table} cellTypes={cellTypes} />
+        <p>Example 3 : Custom cell (no JSX)</p>
+        <Unigrid data={tableData} table={table} cellTypes={cellTypes} />
       </div>
     );
   }

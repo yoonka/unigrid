@@ -112,8 +112,8 @@ export class UnigridExample7 extends React.Component {
 
     return (
       <div>
-      <p>Stripped grid</p>
-      <Unigrid data={tableData} table={table} box={box} ref={(ref) => {this.unigrid = ref;}} />
+        <p>Example 7 : Stripped grid (no JSX)</p>
+        <Unigrid data={tableData} table={table} box={box} ref={(ref) => {this.unigrid = ref;}} />
       </div>
     );
   }

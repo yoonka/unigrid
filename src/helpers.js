@@ -66,17 +66,16 @@ function _applyAmend(cfg, item, fun) {
 
 function _amend(cfg, expr, item, how, def) {
   if (typeof(how) === 'function') {
-    // if 'how' isn't an object then the default is to amend for 'cells'
-    if (expr === def) {
+    if (expr === def || !expr) {
       return _applyAmend(cfg, item, how);
     }
-  } else if (isDefined(how, expr)) {
+  } else if (expr && isDefined(how, expr)) {
     return _applyAmend(cfg, item, how[expr]);
   }
   return cfg;
 }
 
-export const tryAmend = (pCfg, pItem, pExpr, pDef = 'cells') => {
+export const tryAmend = (pCfg, pItem, pExpr, pDef) => {
   if (isDefined(pCfg, 'amend')) {
     return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
