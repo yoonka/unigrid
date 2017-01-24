@@ -1423,52 +1423,6 @@ var UnigridRow = function (_React$Component) {
       return component;
     }
   }, {
-    key: 'processBindToRow',
-    value: function processBindToRow(props, children) {
-      var binds = props.bindToRow || [];
-      binds = typeof binds === 'string' ? [binds] : binds;
-      var toAdd = [];
-
-      var _loop2 = function _loop2(i) {
-        var funName = binds[i];
-        var oldFun = props[funName];
-        if (oldFun !== undefined) {
-          var newFun = function newFun() {
-            //console.log('exec intern', this);
-            return oldFun.apply(this.unigridRow, arguments);
-          };
-          //console.log('poxy function', props, newFun);
-          toAdd.push(newFun);
-          props[funName] = newFun.bind(newFun);
-        }
-      };
-
-      for (var i = 0; i < binds.length; i++) {
-        _loop2(i);
-      }
-
-      var amend = props.amend;
-      var treeAmend = props.treeAmend;
-      var cells = props.cells;
-      var rowAs = props.rowAs;
-      var mixIn = props.mixIn;
-      var box = props.box;
-      var data = props.data;
-      var item = props.item;
-      var cellTypes = props.cellTypes;
-      var $do = props.$do;
-      var sectionCounter = props.sectionCounter;
-      var bindToRow = props.bindToRow;
-
-      var nProps = _objectWithoutProperties(props, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter', 'bindToRow']);
-
-      var component = React.createElement('tr', nProps, children);
-      for (var _i2 = 0; _i2 < toAdd.length; _i2++) {
-        toAdd[_i2].unigridRow = component;
-      }
-      return component;
-    }
-  }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
@@ -1511,7 +1465,22 @@ var UnigridRow = function (_React$Component) {
         arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter));
       });
 
-      return this.processBindToRow(cfg, arr);
+      var amend = cfg.amend;
+      var treeAmend = cfg.treeAmend;
+      var cells = cfg.cells;
+      var rowAs = cfg.rowAs;
+      var mixIn = cfg.mixIn;
+      var box = cfg.box;
+      var data = cfg.data;
+      var item = cfg.item;
+      var cellTypes = cfg.cellTypes;
+      var $do = cfg.$do;
+      var sectionCounter = cfg.sectionCounter;
+      var bindToElement = cfg.bindToElement;
+
+      var nProps = _objectWithoutProperties(cfg, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter', 'bindToElement']);
+
+      return React.createElement('tr', nProps, arr);
     }
   }]);
 
@@ -1543,6 +1512,8 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+var NODE_ENV = typeof process !== 'undefined' ? process.env.NODE_ENV : 'development';
 
 var UnigridSection = function (_React$Component) {
   _inherits(UnigridSection, _React$Component);
@@ -1690,6 +1661,12 @@ var Unigrid = function (_React$Component2) {
 
       var cfg = _objectWithoutProperties(props, ['table', 'data', 'box', 'cellTypes']);
 
+      if (NODE_ENV !== 'production') {
+        if (!data || typeof data !== 'object') {
+          throw new Error('The "data" prop supplied to Unigrid is invalid. It should be either an object or an array.');
+        }
+      }
+
       var sectionCounter = idMaker();
       var children = Unigrid.createChildren(cfg, this.state, this.props, sectionCounter, this.props.data, this.props.item);
       var cleaned = Unigrid.cleanProps(props);
@@ -1720,8 +1697,9 @@ var Unigrid = function (_React$Component2) {
       var mixIn = props.mixIn;
       var $do = props.$do;
       var children = props.children;
+      var bindToElement = props.bindToElement;
 
-      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'sectionCounter', 'cellTypes', 'amend', 'treeAmend', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children']);
+      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'sectionCounter', 'cellTypes', 'amend', 'treeAmend', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children', 'bindToElement']);
 
       return other;
     }
@@ -1796,7 +1774,15 @@ var Unigrid = function (_React$Component2) {
 
         var nCfg = _objectWithoutProperties(_aCfg, ['condition', 'fromProperty']);
 
-        this.addChildren(nCfg, box, props, counter, acc, item[aCfg.fromProperty], undefined);
+        var nData = item[aCfg.fromProperty];
+
+        if (NODE_ENV !== 'production') {
+          if (!nData || typeof nData !== 'object') {
+            throw new Error('Invalid value supplied to "fromProperty": ' + aCfg.fromProperty + '. ' + 'The property could not be found in the data supplied to Unigrid. ' + 'Consider adding the "ifDoes" exist condition.');
+          }
+        }
+
+        this.addChildren(nCfg, box, props, counter, acc, nData, undefined);
         return;
       }
 
@@ -1805,11 +1791,19 @@ var Unigrid = function (_React$Component2) {
         var _aCfg2 = aCfg;
         var _condition = _aCfg2.condition;
         var _fromProperty = _aCfg2.fromProperty;
-        var process = _aCfg2.process;
+        var _process = _aCfg2.process;
 
         var _nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty', 'process']);
 
-        this.addChildren(_nCfg, box, props, counter, acc, aCfg.process(data, box), undefined);
+        var _nData = aCfg.process(data, box);
+
+        if (NODE_ENV !== 'production') {
+          if (!_nData || typeof _nData !== 'object') {
+            throw new Error('Invalid data returned from the "process" function.');
+          }
+        }
+
+        this.addChildren(_nCfg, box, props, counter, acc, _nData, undefined);
         return;
       }
 
@@ -1818,7 +1812,7 @@ var Unigrid = function (_React$Component2) {
         var _aCfg3 = aCfg;
         var _condition2 = _aCfg3.condition;
         var _fromProperty2 = _aCfg3.fromProperty;
-        var _process = _aCfg3.process;
+        var _process2 = _aCfg3.process;
         var select = _aCfg3.select;
 
         var _nCfg2 = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process', 'select']);
@@ -1832,7 +1826,7 @@ var Unigrid = function (_React$Component2) {
         var _aCfg4 = aCfg;
         var _condition3 = _aCfg4.condition;
         var _fromProperty3 = _aCfg4.fromProperty;
-        var _process2 = _aCfg4.process;
+        var _process3 = _aCfg4.process;
         var _select = _aCfg4.select;
         var section = _aCfg4.section;
 
@@ -1848,7 +1842,7 @@ var Unigrid = function (_React$Component2) {
         var _aCfg5 = aCfg;
         var _condition4 = _aCfg5.condition;
         var _fromProperty4 = _aCfg5.fromProperty;
-        var _process3 = _aCfg5.process;
+        var _process4 = _aCfg5.process;
         var _select2 = _aCfg5.select;
         var _section = _aCfg5.section;
         var _children = _aCfg5.children;
@@ -1922,6 +1916,34 @@ var Unigrid = function (_React$Component2) {
       }
     }
   }, {
+    key: '_processChild',
+    value: function _processChild(child, props) {
+      var binds = child.props.bindToElement || [];
+      binds = typeof binds === 'string' ? [binds] : binds;
+      var toAdd = [];
+
+      var _loop = function _loop(i) {
+        var funName = binds[i];
+        var oldFun = child.props[funName];
+        if (oldFun !== undefined) {
+          var newFun = function newFun() {
+            return oldFun.apply(this.unigridElement, arguments);
+          };
+          toAdd.push(newFun);
+          props[funName] = newFun.bind(newFun);
+        }
+      };
+
+      for (var i = 0; i < binds.length; i++) {
+        _loop(i);
+      }
+      var component = React.cloneElement(child, props);
+      for (var _i2 = 0; _i2 < toAdd.length; _i2++) {
+        toAdd[_i2].unigridElement = component;
+      }
+      return component;
+    }
+  }, {
     key: '_getChildren',
     value: function _getChildren(cfg, box, counter, data, item, cTypes) {
       var props = {
@@ -1932,7 +1954,7 @@ var Unigrid = function (_React$Component2) {
         Object.assign(props, { treeAmend: cfg.treeAmend });
       }
       return React.Children.map(cfg.children, function (child) {
-        return React.cloneElement(child, props);
+        return Unigrid._processChild(child, props);
       });
     }
   }, {

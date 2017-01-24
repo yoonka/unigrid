@@ -32,10 +32,10 @@ import {UnigridTextCell} from 'src/UnigridCells';
 export class UnigridExample9 extends React.Component {
   render() {
 
-    const formatA = (cfg, item) => item.a === "apple" ? {style: {backgroundColor: '#ff5555'}} : undefined;
+    const formatA = (cfg, item) => item.a === "apple" ? {style: {backgroundColor: '#55ff55'}} : undefined;
 
     const handleClick = function() {
-      console.log('handleClick', this);
+      console.log('handleClick', this.props.item);
     };
 
     return (
@@ -49,7 +49,7 @@ export class UnigridExample9 extends React.Component {
             <Unigrid cells={['e', 'f']} />
           </UnigridSegment>
           <UnigridSegment select={'all'}>
-            <UnigridRow amend={formatA} onClick={handleClick} bindToRow={'onClick'}>
+            <UnigridRow amend={formatA} onClick={handleClick} bindToElement={'onClick'}>
               <UnigridTextCell show="a" />
               <UnigridTextCell show="b" />
             </UnigridRow>

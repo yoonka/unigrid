@@ -137,34 +137,6 @@ export default class UnigridRow extends React.Component {
     return component;
   }
 
-  processBindToRow(props, children) {
-    let binds = props.bindToRow || [];
-    binds = typeof(binds) === 'string' ? [binds] : binds;
-    let toAdd = [];
-    for (let i = 0; i < binds.length; i++) {
-      let funName = binds[i];
-      let oldFun = props[funName];
-      if (oldFun !== undefined) {
-        let newFun = function() {
-          //console.log('exec intern', this);
-          return oldFun.apply(this.unigridRow, arguments);
-        }
-        //console.log('poxy function', props, newFun);
-        toAdd.push(newFun);
-        props[funName] = newFun.bind(newFun);
-      }
-    }
-
-    let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
-         sectionCounter, bindToRow, ...nProps} = props;
-
-    let component = React.createElement('tr', nProps, children);
-    for (let i = 0; i < toAdd.length; i++) {
-      toAdd[i].unigridRow = component;
-    }
-    return component;
-  }
-
   render() {
     const oCfg = this.props;
     const elems = oCfg.cells || [];
@@ -188,6 +160,8 @@ export default class UnigridRow extends React.Component {
       ));
     });
 
-    return this.processBindToRow(cfg, arr);
+    let {amend, treeAmend, cells, rowAs, mixIn, box, data, item, cellTypes, $do,
+         sectionCounter, bindToElement, ...nProps} = cfg;
+    return React.createElement('tr', nProps, arr);
   }
 }

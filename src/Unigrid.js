@@ -31,6 +31,8 @@ import {getIterator} from 'src/iterators';
 
 export {UnigridRow};
 
+let NODE_ENV = typeof process !== 'undefined' ? process.env.NODE_ENV : 'development';
+
 class UnigridSection extends React.Component {
   static _getSectionComponent(section) {
     switch (section) {
@@ -86,7 +88,7 @@ export default class Unigrid extends React.Component {
   static cleanProps(props) {
     const {data, table, box, sectionCounter, cellTypes, amend, treeAmend,
            condition, fromProperty, process, select, section, cells,
-           rowAs, mixIn, $do, children, ...other} = props;
+           rowAs, mixIn, $do, children, bindToElement, ...other} = props;
     return other;
   }
 
@@ -129,14 +131,32 @@ export default class Unigrid extends React.Component {
     aCfg = this._prepAmend(cfg, item, 'fromProperty');
     if (aCfg) {
       const {condition, fromProperty, ...nCfg} = aCfg;
-      this.addChildren(nCfg, box, props, counter, acc, item[aCfg.fromProperty], undefined);
+      const nData = item[aCfg.fromProperty];
+
+      if (NODE_ENV !== 'production') {
+        if (!nData || typeof(nData) !== 'object') {
+          throw new Error(`Invalid value supplied to "fromProperty": ${aCfg.fromProperty}. ` +
+                          'The property could not be found in the data supplied to Unigrid. ' +
+                          'Consider adding the "ifDoes" exist condition.');
+        }
+      }
+
+      this.addChildren(nCfg, box, props, counter, acc, nData, undefined);
       return;
     }
 
     aCfg = this._prepAmend(cfg, item, 'process');
     if (aCfg) {
       const {condition, fromProperty, process, ...nCfg} = aCfg;
-      this.addChildren(nCfg, box, props, counter, acc, aCfg.process(data, box), undefined);
+      const nData = aCfg.process(data, box);
+
+      if (NODE_ENV !== 'production') {
+        if (!nData || typeof(nData) !== 'object') {
+          throw new Error('Invalid data returned from the "process" function.');
+        }
+      }
+
+      this.addChildren(nCfg, box, props, counter, acc, nData, undefined);
       return;
     }
 
@@ -184,6 +204,28 @@ export default class Unigrid extends React.Component {
     }
   }
 
+  static _processChild(child, props) {
+    let binds = child.props.bindToElement || [];
+    binds = typeof(binds) === 'string' ? [binds] : binds;
+    let toAdd = [];
+    for (let i = 0; i < binds.length; i++) {
+      let funName = binds[i];
+      let oldFun = child.props[funName];
+      if (oldFun !== undefined) {
+        let newFun = function() {
+          return oldFun.apply(this.unigridElement, arguments);
+        }
+        toAdd.push(newFun);
+        props[funName] = newFun.bind(newFun);
+      }
+    }
+    let component = React.cloneElement(child, props);
+    for (let i = 0; i < toAdd.length; i++) {
+      toAdd[i].unigridElement = component;
+    }
+    return component;
+  }
+
   static _getChildren(cfg, box, counter, data, item, cTypes) {
     let props = {
       box: box, data: data, item: item, cellTypes: cTypes,
@@ -193,7 +235,7 @@ export default class Unigrid extends React.Component {
       Object.assign(props, {treeAmend: cfg.treeAmend});
     }
     return React.Children.map(cfg.children, function(child) {
-      return React.cloneElement(child, props);
+      return Unigrid._processChild(child, props);
     });
   }
 
@@ -232,6 +274,13 @@ export default class Unigrid extends React.Component {
     const pTable = this.props.table || {};
     const props = Object.assign({}, pTable, this.props);
     const {table, data, box, cellTypes, ...cfg} = props;
+
+    if (NODE_ENV !== 'production') {
+      if (!data || typeof(data) !== 'object') {
+        throw new Error('The "data" prop supplied to Unigrid is invalid. It should be either an object or an array.');
+      }
+    }
+
     const sectionCounter = idMaker();
     const children = Unigrid.createChildren(
       cfg, this.state, this.props, sectionCounter,
