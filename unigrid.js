@@ -1913,6 +1913,11 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: '_processChild',
     value: function _processChild(child, props) {
+      // Pass null and undefined to React
+      if (!child) {
+        return child;
+      }
+
       var binds = child.props.bindToElement || [];
       binds = typeof binds === 'string' ? [binds] : binds;
       var toAdd = [];

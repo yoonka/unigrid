@@ -205,6 +205,11 @@ export default class Unigrid extends React.Component {
   }
 
   static _processChild(child, props) {
+    // Pass null and undefined to React
+    if (!child) {
+      return child;
+    }
+
     let binds = child.props.bindToElement || [];
     binds = typeof(binds) === 'string' ? [binds] : binds;
     let toAdd = [];
