@@ -891,11 +891,10 @@ var getSorter = function getSorter(colToFields, defOrder) {
 //     descending) is to be used only if a new 'column' is supplied,
 //     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
 // The first argument can be a function to override this with a new behaviour.
-var sort = function sort(unigrid, column, order) {
+var updateBox = function updateBox(box, column, order) {
   var alternate = function alternate(o) {
     return o === 'asc' ? 'desc' : 'asc';
   };
-  var box = unigrid.getBox();
   if (typeof column === 'function') {
     box = column(box, order);
   } else {
@@ -930,7 +929,12 @@ var sort = function sort(unigrid, column, order) {
 
     box = Object.assign({}, box, { column: bColumn, order: bOrder });
   }
-  unigrid.setBox(box);
+  return box;
+};
+
+var sort = function sort(unigrid, column, order) {
+  var box = unigrid.getBox();
+  unigrid.setBox(updateBox(box, column, order));
 };
 
 var _defineProperty = (function (obj, key, value) {
@@ -2024,6 +2028,7 @@ exports.idMaker = idMaker;
 exports.applyFormatter = applyFormatter;
 exports.tryAmend = tryAmend;
 exports.getSorter = getSorter;
+exports.updateBox = updateBox;
 exports.sort = sort;
 exports.isIterable = isIterable;
 exports.getIterator = getIterator;

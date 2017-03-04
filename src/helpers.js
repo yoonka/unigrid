@@ -169,9 +169,8 @@ export const getSorter = (colToFields, defOrder) => {
 //     descending) is to be used only if a new 'column' is supplied,
 //     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
 // The first argument can be a function to override this with a new behaviour.
-export const sort = (unigrid, column, order) => {
+export const updateBox = (box, column, order) => {
   const alternate = (o) => o === 'asc' ? 'desc' : 'asc';
-  let box = unigrid.getBox();
   if (typeof(column) === 'function') {
     box = column(box, order);
   } else {
@@ -203,5 +202,10 @@ export const sort = (unigrid, column, order) => {
 
     box = Object.assign({}, box, {column: bColumn, order: bOrder});
   }
-  unigrid.setBox(box);
+  return box;
+};
+
+export const sort = (unigrid, column, order) => {
+  let box = unigrid.getBox();
+  unigrid.setBox(updateBox(box, column, order));
 };

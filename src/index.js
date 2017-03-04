@@ -30,6 +30,7 @@ export {isDefined,
         applyFormatter,
         tryAmend,
         getSorter,
+        updateBox,
         sort} from 'src/helpers';
 
 export {isIterable,
@@ -44,6 +45,7 @@ import Unigrid, {
   UnigridSegment,
   UnigridFooter} from 'src/Unigrid';
 import UnigridRow from 'src/UnigridRow';
+
 export {
   Unigrid,
   UnigridRow,
