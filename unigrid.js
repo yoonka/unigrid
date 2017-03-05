@@ -696,12 +696,13 @@ var cleanCellProps = function cleanCellProps(props) {
   var cell = props.cell;
   var show = props.show;
   var item = props.item;
+  var box = props.box;
   var rowAs = props.rowAs;
   var amend = props.amend;
   var bindToCell = props.bindToCell;
   var treeAmend = props.treeAmend;
 
-  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'rowAs', 'amend', 'bindToCell', 'treeAmend']);
+  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'box', 'rowAs', 'amend', 'bindToCell', 'treeAmend']);
 
   return other;
 };
@@ -753,26 +754,26 @@ var applyFormatter = function applyFormatter(pProps) {
   return undefined;
 };
 
-function _applyAmend(cfg, item, fun) {
-  return Object.assign({}, cfg, fun(cfg, item));
+function _applyAmend(cfg, item, box, fun) {
+  return Object.assign({}, cfg, fun(cfg, item, box));
 }
 
-function _amend(cfg, expr, item, how, def) {
+function _amend(cfg, expr, item, box, how, def) {
   if (typeof how === 'function') {
     if (expr === def || !expr) {
-      return _applyAmend(cfg, item, how);
+      return _applyAmend(cfg, item, box, how);
     }
   } else if (expr && isDefined(how, expr)) {
-    return _applyAmend(cfg, item, how[expr]);
+    return _applyAmend(cfg, item, box, how[expr]);
   }
   return cfg;
 }
 
-var tryAmend = function tryAmend(pCfg, pItem, pExpr, pDef) {
+var tryAmend = function tryAmend(pCfg, pItem, pBox, pExpr, pDef) {
   if (isDefined(pCfg, 'amend')) {
-    return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
-    return _amend(pCfg, pExpr, pItem, pCfg.treeAmend, pDef);
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.treeAmend, pDef);
   }
   return pCfg;
 };
@@ -1304,7 +1305,7 @@ var UnigridRow = function (_React$Component) {
 
   _createClass(UnigridRow, [{
     key: 'mkProps',
-    value: function mkProps(oCell, item, rowAs, mixIn, addProp) {
+    value: function mkProps(oCell, item, box, rowAs, mixIn, addProp) {
       var cell = undefined;
       var props = Object.assign({}, addProp, mixIn);
 
@@ -1327,6 +1328,9 @@ var UnigridRow = function (_React$Component) {
       }
       if (!isDefined(props, 'item') && item !== undefined) {
         Object.assign(props, { item: item });
+      }
+      if (!isDefined(props, 'box') && box !== undefined) {
+        Object.assign(props, { box: box });
       }
       if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
         Object.assign(props, { rowAs: rowAs });
@@ -1369,19 +1373,19 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'getCell',
-    value: function getCell(cell, item, rowAs, mixIn, addProp) {
+    value: function getCell(cell, item, box, rowAs, mixIn, addProp) {
       if (cell === null) {
-        var props = this.mkProps(undefined, item, rowAs, mixIn, addProp);
-        return ['empty', tryAmend(props, item, 'cell', 'cell')];
+        var props = this.mkProps(undefined, item, box, rowAs, mixIn, addProp);
+        return ['empty', tryAmend(props, item, box, 'cell', 'cell')];
       }
 
-      var cellProps = this.mkProps(cell, item, rowAs, mixIn, addProp);
+      var cellProps = this.mkProps(cell, item, box, rowAs, mixIn, addProp);
 
       if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
         Object.assign(cellProps, { cell: applyFormatter(cellProps) });
       }
 
-      cellProps = tryAmend(cellProps, item, 'cell', 'cell');
+      cellProps = tryAmend(cellProps, item, box, 'cell', 'cell');
 
       if (isDefined(cellProps, 'as')) {
         return [cellProps.as, cellProps];
@@ -1391,10 +1395,10 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'createAndProcessCell',
-    value: function createAndProcessCell(cell, item, rowAs, mixIn, oAddProp, idCounter) {
+    value: function createAndProcessCell(cell, item, box, rowAs, mixIn, oAddProp, idCounter) {
       var addProp = Object.assign({}, oAddProp, { key: idCounter.next().value });
 
-      var _getCell = this.getCell(cell, item, rowAs, mixIn, addProp);
+      var _getCell = this.getCell(cell, item, box, rowAs, mixIn, addProp);
 
       var _getCell2 = _slicedToArray(_getCell, 2);
 
@@ -1437,7 +1441,7 @@ var UnigridRow = function (_React$Component) {
       var idCounter = idMaker();
       var addProp = isDefined(oCfg, 'treeAmend') ? { treeAmend: oCfg.treeAmend } : undefined;
 
-      var cfg = tryAmend(oCfg, oCfg.item);
+      var cfg = tryAmend(oCfg, oCfg.item, oCfg.box);
 
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -1447,7 +1451,7 @@ var UnigridRow = function (_React$Component) {
         for (var _iterator = elems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          arr.push(this.createAndProcessCell(i, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+          arr.push(this.createAndProcessCell(i, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter));
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1466,7 +1470,7 @@ var UnigridRow = function (_React$Component) {
 
       var children = React.Children.map(cfg.children, function (child) {
         var chCfg = Object.assign({}, child.props, { as: child });
-        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter));
       });
 
       var amend = cfg.amend;
@@ -1646,11 +1650,12 @@ var Unigrid = function (_React$Component2) {
   _createClass(Unigrid, [{
     key: 'getBox',
     value: function getBox() {
-      return this.state || this.props.box || {};
+      return this.box || this.props.box || {};
     }
   }, {
     key: 'setBox',
     value: function setBox(box) {
+      this.box = box;
       this.setState(box);
     }
   }, {
@@ -1667,7 +1672,7 @@ var Unigrid = function (_React$Component2) {
       var cfg = _objectWithoutProperties(props, ['table', 'data', 'item', 'box', 'cellTypes']);
 
       var sectionCounter = idMaker();
-      var children = Unigrid.createChildren(cfg, this.state, this.props, sectionCounter, data, item);
+      var children = Unigrid.createChildren(cfg, this.getBox(), this.props, sectionCounter, data, item);
       var cleaned = Unigrid.cleanProps(props);
       return React.createElement('table', cleaned, children);
     }
@@ -1748,9 +1753,9 @@ var Unigrid = function (_React$Component2) {
     }
   }, {
     key: '_prepAmend',
-    value: function _prepAmend(iCfg, iItem, expr) {
+    value: function _prepAmend(iCfg, iItem, iBox, expr) {
       if (isDefined(iCfg, expr)) {
-        var aCfg = tryAmend(iCfg, iItem, expr);
+        var aCfg = tryAmend(iCfg, iItem, iBox, expr);
         if (isDefined(aCfg, expr)) {
           return aCfg;
         }
@@ -1760,12 +1765,12 @@ var Unigrid = function (_React$Component2) {
   }, {
     key: 'addRows',
     value: function addRows(cfg, box, props, counter, acc, data, item) {
-      var aCfg = this._prepAmend(cfg, item, 'condition');
+      var aCfg = this._prepAmend(cfg, item, box, 'condition');
       if (aCfg) {
         if (this.shouldSkip(aCfg.condition, item)) return;
       }
 
-      aCfg = this._prepAmend(cfg, item, 'fromProperty');
+      aCfg = this._prepAmend(cfg, item, box, 'fromProperty');
       if (aCfg) {
         var _aCfg = aCfg;
         var condition = _aCfg.condition;
@@ -1785,7 +1790,7 @@ var Unigrid = function (_React$Component2) {
         return;
       }
 
-      aCfg = this._prepAmend(cfg, item, 'process');
+      aCfg = this._prepAmend(cfg, item, box, 'process');
       if (aCfg) {
         var _aCfg2 = aCfg;
         var _condition = _aCfg2.condition;
@@ -1806,7 +1811,7 @@ var Unigrid = function (_React$Component2) {
         return;
       }
 
-      aCfg = this._prepAmend(cfg, item, 'select');
+      aCfg = this._prepAmend(cfg, item, box, 'select');
       if (aCfg) {
         var _aCfg3 = aCfg;
         var _condition2 = _aCfg3.condition;
@@ -1820,7 +1825,7 @@ var Unigrid = function (_React$Component2) {
         return;
       }
 
-      aCfg = this._prepAmend(cfg, item, 'section');
+      aCfg = this._prepAmend(cfg, item, box, 'section');
       if (aCfg) {
         var _aCfg4 = aCfg;
         var _condition3 = _aCfg4.condition;
@@ -1836,7 +1841,7 @@ var Unigrid = function (_React$Component2) {
       }
 
       var cTypes = props.cellTypes;
-      aCfg = this._prepAmend(cfg, item, 'cells');
+      aCfg = this._prepAmend(cfg, item, box, 'cells');
       if (aCfg) {
         var _aCfg5 = aCfg;
         var _condition4 = _aCfg5.condition;
@@ -1845,16 +1850,15 @@ var Unigrid = function (_React$Component2) {
         var _select2 = _aCfg5.select;
         var _section = _aCfg5.section;
         var _children = _aCfg5.children;
-        var _box = _aCfg5.box;
 
-        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section', 'children', 'box']);
+        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section', 'children']);
 
         var nId = counter.next().value;
         var key = isDefined(item, '_unigridId') ? item._unigridId + '-' + nId : nId;
-        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { item: item, cellTypes: cTypes, key: key })));
+        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { box: box, item: item, cellTypes: cTypes, key: key })));
       }
 
-      aCfg = this._prepAmend(cfg, item, '$do');
+      aCfg = this._prepAmend(cfg, item, box, '$do');
       if (aCfg) {
         var addProp = isDefined(aCfg, 'treeAmend') ? { treeAmend: aCfg.treeAmend } : undefined;
         var _iteratorNormalCompletion2 = true;

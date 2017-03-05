@@ -40,23 +40,23 @@ export class UnigridExample7 extends React.Component {
   }
 
   render() {
-    const chStyleY = (cfg, item) => {
+    const chStyleY = (cfg, item, box) => {
       this.isColorB = !this.isColorB;
       return {style: {backgroundColor: '#ffcc00'}}
     };
 
-    const chStyleG = (cfg, item) => {
+    const chStyleG = (cfg, item, box) => {
       this.isColorB = !this.isColorB;
       return {style: {backgroundColor: '#55ff55'}}
     };
 
-    const chStyleR = (cfg, item) => {
+    const chStyleR = (cfg, item, box) => {
       const isColorR = this.isColorR ? false : true;
       this.isColorR = isColorR;
       return isColorR ? {style: {backgroundColor: '#ff5555'}} : undefined;
     };
 
-    const chStyleB = (cfg, item) => {
+    const chStyleB = (cfg, item, box) => {
       const isColorB = this.isColorB ? false : true;
       this.isColorB = isColorB;
       return isColorB ? {style: {backgroundColor: '#4455ff'}} : undefined;

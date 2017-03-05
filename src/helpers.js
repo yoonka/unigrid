@@ -32,7 +32,7 @@ export const isDefined = (obj, prop) => {
 };
 
 export const cleanCellProps = (props) => {
-  const {cell, show, item, rowAs, amend, bindToCell, treeAmend,
+  const {cell, show, item, box, rowAs, amend, bindToCell, treeAmend,
          ...other} = props;
   return other;
 };
@@ -60,26 +60,26 @@ export const applyFormatter = (pProps) => {
   return undefined;
 };
 
-function _applyAmend(cfg, item, fun) {
-  return Object.assign({}, cfg, fun(cfg, item));
+function _applyAmend(cfg, item, box, fun) {
+  return Object.assign({}, cfg, fun(cfg, item, box));
 }
 
-function _amend(cfg, expr, item, how, def) {
+function _amend(cfg, expr, item, box, how, def) {
   if (typeof(how) === 'function') {
     if (expr === def || !expr) {
-      return _applyAmend(cfg, item, how);
+      return _applyAmend(cfg, item, box, how);
     }
   } else if (expr && isDefined(how, expr)) {
-    return _applyAmend(cfg, item, how[expr]);
+    return _applyAmend(cfg, item, box, how[expr]);
   }
   return cfg;
 }
 
-export const tryAmend = (pCfg, pItem, pExpr, pDef) => {
+export const tryAmend = (pCfg, pItem, pBox, pExpr, pDef) => {
   if (isDefined(pCfg, 'amend')) {
-    return _amend(pCfg, pExpr, pItem, pCfg.amend, pDef);
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.amend, pDef);
   } else if (isDefined(pCfg, 'treeAmend')) {
-    return _amend(pCfg, pExpr, pItem, pCfg.treeAmend, pDef);
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.treeAmend, pDef);
   }
   return pCfg;
 }

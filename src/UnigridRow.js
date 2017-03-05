@@ -32,7 +32,7 @@ import {isDefined, applyFormatter, tryAmend, idMaker} from 'src/helpers';
 
 export default class UnigridRow extends React.Component {
 
-  mkProps(oCell, item, rowAs, mixIn, addProp) {
+  mkProps(oCell, item, box, rowAs, mixIn, addProp) {
     let cell = undefined;
     let props = Object.assign({}, addProp, mixIn);
 
@@ -57,6 +57,9 @@ export default class UnigridRow extends React.Component {
     }
     if (!isDefined(props, 'item') && item !== undefined) {
       Object.assign(props, {item: item});
+    }
+    if (!isDefined(props, 'box') && box !== undefined) {
+      Object.assign(props, {box: box});
     }
     if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
       Object.assign(props, {rowAs: rowAs});
@@ -92,19 +95,19 @@ export default class UnigridRow extends React.Component {
     );
   }
 
-  getCell(cell, item, rowAs, mixIn, addProp) {
+  getCell(cell, item, box, rowAs, mixIn, addProp) {
     if (cell === null) {
-      let props = this.mkProps(undefined, item, rowAs, mixIn, addProp);
-      return ['empty', tryAmend(props, item, 'cell', 'cell')];
+      let props = this.mkProps(undefined, item, box, rowAs, mixIn, addProp);
+      return ['empty', tryAmend(props, item, box, 'cell', 'cell')];
     }
 
-    let cellProps = this.mkProps(cell, item, rowAs, mixIn, addProp);
+    let cellProps = this.mkProps(cell, item, box, rowAs, mixIn, addProp);
 
     if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
       Object.assign(cellProps, {cell: applyFormatter(cellProps)});
     }
 
-    cellProps = tryAmend(cellProps, item, 'cell', 'cell');
+    cellProps = tryAmend(cellProps, item, box, 'cell', 'cell');
 
     if (isDefined(cellProps, 'as')) {
       return [cellProps.as, cellProps];
@@ -113,9 +116,9 @@ export default class UnigridRow extends React.Component {
     return [typeof(cellProps.cell), cellProps];
   }
   
-  createAndProcessCell(cell, item, rowAs, mixIn, oAddProp, idCounter) {
+  createAndProcessCell(cell, item, box, rowAs, mixIn, oAddProp, idCounter) {
     const addProp = Object.assign({}, oAddProp, {key: idCounter.next().value});
-    let [type, props] = this.getCell(cell, item, rowAs, mixIn, addProp);
+    let [type, props] = this.getCell(cell, item, box, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
     binds = typeof(binds) === 'string' ? [binds] : binds;
     let toAdd = [];
@@ -145,18 +148,18 @@ export default class UnigridRow extends React.Component {
     let addProp = isDefined(oCfg, 'treeAmend') ?
         {treeAmend: oCfg.treeAmend} : undefined;
 
-    let cfg = tryAmend(oCfg, oCfg.item);
+    let cfg = tryAmend(oCfg, oCfg.item, oCfg.box);
 
     for (let i of elems) {
       arr.push(this.createAndProcessCell(
-        i, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter
+        i, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter
       ));
     }
 
     const children = React.Children.map(cfg.children, (child) => {
       const chCfg = Object.assign({}, child.props, {as: child});
       arr.push(this.createAndProcessCell(
-        chCfg, cfg.item, cfg.rowAs, cfg.mixIn, addProp, idCounter
+        chCfg, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter
       ));
     });
 

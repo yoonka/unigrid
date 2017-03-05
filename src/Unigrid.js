@@ -112,9 +112,9 @@ export default class Unigrid extends React.Component {
     }
   }
 
-  static _prepAmend(iCfg, iItem, expr) {
+  static _prepAmend(iCfg, iItem, iBox, expr) {
     if (isDefined(iCfg, expr)) {
-      const aCfg = tryAmend(iCfg, iItem, expr);
+      const aCfg = tryAmend(iCfg, iItem, iBox, expr);
       if (isDefined(aCfg, expr)) {
         return aCfg;
       }
@@ -123,12 +123,12 @@ export default class Unigrid extends React.Component {
   }
 
   static addRows(cfg, box, props, counter, acc, data, item) {
-    let aCfg = this._prepAmend(cfg, item, 'condition');
+    let aCfg = this._prepAmend(cfg, item, box, 'condition');
     if (aCfg) {
       if (this.shouldSkip(aCfg.condition, item)) return;
     }
 
-    aCfg = this._prepAmend(cfg, item, 'fromProperty');
+    aCfg = this._prepAmend(cfg, item, box, 'fromProperty');
     if (aCfg) {
       const {condition, fromProperty, ...nCfg} = aCfg;
       const nData = item[aCfg.fromProperty];
@@ -145,7 +145,7 @@ export default class Unigrid extends React.Component {
       return;
     }
 
-    aCfg = this._prepAmend(cfg, item, 'process');
+    aCfg = this._prepAmend(cfg, item, box, 'process');
     if (aCfg) {
       const {condition, fromProperty, process, ...nCfg} = aCfg;
       const nData = aCfg.process(data, box);
@@ -160,14 +160,14 @@ export default class Unigrid extends React.Component {
       return;
     }
 
-    aCfg = this._prepAmend(cfg, item, 'select');
+    aCfg = this._prepAmend(cfg, item, box, 'select');
     if (aCfg) {
       const {condition, fromProperty, process, select, ...nCfg} = aCfg;
       this.executeSelect(nCfg, box, props, counter, acc, aCfg.select, data);
       return;
     }
 
-    aCfg = this._prepAmend(cfg, item, 'section');
+    aCfg = this._prepAmend(cfg, item, box, 'section');
     if (aCfg) {
       const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
       acc.push(UnigridSection.createSection(nCfg, box, props, counter, aCfg.section, data, item));
@@ -175,16 +175,16 @@ export default class Unigrid extends React.Component {
     }
 
     const cTypes = props.cellTypes;
-    aCfg = this._prepAmend(cfg, item, 'cells');
+    aCfg = this._prepAmend(cfg, item, box, 'cells');
     if (aCfg) {
       const {condition, fromProperty, process, select, section,
-             children, box, ...nCfg} = aCfg;
+             children, ...nCfg} = aCfg;
       const nId = counter.next().value;
       const key = isDefined(item, '_unigridId') ? `${item._unigridId}-${nId}` : nId;
-      acc.push(<UnigridRow {...nCfg} item={item} cellTypes={cTypes} key={key} />);
+      acc.push(<UnigridRow {...nCfg} box={box} item={item} cellTypes={cTypes} key={key} />);
     }
 
-    aCfg = this._prepAmend(cfg, item, '$do');
+    aCfg = this._prepAmend(cfg, item, box, '$do');
     if (aCfg) {
       const addProp = isDefined(aCfg, 'treeAmend') ?
             {treeAmend: aCfg.treeAmend} : undefined;
@@ -268,10 +268,11 @@ export default class Unigrid extends React.Component {
   }
 
   getBox() {
-    return this.state || this.props.box || {};
+    return this.box || this.props.box || {};
   }
 
   setBox(box) {
+    this.box = box;
     this.setState(box);
   }
 
@@ -281,7 +282,7 @@ export default class Unigrid extends React.Component {
     const {table, data, item, box, cellTypes, ...cfg} = props;
     const sectionCounter = idMaker();
     const children = Unigrid.createChildren(
-      cfg, this.state, this.props, sectionCounter, data, item);
+      cfg, this.getBox(), this.props, sectionCounter, data, item);
     const cleaned = Unigrid.cleanProps(props);
     return React.createElement('table', cleaned, children);
   }
