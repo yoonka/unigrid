@@ -45,8 +45,7 @@ export const idMaker = function* () {
 // *** Processing expression objects ***
 
 const _propertyFormatter = (props) => {
-  return isDefined(props, 'show') && isDefined(props.item, props.show) ?
-    props.item[props.show] : undefined;
+  return isDefined(props.item, props.show) ? props.item[props.show] : undefined;
 };
 
 const _functionFormatter = (props) => props.show(props);
@@ -96,13 +95,23 @@ const _compareString = (a, b) => {
 }
 
 const _compareAttributes = (oAttrA, oAttrB) => {
+  const noA = oAttrA === undefined || oAttrA === null;
+  const noB = oAttrB === undefined || oAttrB === null;
+  if (noA && noB) return 0;
+  if (noA) return 1; // put undefined/null last
+  if (noB) return -1;
+
   const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
   const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
 
   const aType = typeof attrA;
   const bType = typeof attrB;
 
-  if (aType !== bType) return 0;
+  if (aType !== bType) {
+    if (aType === 'number' && bType === 'string') return -1;
+    if (aType === 'string' && bType === 'number') return 1;
+    return 0;
+  }
 
   if (aType === 'string') {
     const retVal = _compareString(attrA, attrB);
@@ -128,14 +137,22 @@ const _compareObjects = (a, b, attrs, isAsc) => {
   return 0;
 }
 
+const getColumns = (box, fields) => {
+  switch(typeof(fields)) {
+  case 'undefined': return [box.column];
+  case 'function': return fields(box.column) || [];
+  case 'string': return [fields];
+  default: return fields;
+  }
+}
+
 // fields - The list of fields in the 'item' by which the input 'data'
 //   should be sorted. If it's a function then it will be called, with the
 //   selected column as its argument, to obtain the list of fields.
 // defOrder - default order if 'box.order' isn't defined.
-const _sorter = (data, box, fields = (col) => [col], defOrder = 'asc') => {
+const _sorter = (data, box, fields, defOrder = 'asc') => {
   const itemCounter = idMaker();
-  const nColumns = typeof fields === 'function' ?
-        fields(box.column) || [] : fields;
+  const nColumns = getColumns(box, fields);
   const isAsc = (box.order || defOrder) === 'asc';
   const comparer = (a, b) => _compareObjects(a, b, nColumns, isAsc);
   const arr = [];

@@ -736,7 +736,7 @@ var idMaker = _regeneratorRuntime.mark(function idMaker() {
 // *** Processing expression objects ***
 
 var _propertyFormatter = function _propertyFormatter(props) {
-  return isDefined(props, 'show') && isDefined(props.item, props.show) ? props.item[props.show] : undefined;
+  return isDefined(props.item, props.show) ? props.item[props.show] : undefined;
 };
 
 var _functionFormatter = function _functionFormatter(props) {
@@ -790,13 +790,23 @@ var _compareString = function _compareString(a, b) {
 };
 
 var _compareAttributes = function _compareAttributes(oAttrA, oAttrB) {
+  var noA = oAttrA === undefined || oAttrA === null;
+  var noB = oAttrB === undefined || oAttrB === null;
+  if (noA && noB) return 0;
+  if (noA) return 1; // put undefined/null last
+  if (noB) return -1;
+
   var attrA = typeof oAttrA === 'object' ? oAttrA.valueOf() : oAttrA;
   var attrB = typeof oAttrB === 'object' ? oAttrB.valueOf() : oAttrB;
 
   var aType = typeof attrA;
   var bType = typeof attrB;
 
-  if (aType !== bType) return 0;
+  if (aType !== bType) {
+    if (aType === 'number' && bType === 'string') return -1;
+    if (aType === 'string' && bType === 'number') return 1;
+    return 0;
+  }
 
   if (aType === 'string') {
     var retVal = _compareString(attrA, attrB);
@@ -822,18 +832,28 @@ var _compareObjects = function _compareObjects(a, b, attrs, isAsc) {
   return 0;
 };
 
+var getColumns = function getColumns(box, fields) {
+  switch (typeof fields) {
+    case 'undefined':
+      return [box.column];
+    case 'function':
+      return fields(box.column) || [];
+    case 'string':
+      return [fields];
+    default:
+      return fields;
+  }
+};
+
 // fields - The list of fields in the 'item' by which the input 'data'
 //   should be sorted. If it's a function then it will be called, with the
 //   selected column as its argument, to obtain the list of fields.
 // defOrder - default order if 'box.order' isn't defined.
-var _sorter = function _sorter(data, box) {
-  var fields = arguments.length <= 2 || arguments[2] === undefined ? function (col) {
-    return [col];
-  } : arguments[2];
+var _sorter = function _sorter(data, box, fields) {
   var defOrder = arguments.length <= 3 || arguments[3] === undefined ? 'asc' : arguments[3];
 
   var itemCounter = idMaker();
-  var nColumns = typeof fields === 'function' ? fields(box.column) || [] : fields;
+  var nColumns = getColumns(box, fields);
   var isAsc = (box.order || defOrder) === 'asc';
   var comparer = function comparer(a, b) {
     return _compareObjects(a, b, nColumns, isAsc);
@@ -1069,6 +1089,72 @@ var getIterator = function getIterator(pData, pSelect) {
   return undefined;
 };
 
+/*
+Copyright (c) 2016, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var UnigridEmptyCell = function UnigridEmptyCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.rowAs === "header" ? 'th' : 'td';
+  return React.createElement(Tx, cleaned);
+};
+
+var UnigridTextCell = function UnigridTextCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.rowAs === "header" ? 'th' : 'td';
+  return React.createElement(
+    Tx,
+    cleaned,
+    p.cell
+  );
+};
+
+var UnigridNumberCell = function UnigridNumberCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.rowAs === "header" ? 'th' : 'td';
+  return React.createElement(
+    Tx,
+    cleaned,
+    p.cell.toString()
+  );
+};
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var _classCallCheck = (function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -1116,119 +1202,6 @@ var _inherits = (function (subClass, superClass) {
   });
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 })
-
-/*
-Copyright (c) 2016, Grzegorz Junka
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-var UnigridEmptyCell = function (_React$Component) {
-  _inherits(UnigridEmptyCell, _React$Component);
-
-  function UnigridEmptyCell() {
-    _classCallCheck(this, UnigridEmptyCell);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridEmptyCell).apply(this, arguments));
-  }
-
-  _createClass(UnigridEmptyCell, [{
-    key: 'render',
-    value: function render() {
-      var cleaned = cleanCellProps(this.props);
-      var Tx = this.props.rowAs === "header" ? 'th' : 'td';
-      return React.createElement(Tx, cleaned);
-    }
-  }]);
-
-  return UnigridEmptyCell;
-}(React.Component);
-
-var UnigridTextCell = function (_React$Component2) {
-  _inherits(UnigridTextCell, _React$Component2);
-
-  function UnigridTextCell() {
-    _classCallCheck(this, UnigridTextCell);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridTextCell).apply(this, arguments));
-  }
-
-  _createClass(UnigridTextCell, [{
-    key: 'render',
-    value: function render() {
-      var p = this.props;
-      var cleaned = cleanCellProps(p);
-      var Tx = p.rowAs === "header" ? 'th' : 'td';
-      return React.createElement(
-        Tx,
-        cleaned,
-        p.cell
-      );
-    }
-  }]);
-
-  return UnigridTextCell;
-}(React.Component);
-
-var UnigridNumberCell = function (_React$Component3) {
-  _inherits(UnigridNumberCell, _React$Component3);
-
-  function UnigridNumberCell() {
-    _classCallCheck(this, UnigridNumberCell);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridNumberCell).apply(this, arguments));
-  }
-
-  _createClass(UnigridNumberCell, [{
-    key: 'render',
-    value: function render() {
-      var p = this.props;
-      var cleaned = cleanCellProps(p);
-      var Tx = p.rowAs === "header" ? 'th' : 'td';
-      return React.createElement(
-        Tx,
-        cleaned,
-        p.cell.toString()
-      );
-    }
-  }]);
-
-  return UnigridNumberCell;
-}(React.Component);
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
 
 var _slicedToArray = (function () {
   function sliceIterator(arr, i) {

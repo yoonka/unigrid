@@ -40,7 +40,6 @@ export class UnigridExample5 extends React.Component {
   }
 
   render() {
-
     const cellTypes = {
       empty: UnigridEmptyCell,
       string: UnigridTextCell
@@ -53,11 +52,11 @@ export class UnigridExample5 extends React.Component {
           <Unigrid className={'unigrid-main-class'}>
             <UnigridHeader className={'unigrid-header'}>
               <UnigridRow rowAs={'header'}>
-                <UnigridTextCell show={'hAgent'} />
-                <UnigridTextCell show={'hDate'} />
-                <UnigridTextCell show={'hStreet'} />
-                <UnigridTextCell show={'hName'} className={'name-header-cell'} />
-                <UnigridTextCell show={'hNumber'} />
+                <UnigridTextCell show="hAgent" />
+                <UnigridTextCell show="hDate" />
+                <UnigridTextCell show="hStreet" />
+                <UnigridTextCell show="hName" className={'name-header-cell'} />
+                <UnigridTextCell show="hNumber" />
               </UnigridRow>
             </UnigridHeader>
           </Unigrid>
@@ -81,10 +80,10 @@ export class UnigridExample5 extends React.Component {
                 </UnigridRow>
               </Unigrid>
               <UnigridRow className={'some-row-class'}>
-                <UnigridTextCell show={'agent'} />
-                <UnigridTextCell show={'date'} />
-                <UnigridTextCell show={'street'} />
-                <UnigridTextCell show={'name'} />
+                <UnigridTextCell show="agent" />
+                <UnigridTextCell show="date" />
+                <UnigridTextCell show="street" />
+                <UnigridTextCell show="name" />
                 <UnigridTextCell
                   show={'number'}
                   className={'number-cell'}
