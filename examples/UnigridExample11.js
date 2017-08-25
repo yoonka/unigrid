@@ -25,45 +25,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {UnigridExample1} from 'examples/UnigridExample1';
-import {UnigridExample2} from 'examples/UnigridExample2';
-import {UnigridExample3} from 'examples/UnigridExample3';
-import {UnigridExample4} from 'examples/UnigridExample4';
-import {UnigridExample5} from 'examples/UnigridExample5';
-import {UnigridExample6} from 'examples/UnigridExample6';
-import {UnigridExample7} from 'examples/UnigridExample7';
-import {UnigridExample8} from 'examples/UnigridExample8';
-import {UnigridExample9} from 'examples/UnigridExample9';
-import {UnigridExample10} from 'examples/UnigridExample10';
-import {UnigridExample11} from 'examples/UnigridExample11';
+import Unigrid, {UnigridHeader, UnigridSegment, UnigridRow} from 'src/Unigrid';
+import {UnigridTextCell} from 'src/UnigridCells';
+import {getSorter, sort} from 'src/helpers';
+import tableData from './json/tableResp7.json!';
 
-export class UnigridExamples extends React.Component {
+export class UnigridExample11 extends React.Component {
+  clickHandler(field) {
+    return () => sort(this.unigrid, field);
+  }
+
   render() {
     return (
       <div>
-      <hr />
-      <UnigridExample1 />
-      <hr />
-      <UnigridExample2 />
-      <hr />
-      <UnigridExample3 />
-      <hr />
-      <UnigridExample4 />
-      <hr />
-      <UnigridExample5 />
-      <hr />
-      <UnigridExample6 />
-      <hr />
-      <UnigridExample7 />
-      <hr />
-      <UnigridExample8 />
-      <hr />
-      <UnigridExample9 />
-      <hr />
-      <UnigridExample10 />
-      <hr />
-      <UnigridExample11 />
-      <hr />
+      <p>Example 11 : Sorting with nested objects</p>
+      <Unigrid
+        box={{column: 'x1.x2.x3', order: 'asc'}}
+        data={tableData}
+        ref={ref => {this.unigrid = ref;}}
+      >
+        <UnigridHeader>
+          <UnigridRow rowAs={'header'}>
+            <UnigridTextCell cell="X" onClick={this.clickHandler('x1.x2.x3')} />
+            <UnigridTextCell cell="Y" onClick={this.clickHandler('y1.y2.y3')} />
+          </UnigridRow>
+        </UnigridHeader>
+        <UnigridSegment
+          process={getSorter()}
+          select={'all'}
+        >
+          <UnigridRow>
+            <UnigridTextCell show="x1.x2.x3" />
+            <UnigridTextCell show="y1.y2.y3" />
+          </UnigridRow>
+        </UnigridSegment>
+      </Unigrid>
       </div>
     );
   }

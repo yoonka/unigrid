@@ -45,7 +45,16 @@ export const idMaker = function* () {
 // *** Processing expression objects ***
 
 const _propertyFormatter = (props) => {
-  return isDefined(props.item, props.show) ? props.item[props.show] : undefined;
+  const nested = props.show.split('.');
+
+  let last = props.item;
+  for (let i = 0; i < nested.length; i++) {
+    if (!isDefined(last, nested[i])) {
+      return undefined;
+    }
+    last = last[nested[i]];
+  }
+  return last;
 };
 
 const _functionFormatter = (props) => props.show(props);

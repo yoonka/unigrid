@@ -736,7 +736,16 @@ var idMaker = _regeneratorRuntime.mark(function idMaker() {
 // *** Processing expression objects ***
 
 var _propertyFormatter = function _propertyFormatter(props) {
-  return isDefined(props.item, props.show) ? props.item[props.show] : undefined;
+  var nested = props.show.split('.');
+
+  var last = props.item;
+  for (var i = 0; i < nested.length; i++) {
+    if (!isDefined(last, nested[i])) {
+      return undefined;
+    }
+    last = last[nested[i]];
+  }
+  return last;
 };
 
 var _functionFormatter = function _functionFormatter(props) {
