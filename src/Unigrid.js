@@ -263,6 +263,13 @@ export default class Unigrid extends React.Component {
           }
         }
       }
+      if (condition.ifDoes === 'equal') {
+        if (!isDefined(condition, 'property') || !isDefined(condition, 'value')
+            || !isDefined(item, condition.property)
+            || item[condition.property] !== condition.value) {
+          return true;
+        }
+      }
     }
     return false;
   }

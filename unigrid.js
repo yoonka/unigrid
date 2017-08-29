@@ -1969,6 +1969,11 @@ var Unigrid = function (_React$Component2) {
             }
           }
         }
+        if (condition.ifDoes === 'equal') {
+          if (!isDefined(condition, 'property') || !isDefined(condition, 'value') || !isDefined(item, condition.property) || item[condition.property] !== condition.value) {
+            return true;
+          }
+        }
       }
       return false;
     }
