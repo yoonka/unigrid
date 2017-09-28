@@ -1749,7 +1749,7 @@ var Unigrid = function (_React$Component2) {
     value: function addRows(cfg, box, props, counter, acc, data, item) {
       var aCfg = this._prepAmend(cfg, item, box, 'condition');
       if (aCfg) {
-        if (this.shouldSkip(aCfg.condition, item)) return;
+        if (!this.shouldRender(aCfg.condition, item)) return;
       }
 
       aCfg = this._prepAmend(cfg, item, box, 'fromProperty');
@@ -1959,23 +1959,21 @@ var Unigrid = function (_React$Component2) {
       return !isUnigrid;
     }
   }, {
-    key: 'shouldSkip',
-    value: function shouldSkip(condition, item) {
-      if (isDefined(condition, 'ifDoes')) {
-        if (condition.ifDoes === 'exist') {
-          if (isDefined(condition, 'property')) {
-            if (!isDefined(item, condition.property)) {
-              return true;
-            }
-          }
-        }
-        if (condition.ifDoes === 'equal') {
-          if (!isDefined(condition, 'property') || !isDefined(condition, 'value') || !isDefined(item, condition.property) || item[condition.property] !== condition.value) {
-            return true;
-          }
-        }
+    key: 'shouldRender',
+    value: function shouldRender(condition, item) {
+      var exists = isDefined(condition, 'property') && isDefined(item, condition.property);
+
+      switch (condition.ifDoes) {
+        case 'exist':
+          return exists;
+        case 'notExist':
+          return !exists;
+        case 'equal':
+          return exists && isDefined(condition, 'value') && item[condition.property] === condition.value;
+        case 'notEqual':
+          return !exists || !isDefined(condition, 'value') || item[condition.property] !== condition.value;
       }
-      return false;
+      return true;
     }
   }]);
 

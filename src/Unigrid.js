@@ -125,7 +125,7 @@ export default class Unigrid extends React.Component {
   static addRows(cfg, box, props, counter, acc, data, item) {
     let aCfg = this._prepAmend(cfg, item, box, 'condition');
     if (aCfg) {
-      if (this.shouldSkip(aCfg.condition, item)) return;
+      if (!this.shouldRender(aCfg.condition, item)) return;
     }
 
     aCfg = this._prepAmend(cfg, item, box, 'fromProperty');
@@ -254,24 +254,25 @@ export default class Unigrid extends React.Component {
     return !isUnigrid;
   }
 
-  static shouldSkip(condition, item) {
-    if (isDefined(condition, 'ifDoes')) {
-      if (condition.ifDoes === 'exist') {
-        if (isDefined(condition, 'property')) {
-          if (!isDefined(item, condition.property)) {
-            return true;
-          }
-        }
-      }
-      if (condition.ifDoes === 'equal') {
-        if (!isDefined(condition, 'property') || !isDefined(condition, 'value')
-            || !isDefined(item, condition.property)
-            || item[condition.property] !== condition.value) {
-          return true;
-        }
-      }
+  static shouldRender(condition, item) {
+    const exists = isDefined(condition, 'property')
+          && isDefined(item, condition.property);
+
+    switch (condition.ifDoes) {
+    case 'exist':
+      return exists;
+    case 'notExist':
+      return !exists;
+    case 'equal':
+      return exists
+        && isDefined(condition, 'value')
+        && item[condition.property] === condition.value;
+    case 'notEqual':
+      return !exists
+        || !isDefined(condition, 'value')
+        || item[condition.property] !== condition.value;
     }
-    return false;
+    return true;
   }
 
   getBox() {
