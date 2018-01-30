@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,18 @@ import {cleanCellProps} from 'src/helpers';
 
 export const UnigridEmptyCell = (p) => {
   const cleaned = cleanCellProps(p);
-  const Tx = p.rowAs === "header" ? 'th' : 'td';
+  const Tx = p.Tx;
   return (<Tx {...cleaned} />);
 }
 
 export const UnigridTextCell = (p) => {
   const cleaned = cleanCellProps(p);
-  const Tx = p.rowAs === "header" ? 'th' : 'td';
+  const Tx = p.Tx;
   return (<Tx {...cleaned} >{p.cell}</Tx>);
 }
 
 export const UnigridNumberCell = (p) => {
   const cleaned = cleanCellProps(p);
-  const Tx = p.rowAs === "header" ? 'th' : 'td';
+  const Tx = p.Tx;
   return (<Tx {...cleaned} >{p.cell.toString()}</Tx>);
 }

@@ -32,11 +32,12 @@ import {
   UnigridSegment,
   UnigridFooter,
   UnigridRow,
+  UnigridHeaderRow,
   UnigridEmptyCell,
   UnigridTextCell
 } from 'src/index';
 
-export class UnigridExample5 extends React.Component {
+export class UnigridExample13 extends React.Component {
   constructor() {
     super();
     this.idCounter = () => {var counter = 0; return () => counter += 1;}
@@ -54,17 +55,17 @@ export class UnigridExample5 extends React.Component {
 
     return (
       <div>
-        <p>Example 5 : Multitable (JSX - specialized components)</p>
-        <Unigrid data={tableData} cellTypes={cellTypes}>
+        <p>Example 13 : Div Multitable (JSX - specialized components rendered as divs)</p>
+        <Unigrid renderAs="div" data={tableData} cellTypes={cellTypes}>
           <Unigrid className={'unigrid-main-class'}>
             <UnigridHeader className={'unigrid-header'}>
-              <UnigridRow rowAs={'header'}>
+              <UnigridHeaderRow>
                 <UnigridTextCell show="hAgent" />
                 <UnigridTextCell show="hDate" />
                 <UnigridTextCell show="hStreet" />
                 <UnigridTextCell show="hName" className={'name-header-cell'} />
                 <UnigridTextCell show="hNumber" />
-              </UnigridRow>
+              </UnigridHeaderRow>
             </UnigridHeader>
           </Unigrid>
           <Unigrid select={'all'}>
@@ -80,11 +81,11 @@ export class UnigridExample5 extends React.Component {
               </Unigrid>
               <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
                 fromProperty={'list'}>
-                <UnigridRow rowAs={'header'}>
+                <UnigridHeaderRow>
                   <UnigridTextCell cell={'category2'} />
                   <UnigridEmptyCell colSpan={3} />
                   <UnigridTextCell show={'hNumber'} />
-                </UnigridRow>
+                </UnigridHeaderRow>
               </Unigrid>
               <UnigridRow className={'some-row-class'}>
                 <UnigridTextCell show="agent" />

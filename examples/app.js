@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

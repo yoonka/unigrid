@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid from 'src/Unigrid';
-import {UnigridEmptyCell, UnigridTextCell} from 'src/UnigridCells';
 import tableData from './json/tableResp1.json!';
-import {isDefined, idMaker} from 'src/helpers';
+import {
+  Unigrid,
+  UnigridEmptyCell,
+  UnigridTextCell,
+  isDefined,
+  idMaker
+} from 'src/index';
 
 export class UnigridExample1 extends React.Component {
   handleClick() {

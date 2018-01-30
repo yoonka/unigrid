@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -24,15 +24,29 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+import React from 'react';
+import {getIterator} from 'src/iterators';
+import {UnigridRow} from 'src/UnigridRow';
+import {UnigridSection} from 'src/UnigridSection';
+
+let NODE_ENV = typeof process !== 'undefined' ? process.env.NODE_ENV : 'development';
+
 // *** Utility functions ***
 
 export const isDefined = (obj, prop) => {
   var undefined; // really undefined
-  return obj.hasOwnProperty(prop) && obj[prop] !== undefined;
+  return typeof obj === 'object' && obj.hasOwnProperty(prop) && obj[prop] !== undefined;
 };
 
+export const cleanProps = (props) => {
+  const {table, data, item, box, sectionCounter, cellTypes, amend, treeAmend,
+         condition, fromProperty, process, select, section, cells,
+         renderAs, rowAs, mixIn, $do, children, bindToElement, ...other} = props;
+  return other;
+}
+
 export const cleanCellProps = (props) => {
-  const {cell, show, item, box, rowAs, amend, bindToCell, treeAmend,
+  const {cell, show, item, box, renderAs, rowAs, amend, bindToCell, treeAmend, Tx,
          ...other} = props;
   return other;
 };
@@ -43,30 +57,6 @@ export const idMaker = function* () {
 }
 
 // *** Processing expression objects ***
-
-const _propertyFormatter = (props) => {
-  const nested = props.show.split('.');
-
-  let last = props.item;
-  for (let i = 0; i < nested.length; i++) {
-    if (!isDefined(last, nested[i])) {
-      return undefined;
-    }
-    last = last[nested[i]];
-  }
-  return last;
-};
-
-const _functionFormatter = (props) => props.show(props);
-
-export const applyFormatter = (pProps) => {
-  let tShow = typeof(pProps.show);
-  switch(tShow) {
-  case 'string': return _propertyFormatter(pProps);
-  case 'function': return _functionFormatter(pProps);
-  }
-  return undefined;
-};
 
 function _applyAmend(cfg, item, box, fun) {
   return Object.assign({}, cfg, fun(cfg, item, box));
@@ -92,146 +82,196 @@ export const tryAmend = (pCfg, pItem, pBox, pExpr, pDef) => {
   return pCfg;
 }
 
-// *** Sorting functions ***
+// *** Unigrid rendering functions ***
 
-const _compareString = (a, b) => {
-  const la = a.toLowerCase();
-  const lb = b.toLowerCase();
-
-  if (la < lb) return -1;
-  if (la > lb) return 1;
-  return 0;
+export const prepAmend = (iCfg, iItem, iBox, expr) => {
+  if (isDefined(iCfg, expr)) {
+    const aCfg = tryAmend(iCfg, iItem, iBox, expr);
+    if (isDefined(aCfg, expr)) {
+      return aCfg;
+    }
+  }
+  return false;
 }
 
-const _compareAttributes = (oAttrA, oAttrB) => {
-  const noA = oAttrA === undefined || oAttrA === null;
-  const noB = oAttrB === undefined || oAttrB === null;
-  if (noA && noB) return 0;
-  if (noA) return 1; // put undefined/null last
-  if (noB) return -1;
-
-  const attrA = (typeof oAttrA === 'object') ? oAttrA.valueOf() : oAttrA;
-  const attrB = (typeof oAttrB === 'object') ? oAttrB.valueOf() : oAttrB;
-
-  const aType = typeof attrA;
-  const bType = typeof attrB;
-
-  if (aType !== bType) {
-    if (aType === 'number' && bType === 'string') return -1;
-    if (aType === 'string' && bType === 'number') return 1;
-    return 0;
-  }
-
-  if (aType === 'string') {
-    const retVal = _compareString(attrA, attrB);
-    if(retVal !== 0) return retVal;
-  } else if (aType === 'number') {
-    const retVal = attrA - attrB;
-    if (retVal !== 0) return retVal;
-  }
-  return 0;
+function _isSupported(elem) {
+  const isUnigrid = elem.type && elem.type.isUnigrid && elem.type.isUnigrid();
+  /*
+  // Maybe once react supports returning multiple children from a render function
+  acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
+  cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
+  */
+  return !isUnigrid;
 }
 
-const _compareObjects = (a, b, attrs, isAsc) => {
-  for (let i = 0; i < attrs.length; i++) {
-    const aVal = applyFormatter({show: attrs[i], item: a});
-    const bVal = applyFormatter({show: attrs[i], item: b});
-    const retVal = _compareAttributes(aVal, bVal);
-    if (retVal === 0) {
-      continue;
+function _processChild(child, props) {
+  // Pass null and undefined to React
+  if (!child) {
+    return child;
+  }
+
+  let binds = child.props.bindToElement || [];
+  binds = typeof(binds) === 'string' ? [binds] : binds;
+  let toAdd = [];
+  for (let i = 0; i < binds.length; i++) {
+    let funName = binds[i];
+    let oldFun = child.props[funName];
+    if (oldFun !== undefined) {
+      let newFun = function() {
+        return oldFun.apply(this.unigridElement, arguments);
+      }
+      toAdd.push(newFun);
+      props[funName] = newFun.bind(newFun);
+    }
+  }
+  let component = React.cloneElement(child, props);
+  for (let i = 0; i < toAdd.length; i++) {
+    toAdd[i].unigridElement = component;
+  }
+  return component;
+}
+
+function _getChildren(cfg, box, counter, data, item, cTypes) {
+  let props = {
+    box: box, data: data, item: item, cellTypes: cTypes,
+    sectionCounter: counter, key: counter.next().value
+  };
+  if (isDefined(cfg, 'treeAmend')) {
+    Object.assign(props, {treeAmend: cfg.treeAmend});
+  }
+  if (isDefined(cfg, 'renderAs')) {
+    Object.assign(props, {renderAs: cfg.renderAs});
+  }
+  return React.Children.map(cfg.children, function(child) {
+    return _processChild(child, props);
+  });
+}
+
+function _shouldRender(condition, item) {
+  const exists = isDefined(condition, 'property')
+        && isDefined(item, condition.property);
+
+  switch (condition.ifDoes) {
+  case 'exist':
+    return exists;
+  case 'notExist':
+    return !exists;
+  case 'equal':
+    return exists
+      && isDefined(condition, 'value')
+      && item[condition.property] === condition.value;
+  case 'notEqual':
+    return !exists
+      || !isDefined(condition, 'value')
+      || item[condition.property] !== condition.value;
+  }
+  return true;
+}
+
+function addRows(cfg, box, props, counter, acc, data, item) {
+  let aCfg = prepAmend(cfg, item, box, 'condition');
+  if (aCfg) {
+    if (!_shouldRender(aCfg.condition, item)) return;
+  }
+
+  aCfg = prepAmend(cfg, item, box, 'fromProperty');
+  if (aCfg) {
+    const {condition, fromProperty, ...nCfg} = aCfg;
+    const nData = item[aCfg.fromProperty];
+
+    if (NODE_ENV !== 'production') {
+      if (!nData || typeof(nData) !== 'object') {
+        throw new Error(`Invalid value supplied to "fromProperty": ${aCfg.fromProperty}. ` +
+                        'The property could not be found in the data supplied to Unigrid. ' +
+                        'Consider adding the "ifDoes" exist condition.');
+      }
+    }
+
+    addChildren(nCfg, box, props, counter, acc, nData, undefined);
+    return;
+  }
+
+  aCfg = prepAmend(cfg, item, box, 'process');
+  if (aCfg) {
+    const {condition, fromProperty, process, ...nCfg} = aCfg;
+    const nData = aCfg.process(data, box);
+
+    if (NODE_ENV !== 'production') {
+      if (!nData || typeof(nData) !== 'object') {
+        throw new Error('Invalid data returned from the "process" function.');
+      }
+    }
+
+    addChildren(nCfg, box, props, counter, acc, nData, undefined);
+    return;
+  }
+
+  aCfg = prepAmend(cfg, item, box, 'select');
+  if (aCfg) {
+    const {condition, fromProperty, process, select, ...nCfg} = aCfg;
+    executeSelect(nCfg, box, props, counter, acc, aCfg.select, data);
+    return;
+  }
+
+  aCfg = prepAmend(cfg, item, box, 'section');
+  if (aCfg) {
+    const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
+    acc.push(UnigridSection.createSection(nCfg, box, props, counter, aCfg.section, data, item));
+    return;
+  }
+
+  const cTypes = props.cellTypes;
+  aCfg = prepAmend(cfg, item, box, 'cells');
+  if (aCfg) {
+    const {condition, fromProperty, process, select, section, children, ...nCfg} = aCfg;
+    const nId = counter.next().value;
+    const key = isDefined(item, '_unigridId') ? `${item._unigridId}-${nId}` : nId;
+    acc.push(<UnigridRow {...nCfg} box={box} item={item} cellTypes={cTypes} key={key} />);
+  }
+
+  aCfg = prepAmend(cfg, item, box, '$do');
+  if (aCfg) {
+    const addProp = isDefined(aCfg, 'treeAmend') ?
+          {treeAmend: aCfg.treeAmend} : undefined;
+    for (let i of aCfg.$do) {
+      let nCfg = addProp ? Object.assign({}, addProp, i) : i;
+      addChildren(nCfg, box, props, counter, acc, data, item);
+    }
+  }
+
+  const children = _getChildren(cfg, box, counter, data, item, cTypes) || [];
+  for (const i of children) {
+    if (_isSupported(i)) {
+      acc.push(i);
     } else {
-      return isAsc ? retVal : -retVal;
+      addChildren(i.props, box, props, counter, acc, data, item);
     }
   }
-  return 0;
 }
 
-const getColumns = (box, fields) => {
-  switch(typeof(fields)) {
-  case 'undefined': return [box.column];
-  case 'function': return fields(box.column) || [];
-  case 'string': return [fields];
-  default: return fields;
+function executeSelect(cfg, box, props, counter, acc, select, data) {
+  for (let i of getIterator(data, select)) {
+    addRows(cfg, box, props, counter, acc, data, i);
   }
 }
 
-// fields - The list of fields in the 'item' by which the input 'data'
-//   should be sorted. If it's a function then it will be called, with the
-//   selected column as its argument, to obtain the list of fields.
-// defOrder - default order if 'box.order' isn't defined.
-const _sorter = (data, box, fields, defOrder = 'asc') => {
-  const itemCounter = idMaker();
-  const nColumns = getColumns(box, fields);
-  const isAsc = (box.order || defOrder) === 'asc';
-  const comparer = (a, b) => _compareObjects(a, b, nColumns, isAsc);
-  const arr = [];
-  for (const i of data) {
-    arr.push(Object.assign({}, {_unigridId: itemCounter.next().value}, i));
-  }
-  return arr.sort(comparer);
-}
-
-export const getSorter = (colToFields, defOrder) => {
-  return (data, box) =>
-    _sorter(data, box, colToFields, defOrder);
-};
-
-// 'column' is used to track a change in sorting order. This name is supplied
-//   to the sorter function, so if it's a name of a field in the data item
-//   the default columnToFields mapper function can be used.
-// 'order' is the order to be used when sorting. Its behaviour depends on
-//     values supplied to this function in previous calls (if there were any).
-//   Valid values are: undefined, 'alter', 'old:alter',
-//     'asc', 'desc', 'new:asc' and 'new:desc'.
-//   If undefined is supplied then 'new:asc' is used as default.
-//   Value 'alter' means that subsequnt calls will alternate the order
-//     ('asc' to 'desc' and 'desc' to 'asc').
-//   Value 'old:alter' is similar to 'alter' but it will alternate only if the
-//     supplied 'column' value is the same as supplied in the previous call.
-//     If a new 'column' is supplied then it will leave the order unchanged.
-//   Value 'asc' or 'desc' will unconditionally sort in ascending or
-//     descending order.
-//   Values 'new:asc' and 'new:desc' mean that the order (ascending or
-//     descending) is to be used only if a new 'column' is supplied,
-//     i.e. if 'box.column' != 'column. Otherwise the order will alternate.
-// The first argument can be a function to override this with a new behaviour.
-export const updateBox = (box, column, order) => {
-  const alternate = (o) => o === 'asc' ? 'desc' : 'asc';
-  if (typeof(column) === 'function') {
-    box = column(box, order);
+function addChildren(cfg, box, props, counter, acc, data, item) {
+  if (item === undefined) {
+    executeSelect(cfg, box, props, counter, acc, 'first', data);
   } else {
-    const nOrder = order || 'new:asc';
-    let {column: bColumn, order: bOrder} = box;
-    const isNew = !bColumn || bColumn !== column;
-    bColumn = isNew ? column : bColumn;
-
-    switch(nOrder) {
-    case 'alter':
-      bOrder = alternate(bOrder);
-      break;
-    case 'old:alter':
-      bOrder = isNew ? bOrder : alternate(bOrder);
-      break;
-    case 'asc':
-      bOrder = 'asc';
-      break;
-    case 'desc':
-      bOrder = 'desc';
-      break;
-    case 'new:asc':
-      bOrder = isNew ? 'asc' : alternate(bOrder);
-      break;
-    case 'new:desc':
-      bOrder = isNew ? 'desc' : alternate(bOrder);
-      break;
-    }
-
-    box = Object.assign({}, box, {column: bColumn, order: bOrder});
+    addRows(cfg, box, props, counter, acc, data, item);
   }
-  return box;
-};
+}
 
-export const sort = (unigrid, column, order) => {
-  let box = unigrid.getBox();
-  unigrid.setBox(updateBox(box, column, order));
-};
+export const createChildren = (cfg, box, props, counter, data, item) => {
+  const acc = [];
+  addChildren(cfg, box, props, counter, acc, data, item);
+  return acc;
+}
+
+export const newChildren = (unigrid, cfg, data, item) => {
+  const box = unigrid.getBox();
+  const props = unigrid.props;
+  const counter = idMaker();
+  return createChildren(cfg, box, props, counter, data, item);
+}

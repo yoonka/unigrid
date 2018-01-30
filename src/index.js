@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -24,32 +24,37 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-export {isDefined,
-        cleanCellProps,
-        idMaker,
-        applyFormatter,
-        tryAmend,
-        getSorter,
-        updateBox,
-        sort} from 'src/helpers';
-
-export {isIterable,
-        getIterator} from 'src/iterators';
-
-export {UnigridEmptyCell,
-        UnigridTextCell,
-        UnigridNumberCell} from 'src/UnigridCells';
-
-import Unigrid, {
-  UnigridHeader,
-  UnigridSegment,
-  UnigridFooter} from 'src/Unigrid';
-import UnigridRow from 'src/UnigridRow';
+export {
+  isDefined,
+  cleanCellProps,
+  idMaker
+} from 'src/helpers';
 
 export {
-  Unigrid,
-  UnigridRow,
+  getSorter,
+  updateBox,
+  sort
+} from 'src/sorting';
+
+export {
+  UnigridEmptyCell,
+  UnigridTextCell,
+  UnigridNumberCell
+} from 'src/UnigridCells';
+
+export {
   UnigridHeader,
   UnigridSegment,
   UnigridFooter
+} from 'src/UnigridSection';
+
+export {
+  UnigridRow,
+  UnigridHeaderRow
+} from 'src/UnigridRow';
+
+import Unigrid from 'src/Unigrid';
+
+export {
+  Unigrid
 };

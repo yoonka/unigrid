@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ import {UnigridExample9} from 'examples/UnigridExample9';
 import {UnigridExample10} from 'examples/UnigridExample10';
 import {UnigridExample11} from 'examples/UnigridExample11';
 import {UnigridExample12} from 'examples/UnigridExample12';
+import {UnigridExample13} from 'examples/UnigridExample13';
 
 export class UnigridExamples extends React.Component {
   render() {
@@ -66,6 +67,8 @@ export class UnigridExamples extends React.Component {
       <UnigridExample11 />
       <hr />
       <UnigridExample12 />
+      <hr />
+      <UnigridExample13 />
       <hr />
       </div>
     );

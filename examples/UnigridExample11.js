@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import Unigrid, {UnigridHeader, UnigridSegment, UnigridRow} from 'src/Unigrid';
-import {UnigridTextCell} from 'src/UnigridCells';
-import {getSorter, sort} from 'src/helpers';
 import tableData from './json/tableResp7.json!';
+import {
+  Unigrid,
+  UnigridHeader,
+  UnigridSegment,
+  UnigridRow,
+  UnigridTextCell,
+  getSorter,
+  sort
+} from 'src/index';
 
 export class UnigridExample11 extends React.Component {
   clickHandler(field) {

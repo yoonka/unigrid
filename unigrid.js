@@ -6,6 +6,20 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var _regeneratorRuntime = (function (module) {
   /**
    * Copyright (c) 2014, Facebook, Inc.
@@ -659,8 +673,23 @@ var _objectWithoutProperties = (function (obj, keys) {
   return target;
 })
 
+var _defineProperty = (function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+})
+
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -685,55 +714,261 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// *** Utility functions ***
+// *** Data iterators ***
 
-var isDefined = function isDefined(obj, prop) {
-  var undefined; // really undefined
-  return obj.hasOwnProperty(prop) && obj[prop] !== undefined;
+var isIterable = function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
 };
 
-var cleanCellProps = function cleanCellProps(props) {
-  var cell = props.cell;
-  var show = props.show;
-  var item = props.item;
-  var box = props.box;
-  var rowAs = props.rowAs;
-  var amend = props.amend;
-  var bindToCell = props.bindToCell;
-  var treeAmend = props.treeAmend;
+var getIterator = function getIterator(pData, pSelect) {
+  function addIterable(obj) {
+    return _defineProperty({}, Symbol.iterator, function () {
+      return obj;
+    });
+  }
 
-  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'box', 'rowAs', 'amend', 'bindToCell', 'treeAmend']);
+  function makeAllIterator(data) {
+    var nextIndex = 0;
+    var obj = {
+      next: function next() {
+        return nextIndex < data.length ? { value: data[nextIndex++], done: false } : { done: true };
+      }
+    };
+    return addIterable(obj);
+  }
 
-  return other;
-};
+  function mkIterator(data, how, test) {
+    var nTest = test || function () {
+      return true;
+    };
+    var delivered = false;
+    var obj = {
+      next: function next() {
+        if (!delivered && nTest(data)) {
+          delivered = true;
+          return { value: how(data), done: false };
+        }
+        return { done: true };
+      }
+    };
+    return addIterable(obj);
+  }
 
-var idMaker = _regeneratorRuntime.mark(function idMaker() {
-  var index;
-  return _regeneratorRuntime.wrap(function idMaker$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          index = 0;
+  function makeFirstIterator(data) {
+    return mkIterator(data, function (d) {
+      return d[Symbol.iterator]().next().value;
+    });
+  }
 
-        case 1:
-          
+  function makeIteratorForItem(item) {
+    return mkIterator(item, function (i) {
+      return i;
+    });
+  }
 
-          _context.next = 4;
-          return index++;
+  function makeNumberIterator(data, select) {
+    var test = function test(d) {
+      return select >= 0 && select < d.length;
+    };
+    return mkIterator(data, function (d) {
+      return d[select];
+    }, test);
+  }
 
-        case 4:
-          _context.next = 1;
-          break;
-
-        case 6:
-        case 'end':
-          return _context.stop();
+  function makeStringIterator(data, select) {
+    if (select === 'all') {
+      if (isIterable(data)) {
+        return data;
+      } else {
+        return makeAllIterator(data);
+      }
+    } else if (select === 'first') {
+      if (isIterable(data)) {
+        return makeFirstIterator(data);
+      } else {
+        return makeIteratorForItem(data);
       }
     }
-  }, idMaker, this);
-});
+  }
 
-// *** Processing expression objects ***
+  switch (typeof pSelect) {
+    case 'number':
+      return makeNumberIterator(pData, pSelect);
+    case 'string':
+      return makeStringIterator(pData, pSelect);
+  }
+  return undefined;
+};
+
+var _slicedToArray = (function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+})();
+
+var _classCallCheck = (function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+})
+
+var _createClass = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+})();
+
+var _possibleConstructorReturn = (function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+})
+
+var _inherits = (function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+})
+
+/*
+Copyright (c) 2018, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var UnigridEmptyCell = function UnigridEmptyCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.Tx;
+  return React.createElement(Tx, cleaned);
+};
+
+var UnigridTextCell = function UnigridTextCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.Tx;
+  return React.createElement(
+    Tx,
+    cleaned,
+    p.cell
+  );
+};
+
+var UnigridNumberCell = function UnigridNumberCell(p) {
+  var cleaned = cleanCellProps(p);
+  var Tx = p.Tx;
+  return React.createElement(
+    Tx,
+    cleaned,
+    p.cell.toString()
+  );
+};
+
+/*
+Copyright (c) 2018, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// *** Sorting functions ***
 
 var _propertyFormatter = function _propertyFormatter(props) {
   var nested = props.show.split('.');
@@ -762,32 +997,6 @@ var applyFormatter = function applyFormatter(pProps) {
   }
   return undefined;
 };
-
-function _applyAmend(cfg, item, box, fun) {
-  return Object.assign({}, cfg, fun(cfg, item, box));
-}
-
-function _amend(cfg, expr, item, box, how, def) {
-  if (typeof how === 'function') {
-    if (expr === def || !expr) {
-      return _applyAmend(cfg, item, box, how);
-    }
-  } else if (expr && isDefined(how, expr)) {
-    return _applyAmend(cfg, item, box, how[expr]);
-  }
-  return cfg;
-}
-
-var tryAmend = function tryAmend(pCfg, pItem, pBox, pExpr, pDef) {
-  if (isDefined(pCfg, 'amend')) {
-    return _amend(pCfg, pExpr, pItem, pBox, pCfg.amend, pDef);
-  } else if (isDefined(pCfg, 'treeAmend')) {
-    return _amend(pCfg, pExpr, pItem, pBox, pCfg.treeAmend, pDef);
-  }
-  return pCfg;
-};
-
-// *** Sorting functions ***
 
 var _compareString = function _compareString(a, b) {
   var la = a.toLowerCase();
@@ -967,291 +1176,8 @@ var sort = function sort(unigrid, column, order) {
   unigrid.setBox(updateBox(box, column, order));
 };
 
-var _defineProperty = (function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-})
-
 /*
-Copyright (c) 2016, Grzegorz Junka
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// *** Data iterators ***
-
-var isIterable = function isIterable(obj) {
-  // checks for null and undefined
-  if (obj == null) {
-    return false;
-  }
-  return typeof obj[Symbol.iterator] === 'function';
-};
-
-var getIterator = function getIterator(pData, pSelect) {
-  function addIterable(obj) {
-    return _defineProperty({}, Symbol.iterator, function () {
-      return obj;
-    });
-  }
-
-  function makeAllIterator(data) {
-    var nextIndex = 0;
-    var obj = {
-      next: function next() {
-        return nextIndex < data.length ? { value: data[nextIndex++], done: false } : { done: true };
-      }
-    };
-    return addIterable(obj);
-  }
-
-  function mkIterator(data, how, test) {
-    var nTest = test || function () {
-      return true;
-    };
-    var delivered = false;
-    var obj = {
-      next: function next() {
-        if (!delivered && nTest(data)) {
-          delivered = true;
-          return { value: how(data), done: false };
-        }
-        return { done: true };
-      }
-    };
-    return addIterable(obj);
-  }
-
-  function makeFirstIterator(data) {
-    return mkIterator(data, function (d) {
-      return d[Symbol.iterator]().next().value;
-    });
-  }
-
-  function makeIteratorForItem(item) {
-    return mkIterator(item, function (i) {
-      return i;
-    });
-  }
-
-  function makeNumberIterator(data, select) {
-    var test = function test(d) {
-      return select >= 0 && select < d.length;
-    };
-    return mkIterator(data, function (d) {
-      return d[select];
-    }, test);
-  }
-
-  function makeStringIterator(data, select) {
-    if (select === 'all') {
-      if (isIterable(data)) {
-        return data;
-      } else {
-        return makeAllIterator(data);
-      }
-    } else if (select === 'first') {
-      if (isIterable(data)) {
-        return makeFirstIterator(data);
-      } else {
-        return makeIteratorForItem(data);
-      }
-    }
-  }
-
-  switch (typeof pSelect) {
-    case 'number':
-      return makeNumberIterator(pData, pSelect);
-    case 'string':
-      return makeStringIterator(pData, pSelect);
-  }
-  return undefined;
-};
-
-/*
-Copyright (c) 2016, Grzegorz Junka
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-var UnigridEmptyCell = function UnigridEmptyCell(p) {
-  var cleaned = cleanCellProps(p);
-  var Tx = p.rowAs === "header" ? 'th' : 'td';
-  return React.createElement(Tx, cleaned);
-};
-
-var UnigridTextCell = function UnigridTextCell(p) {
-  var cleaned = cleanCellProps(p);
-  var Tx = p.rowAs === "header" ? 'th' : 'td';
-  return React.createElement(
-    Tx,
-    cleaned,
-    p.cell
-  );
-};
-
-var UnigridNumberCell = function UnigridNumberCell(p) {
-  var cleaned = cleanCellProps(p);
-  var Tx = p.rowAs === "header" ? 'th' : 'td';
-  return React.createElement(
-    Tx,
-    cleaned,
-    p.cell.toString()
-  );
-};
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
-var _classCallCheck = (function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-})
-
-var _createClass = (function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-})();
-
-var _possibleConstructorReturn = (function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-})
-
-var _inherits = (function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-})
-
-var _slicedToArray = (function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
-
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
-
-    return _arr;
-  }
-
-  return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if (Symbol.iterator in Object(arr)) {
-      return sliceIterator(arr, i);
-    } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
-    }
-  };
-})();
-
-/*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1287,7 +1213,7 @@ var UnigridRow = function (_React$Component) {
 
   _createClass(UnigridRow, [{
     key: 'mkProps',
-    value: function mkProps(oCell, item, box, rowAs, mixIn, addProp) {
+    value: function mkProps(oCell, item, box, renderAs, rowAs, mixIn, addProp) {
       var cell = undefined;
       var props = Object.assign({}, addProp, mixIn);
 
@@ -1314,11 +1240,36 @@ var UnigridRow = function (_React$Component) {
       if (!isDefined(props, 'box') && box !== undefined) {
         Object.assign(props, { box: box });
       }
+      if (!isDefined(props, 'renderAs') && renderAs !== undefined) {
+        Object.assign(props, { renderAs: renderAs });
+      }
       if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
         Object.assign(props, { rowAs: rowAs });
       }
 
       return props;
+    }
+  }, {
+    key: 'cellTypeAndProps',
+    value: function cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp) {
+      if (cell === null) {
+        var props = this.mkProps(undefined, item, box, renderAs, rowAs, mixIn, addProp);
+        return ['empty', tryAmend(props, item, box, 'cell', 'cell')];
+      }
+
+      var cellProps = this.mkProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
+
+      if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
+        Object.assign(cellProps, { cell: applyFormatter(cellProps) });
+      }
+
+      cellProps = tryAmend(cellProps, item, box, 'cell', 'cell');
+
+      if (isDefined(cellProps, 'as')) {
+        return [cellProps.as, cellProps];
+      }
+
+      return [typeof cellProps.cell, cellProps];
     }
   }, {
     key: 'createCellForType',
@@ -1329,6 +1280,9 @@ var UnigridRow = function (_React$Component) {
       var bindToCell = oProps.bindToCell;
 
       var nProps = _objectWithoutProperties(oProps, ['show', 'using', 'as', 'bindToCell']);
+
+      var Tx = nProps.renderAs || (nProps.rowAs === 'header' ? 'th' : 'td');
+      Object.assign(nProps, { Tx: Tx });
 
       if (typeof type !== 'string') {
         if (isDefined(type, 'type')) {
@@ -1354,38 +1308,16 @@ var UnigridRow = function (_React$Component) {
       return React.createElement(UnigridTextCell, _extends({}, nProps, { cell: "Error: " + JSON.stringify(oProps) }));
     }
   }, {
-    key: 'getCell',
-    value: function getCell(cell, item, box, rowAs, mixIn, addProp) {
-      if (cell === null) {
-        var props = this.mkProps(undefined, item, box, rowAs, mixIn, addProp);
-        return ['empty', tryAmend(props, item, box, 'cell', 'cell')];
-      }
-
-      var cellProps = this.mkProps(cell, item, box, rowAs, mixIn, addProp);
-
-      if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
-        Object.assign(cellProps, { cell: applyFormatter(cellProps) });
-      }
-
-      cellProps = tryAmend(cellProps, item, box, 'cell', 'cell');
-
-      if (isDefined(cellProps, 'as')) {
-        return [cellProps.as, cellProps];
-      }
-
-      return [typeof cellProps.cell, cellProps];
-    }
-  }, {
     key: 'createAndProcessCell',
-    value: function createAndProcessCell(cell, item, box, rowAs, mixIn, oAddProp, idCounter) {
+    value: function createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, oAddProp, idCounter) {
       var addProp = Object.assign({}, oAddProp, { key: idCounter.next().value });
 
-      var _getCell = this.getCell(cell, item, box, rowAs, mixIn, addProp);
+      var _cellTypeAndProps = this.cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
 
-      var _getCell2 = _slicedToArray(_getCell, 2);
+      var _cellTypeAndProps2 = _slicedToArray(_cellTypeAndProps, 2);
 
-      var type = _getCell2[0];
-      var props = _getCell2[1];
+      var type = _cellTypeAndProps2[0];
+      var props = _cellTypeAndProps2[1];
 
       var binds = props.bindToCell || [];
       binds = typeof binds === 'string' ? [binds] : binds;
@@ -1433,7 +1365,7 @@ var UnigridRow = function (_React$Component) {
         for (var _iterator = elems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          arr.push(this.createAndProcessCell(i, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+          arr.push(this.createAndProcessCell(i, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter));
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1452,33 +1384,161 @@ var UnigridRow = function (_React$Component) {
 
       var children = React.Children.map(cfg.children, function (child) {
         var chCfg = Object.assign({}, child.props, { as: child });
-        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.box, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter));
       });
 
-      var amend = cfg.amend;
-      var treeAmend = cfg.treeAmend;
-      var cells = cfg.cells;
-      var rowAs = cfg.rowAs;
-      var mixIn = cfg.mixIn;
-      var box = cfg.box;
-      var data = cfg.data;
-      var item = cfg.item;
-      var cellTypes = cfg.cellTypes;
-      var $do = cfg.$do;
-      var sectionCounter = cfg.sectionCounter;
-      var bindToElement = cfg.bindToElement;
-
-      var nProps = _objectWithoutProperties(cfg, ['amend', 'treeAmend', 'cells', 'rowAs', 'mixIn', 'box', 'data', 'item', 'cellTypes', '$do', 'sectionCounter', 'bindToElement']);
-
-      return React.createElement('tr', nProps, arr);
+      var cleaned = cleanProps(cfg);
+      return React.createElement(cfg.renderAs || 'tr', cleaned, arr);
     }
   }]);
 
   return UnigridRow;
 }(React.Component);
 
+var UnigridHeaderRow = function UnigridHeaderRow(props) {
+  return React.createElement(UnigridRow, _extends({ rowAs: 'header' }, props));
+};
+
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var UnigridSection = function (_React$Component) {
+  _inherits(UnigridSection, _React$Component);
+
+  function UnigridSection() {
+    _classCallCheck(this, UnigridSection);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSection).apply(this, arguments));
+  }
+
+  _createClass(UnigridSection, [{
+    key: 'makeElement',
+    value: function makeElement(name) {
+      var _props = this.props;
+      var unfolded = _props.unfolded;
+      var box = _props.box;
+      var sectionCounter = _props.sectionCounter;
+      var data = _props.data;
+      var item = _props.item;
+
+      var cfg = _objectWithoutProperties(_props, ['unfolded', 'box', 'sectionCounter', 'data', 'item']);
+
+      var children = this.props.children;
+      if (!unfolded) {
+        children = createChildren(cfg, box, cfg, sectionCounter, data, item);
+      }
+      var cleaned = cleanProps(cfg);
+      return React.createElement(name, cleaned, children);
+    }
+  }], [{
+    key: '_getSectionComponent',
+    value: function _getSectionComponent(section) {
+      switch (section) {
+        case 'header':
+          return UnigridHeader;
+        case 'body':
+          return UnigridSegment;
+        case 'footer':
+          return UnigridFooter;
+      }
+    }
+  }, {
+    key: 'createSection',
+    value: function createSection(cfg, box, props, counter, section, data, item) {
+      var children = createChildren(cfg, box, props, counter, data, item);
+      var cleaned = cleanProps(cfg);
+      Object.assign(cleaned, {
+        children: children, unfolded: true, key: counter.next().value
+      });
+      return React.createElement(this._getSectionComponent(section), cleaned);
+    }
+  }]);
+
+  return UnigridSection;
+}(React.Component);
+
+var UnigridHeader = function (_UnigridSection) {
+  _inherits(UnigridHeader, _UnigridSection);
+
+  function UnigridHeader() {
+    _classCallCheck(this, UnigridHeader);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridHeader).apply(this, arguments));
+  }
+
+  _createClass(UnigridHeader, [{
+    key: 'render',
+    value: function render() {
+      return this.makeElement(this.props.renderAs || 'thead');
+    }
+  }]);
+
+  return UnigridHeader;
+}(UnigridSection);
+
+var UnigridSegment = function (_UnigridSection2) {
+  _inherits(UnigridSegment, _UnigridSection2);
+
+  function UnigridSegment() {
+    _classCallCheck(this, UnigridSegment);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSegment).apply(this, arguments));
+  }
+
+  _createClass(UnigridSegment, [{
+    key: 'render',
+    value: function render() {
+      return this.makeElement(this.props.renderAs || 'tbody');
+    }
+  }]);
+
+  return UnigridSegment;
+}(UnigridSection);
+
+var UnigridFooter = function (_UnigridSection3) {
+  _inherits(UnigridFooter, _UnigridSection3);
+
+  function UnigridFooter() {
+    _classCallCheck(this, UnigridFooter);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridFooter).apply(this, arguments));
+  }
+
+  _createClass(UnigridFooter, [{
+    key: 'render',
+    value: function render() {
+      return this.makeElement(this.props.renderAs || 'tfoot');
+    }
+  }]);
+
+  return UnigridFooter;
+}(UnigridSection);
+
+/*
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1505,128 +1565,434 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 var NODE_ENV = typeof process !== 'undefined' ? process.env.NODE_ENV : 'development';
 
-var UnigridSection = function (_React$Component) {
-  _inherits(UnigridSection, _React$Component);
+// *** Utility functions ***
 
-  function UnigridSection() {
-    _classCallCheck(this, UnigridSection);
+var isDefined = function isDefined(obj, prop) {
+  var undefined; // really undefined
+  return typeof obj === 'object' && obj.hasOwnProperty(prop) && obj[prop] !== undefined;
+};
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSection).apply(this, arguments));
-  }
+var cleanProps = function cleanProps(props) {
+  var table = props.table;
+  var data = props.data;
+  var item = props.item;
+  var box = props.box;
+  var sectionCounter = props.sectionCounter;
+  var cellTypes = props.cellTypes;
+  var amend = props.amend;
+  var treeAmend = props.treeAmend;
+  var condition = props.condition;
+  var fromProperty = props.fromProperty;
+  var process = props.process;
+  var select = props.select;
+  var section = props.section;
+  var cells = props.cells;
+  var renderAs = props.renderAs;
+  var rowAs = props.rowAs;
+  var mixIn = props.mixIn;
+  var $do = props.$do;
+  var children = props.children;
+  var bindToElement = props.bindToElement;
 
-  _createClass(UnigridSection, [{
-    key: 'makeElement',
-    value: function makeElement(name) {
-      var _props = this.props;
-      var unfolded = _props.unfolded;
-      var box = _props.box;
-      var sectionCounter = _props.sectionCounter;
-      var data = _props.data;
-      var item = _props.item;
+  var other = _objectWithoutProperties(props, ['table', 'data', 'item', 'box', 'sectionCounter', 'cellTypes', 'amend', 'treeAmend', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'renderAs', 'rowAs', 'mixIn', '$do', 'children', 'bindToElement']);
 
-      var cfg = _objectWithoutProperties(_props, ['unfolded', 'box', 'sectionCounter', 'data', 'item']);
+  return other;
+};
 
-      var children = this.props.children;
-      if (!unfolded) {
-        children = Unigrid.createChildren(cfg, box, cfg, sectionCounter, data, item);
+var cleanCellProps = function cleanCellProps(props) {
+  var cell = props.cell;
+  var show = props.show;
+  var item = props.item;
+  var box = props.box;
+  var renderAs = props.renderAs;
+  var rowAs = props.rowAs;
+  var amend = props.amend;
+  var bindToCell = props.bindToCell;
+  var treeAmend = props.treeAmend;
+  var Tx = props.Tx;
+
+  var other = _objectWithoutProperties(props, ['cell', 'show', 'item', 'box', 'renderAs', 'rowAs', 'amend', 'bindToCell', 'treeAmend', 'Tx']);
+
+  return other;
+};
+
+var idMaker = _regeneratorRuntime.mark(function idMaker() {
+  var index;
+  return _regeneratorRuntime.wrap(function idMaker$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          index = 0;
+
+        case 1:
+          
+
+          _context.next = 4;
+          return index++;
+
+        case 4:
+          _context.next = 1;
+          break;
+
+        case 6:
+        case 'end':
+          return _context.stop();
       }
-      var cleaned = Unigrid.cleanProps(cfg);
-      return React.createElement(name, cleaned, children);
     }
-  }], [{
-    key: '_getSectionComponent',
-    value: function _getSectionComponent(section) {
-      switch (section) {
-        case 'header':
-          return UnigridHeader;
-        case 'body':
-          return UnigridSegment;
-        case 'footer':
-          return UnigridFooter;
+  }, idMaker, this);
+});
+
+// *** Processing expression objects ***
+
+function _applyAmend(cfg, item, box, fun) {
+  return Object.assign({}, cfg, fun(cfg, item, box));
+}
+
+function _amend(cfg, expr, item, box, how, def) {
+  if (typeof how === 'function') {
+    if (expr === def || !expr) {
+      return _applyAmend(cfg, item, box, how);
+    }
+  } else if (expr && isDefined(how, expr)) {
+    return _applyAmend(cfg, item, box, how[expr]);
+  }
+  return cfg;
+}
+
+var tryAmend = function tryAmend(pCfg, pItem, pBox, pExpr, pDef) {
+  if (isDefined(pCfg, 'amend')) {
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.amend, pDef);
+  } else if (isDefined(pCfg, 'treeAmend')) {
+    return _amend(pCfg, pExpr, pItem, pBox, pCfg.treeAmend, pDef);
+  }
+  return pCfg;
+};
+
+// *** Unigrid rendering functions ***
+
+var prepAmend = function prepAmend(iCfg, iItem, iBox, expr) {
+  if (isDefined(iCfg, expr)) {
+    var aCfg = tryAmend(iCfg, iItem, iBox, expr);
+    if (isDefined(aCfg, expr)) {
+      return aCfg;
+    }
+  }
+  return false;
+};
+
+function _isSupported(elem) {
+  var isUnigrid = elem.type && elem.type.isUnigrid && elem.type.isUnigrid();
+  /*
+  // Maybe once react supports returning multiple children from a render function
+  acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
+  cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
+  */
+  return !isUnigrid;
+}
+
+function _processChild(child, props) {
+  // Pass null and undefined to React
+  if (!child) {
+    return child;
+  }
+
+  var binds = child.props.bindToElement || [];
+  binds = typeof binds === 'string' ? [binds] : binds;
+  var toAdd = [];
+
+  var _loop = function _loop(i) {
+    var funName = binds[i];
+    var oldFun = child.props[funName];
+    if (oldFun !== undefined) {
+      var newFun = function newFun() {
+        return oldFun.apply(this.unigridElement, arguments);
+      };
+      toAdd.push(newFun);
+      props[funName] = newFun.bind(newFun);
+    }
+  };
+
+  for (var i = 0; i < binds.length; i++) {
+    _loop(i);
+  }
+  var component = React.cloneElement(child, props);
+  for (var _i = 0; _i < toAdd.length; _i++) {
+    toAdd[_i].unigridElement = component;
+  }
+  return component;
+}
+
+function _getChildren(cfg, box, counter, data, item, cTypes) {
+  var props = {
+    box: box, data: data, item: item, cellTypes: cTypes,
+    sectionCounter: counter, key: counter.next().value
+  };
+  if (isDefined(cfg, 'treeAmend')) {
+    Object.assign(props, { treeAmend: cfg.treeAmend });
+  }
+  if (isDefined(cfg, 'renderAs')) {
+    Object.assign(props, { renderAs: cfg.renderAs });
+  }
+  return React.Children.map(cfg.children, function (child) {
+    return _processChild(child, props);
+  });
+}
+
+function _shouldRender(condition, item) {
+  var exists = isDefined(condition, 'property') && isDefined(item, condition.property);
+
+  switch (condition.ifDoes) {
+    case 'exist':
+      return exists;
+    case 'notExist':
+      return !exists;
+    case 'equal':
+      return exists && isDefined(condition, 'value') && item[condition.property] === condition.value;
+    case 'notEqual':
+      return !exists || !isDefined(condition, 'value') || item[condition.property] !== condition.value;
+  }
+  return true;
+}
+
+function addRows(cfg, box, props, counter, acc, data, item) {
+  var aCfg = prepAmend(cfg, item, box, 'condition');
+  if (aCfg) {
+    if (!_shouldRender(aCfg.condition, item)) return;
+  }
+
+  aCfg = prepAmend(cfg, item, box, 'fromProperty');
+  if (aCfg) {
+    var _aCfg = aCfg;
+    var condition = _aCfg.condition;
+    var fromProperty = _aCfg.fromProperty;
+
+    var nCfg = _objectWithoutProperties(_aCfg, ['condition', 'fromProperty']);
+
+    var nData = item[aCfg.fromProperty];
+
+    if (NODE_ENV !== 'production') {
+      if (!nData || typeof nData !== 'object') {
+        throw new Error('Invalid value supplied to "fromProperty": ' + aCfg.fromProperty + '. ' + 'The property could not be found in the data supplied to Unigrid. ' + 'Consider adding the "ifDoes" exist condition.');
       }
     }
-  }, {
-    key: 'createSection',
-    value: function createSection(cfg, box, props, counter, section, data, item) {
-      var children = Unigrid.createChildren(cfg, box, props, counter, data, item);
-      var cleaned = Unigrid.cleanProps(cfg);
-      Object.assign(cleaned, {
-        children: children, unfolded: true, key: counter.next().value
-      });
-      return React.createElement(this._getSectionComponent(section), cleaned);
-    }
-  }]);
 
-  return UnigridSection;
-}(React.Component);
-
-var UnigridHeader = function (_UnigridSection) {
-  _inherits(UnigridHeader, _UnigridSection);
-
-  function UnigridHeader() {
-    _classCallCheck(this, UnigridHeader);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridHeader).apply(this, arguments));
+    addChildren(nCfg, box, props, counter, acc, nData, undefined);
+    return;
   }
 
-  _createClass(UnigridHeader, [{
-    key: 'render',
-    value: function render() {
-      return this.makeElement('thead');
+  aCfg = prepAmend(cfg, item, box, 'process');
+  if (aCfg) {
+    var _aCfg2 = aCfg;
+    var _condition = _aCfg2.condition;
+    var _fromProperty = _aCfg2.fromProperty;
+    var _process = _aCfg2.process;
+
+    var _nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty', 'process']);
+
+    var _nData = aCfg.process(data, box);
+
+    if (NODE_ENV !== 'production') {
+      if (!_nData || typeof _nData !== 'object') {
+        throw new Error('Invalid data returned from the "process" function.');
+      }
     }
-  }]);
 
-  return UnigridHeader;
-}(UnigridSection);
-
-var UnigridSegment = function (_UnigridSection2) {
-  _inherits(UnigridSegment, _UnigridSection2);
-
-  function UnigridSegment() {
-    _classCallCheck(this, UnigridSegment);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridSegment).apply(this, arguments));
+    addChildren(_nCfg, box, props, counter, acc, _nData, undefined);
+    return;
   }
 
-  _createClass(UnigridSegment, [{
-    key: 'render',
-    value: function render() {
-      return this.makeElement('tbody');
-    }
-  }]);
+  aCfg = prepAmend(cfg, item, box, 'select');
+  if (aCfg) {
+    var _aCfg3 = aCfg;
+    var _condition2 = _aCfg3.condition;
+    var _fromProperty2 = _aCfg3.fromProperty;
+    var _process2 = _aCfg3.process;
+    var select = _aCfg3.select;
 
-  return UnigridSegment;
-}(UnigridSection);
+    var _nCfg2 = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process', 'select']);
 
-var UnigridFooter = function (_UnigridSection3) {
-  _inherits(UnigridFooter, _UnigridSection3);
-
-  function UnigridFooter() {
-    _classCallCheck(this, UnigridFooter);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(UnigridFooter).apply(this, arguments));
+    executeSelect(_nCfg2, box, props, counter, acc, aCfg.select, data);
+    return;
   }
 
-  _createClass(UnigridFooter, [{
-    key: 'render',
-    value: function render() {
-      return this.makeElement('tfoot');
+  aCfg = prepAmend(cfg, item, box, 'section');
+  if (aCfg) {
+    var _aCfg4 = aCfg;
+    var _condition3 = _aCfg4.condition;
+    var _fromProperty3 = _aCfg4.fromProperty;
+    var _process3 = _aCfg4.process;
+    var _select = _aCfg4.select;
+    var section = _aCfg4.section;
+
+    var _nCfg3 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select', 'section']);
+
+    acc.push(UnigridSection.createSection(_nCfg3, box, props, counter, aCfg.section, data, item));
+    return;
+  }
+
+  var cTypes = props.cellTypes;
+  aCfg = prepAmend(cfg, item, box, 'cells');
+  if (aCfg) {
+    var _aCfg5 = aCfg;
+    var _condition4 = _aCfg5.condition;
+    var _fromProperty4 = _aCfg5.fromProperty;
+    var _process4 = _aCfg5.process;
+    var _select2 = _aCfg5.select;
+    var _section = _aCfg5.section;
+    var _children = _aCfg5.children;
+
+    var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section', 'children']);
+
+    var nId = counter.next().value;
+    var key = isDefined(item, '_unigridId') ? item._unigridId + '-' + nId : nId;
+    acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { box: box, item: item, cellTypes: cTypes, key: key })));
+  }
+
+  aCfg = prepAmend(cfg, item, box, '$do');
+  if (aCfg) {
+    var addProp = isDefined(aCfg, 'treeAmend') ? { treeAmend: aCfg.treeAmend } : undefined;
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = aCfg.$do[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var i = _step.value;
+
+        var _nCfg5 = addProp ? Object.assign({}, addProp, i) : i;
+        addChildren(_nCfg5, box, props, counter, acc, data, item);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
     }
-  }]);
+  }
 
-  return UnigridFooter;
-}(UnigridSection);
+  var children = _getChildren(cfg, box, counter, data, item, cTypes) || [];
+  var _iteratorNormalCompletion2 = true;
+  var _didIteratorError2 = false;
+  var _iteratorError2 = undefined;
 
-var Unigrid = function (_React$Component2) {
-  _inherits(Unigrid, _React$Component2);
+  try {
+    for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+      var _i2 = _step2.value;
+
+      if (_isSupported(_i2)) {
+        acc.push(_i2);
+      } else {
+        addChildren(_i2.props, box, props, counter, acc, data, item);
+      }
+    }
+  } catch (err) {
+    _didIteratorError2 = true;
+    _iteratorError2 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion2 && _iterator2.return) {
+        _iterator2.return();
+      }
+    } finally {
+      if (_didIteratorError2) {
+        throw _iteratorError2;
+      }
+    }
+  }
+}
+
+function executeSelect(cfg, box, props, counter, acc, select, data) {
+  var _iteratorNormalCompletion3 = true;
+  var _didIteratorError3 = false;
+  var _iteratorError3 = undefined;
+
+  try {
+    for (var _iterator3 = getIterator(data, select)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      var i = _step3.value;
+
+      addRows(cfg, box, props, counter, acc, data, i);
+    }
+  } catch (err) {
+    _didIteratorError3 = true;
+    _iteratorError3 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion3 && _iterator3.return) {
+        _iterator3.return();
+      }
+    } finally {
+      if (_didIteratorError3) {
+        throw _iteratorError3;
+      }
+    }
+  }
+}
+
+function addChildren(cfg, box, props, counter, acc, data, item) {
+  if (item === undefined) {
+    executeSelect(cfg, box, props, counter, acc, 'first', data);
+  } else {
+    addRows(cfg, box, props, counter, acc, data, item);
+  }
+}
+
+var createChildren = function createChildren(cfg, box, props, counter, data, item) {
+  var acc = [];
+  addChildren(cfg, box, props, counter, acc, data, item);
+  return acc;
+};
+
+var newChildren = function newChildren(unigrid, cfg, data, item) {
+  var box = unigrid.getBox();
+  var props = unigrid.props;
+  var counter = idMaker();
+  return createChildren(cfg, box, props, counter, data, item);
+};
+
+/*
+Copyright (c) 2018, Grzegorz Junka
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var Unigrid = function (_React$Component) {
+  _inherits(Unigrid, _React$Component);
 
   function Unigrid(props) {
     _classCallCheck(this, Unigrid);
 
-    var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).call(this, props));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Unigrid).call(this, props));
 
-    _this5.state = isDefined(_this5.props, 'box') ? _this5.props.box : undefined;
-    return _this5;
+    _this.state = isDefined(_this.props, 'box') ? _this.props.box : undefined;
+    return _this;
   }
 
   _createClass(Unigrid, [{
@@ -1653,326 +2019,13 @@ var Unigrid = function (_React$Component2) {
 
       var cfg = _objectWithoutProperties(props, ['table', 'data', 'item', 'box', 'cellTypes']);
 
-      var sectionCounter = idMaker();
-      var children = Unigrid.createChildren(cfg, this.getBox(), this.props, sectionCounter, data, item);
-      var cleaned = Unigrid.cleanProps(props);
-      return React.createElement('table', cleaned, children);
+      var children = newChildren(this, cfg, data, item);
+      var cleaned = cleanProps(props);
+      return React.createElement(cfg.renderAs || 'table', cleaned, children);
     }
   }], [{
     key: 'isUnigrid',
     value: function isUnigrid() {
-      return true;
-    }
-  }, {
-    key: 'cleanProps',
-    value: function cleanProps(props) {
-      var data = props.data;
-      var table = props.table;
-      var box = props.box;
-      var sectionCounter = props.sectionCounter;
-      var cellTypes = props.cellTypes;
-      var amend = props.amend;
-      var treeAmend = props.treeAmend;
-      var condition = props.condition;
-      var fromProperty = props.fromProperty;
-      var process = props.process;
-      var select = props.select;
-      var section = props.section;
-      var cells = props.cells;
-      var rowAs = props.rowAs;
-      var mixIn = props.mixIn;
-      var $do = props.$do;
-      var children = props.children;
-      var bindToElement = props.bindToElement;
-
-      var other = _objectWithoutProperties(props, ['data', 'table', 'box', 'sectionCounter', 'cellTypes', 'amend', 'treeAmend', 'condition', 'fromProperty', 'process', 'select', 'section', 'cells', 'rowAs', 'mixIn', '$do', 'children', 'bindToElement']);
-
-      return other;
-    }
-  }, {
-    key: 'createChildren',
-    value: function createChildren(cfg, box, props, counter, data, item) {
-      var acc = [];
-      this.addChildren(cfg, box, props, counter, acc, data, item);
-      return acc;
-    }
-  }, {
-    key: 'addChildren',
-    value: function addChildren(cfg, box, props, counter, acc, data, item) {
-      if (item === undefined) {
-        this.executeSelect(cfg, box, props, counter, acc, 'first', data);
-      } else {
-        this.addRows(cfg, box, props, counter, acc, data, item);
-      }
-    }
-  }, {
-    key: 'executeSelect',
-    value: function executeSelect(cfg, box, props, counter, acc, select, data) {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = getIterator(data, select)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var i = _step.value;
-
-          this.addRows(cfg, box, props, counter, acc, data, i);
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-    }
-  }, {
-    key: '_prepAmend',
-    value: function _prepAmend(iCfg, iItem, iBox, expr) {
-      if (isDefined(iCfg, expr)) {
-        var aCfg = tryAmend(iCfg, iItem, iBox, expr);
-        if (isDefined(aCfg, expr)) {
-          return aCfg;
-        }
-      }
-      return false;
-    }
-  }, {
-    key: 'addRows',
-    value: function addRows(cfg, box, props, counter, acc, data, item) {
-      var aCfg = this._prepAmend(cfg, item, box, 'condition');
-      if (aCfg) {
-        if (!this.shouldRender(aCfg.condition, item)) return;
-      }
-
-      aCfg = this._prepAmend(cfg, item, box, 'fromProperty');
-      if (aCfg) {
-        var _aCfg = aCfg;
-        var condition = _aCfg.condition;
-        var fromProperty = _aCfg.fromProperty;
-
-        var nCfg = _objectWithoutProperties(_aCfg, ['condition', 'fromProperty']);
-
-        var nData = item[aCfg.fromProperty];
-
-        if (NODE_ENV !== 'production') {
-          if (!nData || typeof nData !== 'object') {
-            throw new Error('Invalid value supplied to "fromProperty": ' + aCfg.fromProperty + '. ' + 'The property could not be found in the data supplied to Unigrid. ' + 'Consider adding the "ifDoes" exist condition.');
-          }
-        }
-
-        this.addChildren(nCfg, box, props, counter, acc, nData, undefined);
-        return;
-      }
-
-      aCfg = this._prepAmend(cfg, item, box, 'process');
-      if (aCfg) {
-        var _aCfg2 = aCfg;
-        var _condition = _aCfg2.condition;
-        var _fromProperty = _aCfg2.fromProperty;
-        var _process = _aCfg2.process;
-
-        var _nCfg = _objectWithoutProperties(_aCfg2, ['condition', 'fromProperty', 'process']);
-
-        var _nData = aCfg.process(data, box);
-
-        if (NODE_ENV !== 'production') {
-          if (!_nData || typeof _nData !== 'object') {
-            throw new Error('Invalid data returned from the "process" function.');
-          }
-        }
-
-        this.addChildren(_nCfg, box, props, counter, acc, _nData, undefined);
-        return;
-      }
-
-      aCfg = this._prepAmend(cfg, item, box, 'select');
-      if (aCfg) {
-        var _aCfg3 = aCfg;
-        var _condition2 = _aCfg3.condition;
-        var _fromProperty2 = _aCfg3.fromProperty;
-        var _process2 = _aCfg3.process;
-        var select = _aCfg3.select;
-
-        var _nCfg2 = _objectWithoutProperties(_aCfg3, ['condition', 'fromProperty', 'process', 'select']);
-
-        this.executeSelect(_nCfg2, box, props, counter, acc, aCfg.select, data);
-        return;
-      }
-
-      aCfg = this._prepAmend(cfg, item, box, 'section');
-      if (aCfg) {
-        var _aCfg4 = aCfg;
-        var _condition3 = _aCfg4.condition;
-        var _fromProperty3 = _aCfg4.fromProperty;
-        var _process3 = _aCfg4.process;
-        var _select = _aCfg4.select;
-        var section = _aCfg4.section;
-
-        var _nCfg3 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select', 'section']);
-
-        acc.push(UnigridSection.createSection(_nCfg3, box, props, counter, aCfg.section, data, item));
-        return;
-      }
-
-      var cTypes = props.cellTypes;
-      aCfg = this._prepAmend(cfg, item, box, 'cells');
-      if (aCfg) {
-        var _aCfg5 = aCfg;
-        var _condition4 = _aCfg5.condition;
-        var _fromProperty4 = _aCfg5.fromProperty;
-        var _process4 = _aCfg5.process;
-        var _select2 = _aCfg5.select;
-        var _section = _aCfg5.section;
-        var _children = _aCfg5.children;
-
-        var _nCfg4 = _objectWithoutProperties(_aCfg5, ['condition', 'fromProperty', 'process', 'select', 'section', 'children']);
-
-        var nId = counter.next().value;
-        var key = isDefined(item, '_unigridId') ? item._unigridId + '-' + nId : nId;
-        acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { box: box, item: item, cellTypes: cTypes, key: key })));
-      }
-
-      aCfg = this._prepAmend(cfg, item, box, '$do');
-      if (aCfg) {
-        var addProp = isDefined(aCfg, 'treeAmend') ? { treeAmend: aCfg.treeAmend } : undefined;
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = aCfg.$do[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var i = _step2.value;
-
-            var _nCfg5 = addProp ? Object.assign({}, addProp, i) : i;
-            this.addChildren(_nCfg5, box, props, counter, acc, data, item);
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-      }
-
-      var children = this._getChildren(cfg, box, counter, data, item, cTypes) || [];
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var _i = _step3.value;
-
-          if (this._isSupported(_i)) {
-            acc.push(_i);
-          } else {
-            this.addChildren(_i.props, box, props, counter, acc, data, item);
-          }
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-    }
-  }, {
-    key: '_processChild',
-    value: function _processChild(child, props) {
-      // Pass null and undefined to React
-      if (!child) {
-        return child;
-      }
-
-      var binds = child.props.bindToElement || [];
-      binds = typeof binds === 'string' ? [binds] : binds;
-      var toAdd = [];
-
-      var _loop = function _loop(i) {
-        var funName = binds[i];
-        var oldFun = child.props[funName];
-        if (oldFun !== undefined) {
-          var newFun = function newFun() {
-            return oldFun.apply(this.unigridElement, arguments);
-          };
-          toAdd.push(newFun);
-          props[funName] = newFun.bind(newFun);
-        }
-      };
-
-      for (var i = 0; i < binds.length; i++) {
-        _loop(i);
-      }
-      var component = React.cloneElement(child, props);
-      for (var _i2 = 0; _i2 < toAdd.length; _i2++) {
-        toAdd[_i2].unigridElement = component;
-      }
-      return component;
-    }
-  }, {
-    key: '_getChildren',
-    value: function _getChildren(cfg, box, counter, data, item, cTypes) {
-      var props = {
-        box: box, data: data, item: item, cellTypes: cTypes,
-        sectionCounter: counter, key: counter.next().value
-      };
-      if (isDefined(cfg, 'treeAmend')) {
-        Object.assign(props, { treeAmend: cfg.treeAmend });
-      }
-      return React.Children.map(cfg.children, function (child) {
-        return Unigrid._processChild(child, props);
-      });
-    }
-  }, {
-    key: '_isSupported',
-    value: function _isSupported(elem) {
-      var isUnigrid = elem.type && elem.type.isUnigrid && elem.type.isUnigrid();
-      /*
-      // Maybe once react supports returning multiple children from a render function
-      acc.push(<Unigrid table={nCfg} data={data} item={item} box={this.props.box}
-      cellTypes={this.props.cellTypes} isChildUnigrid={true} />);
-      */
-      return !isUnigrid;
-    }
-  }, {
-    key: 'shouldRender',
-    value: function shouldRender(condition, item) {
-      var exists = isDefined(condition, 'property') && isDefined(item, condition.property);
-
-      switch (condition.ifDoes) {
-        case 'exist':
-          return exists;
-        case 'notExist':
-          return !exists;
-        case 'equal':
-          return exists && isDefined(condition, 'value') && item[condition.property] === condition.value;
-        case 'notEqual':
-          return !exists || !isDefined(condition, 'value') || item[condition.property] !== condition.value;
-      }
       return true;
     }
   }]);
@@ -1981,7 +2034,7 @@ var Unigrid = function (_React$Component2) {
 }(React.Component);
 
 /*
-Copyright (c) 2016, Grzegorz Junka
+Copyright (c) 2018, Grzegorz Junka
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -2007,22 +2060,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 exports.Unigrid = Unigrid;
-exports.UnigridRow = UnigridRow;
-exports.UnigridHeader = UnigridHeader;
-exports.UnigridSegment = UnigridSegment;
-exports.UnigridFooter = UnigridFooter;
 exports.isDefined = isDefined;
 exports.cleanCellProps = cleanCellProps;
 exports.idMaker = idMaker;
-exports.applyFormatter = applyFormatter;
-exports.tryAmend = tryAmend;
 exports.getSorter = getSorter;
 exports.updateBox = updateBox;
 exports.sort = sort;
-exports.isIterable = isIterable;
-exports.getIterator = getIterator;
 exports.UnigridEmptyCell = UnigridEmptyCell;
 exports.UnigridTextCell = UnigridTextCell;
 exports.UnigridNumberCell = UnigridNumberCell;
+exports.UnigridHeader = UnigridHeader;
+exports.UnigridSegment = UnigridSegment;
+exports.UnigridFooter = UnigridFooter;
+exports.UnigridRow = UnigridRow;
+exports.UnigridHeaderRow = UnigridHeaderRow;
 
 //# sourceMappingURL=unigrid.js.map
