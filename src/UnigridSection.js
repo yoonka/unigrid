@@ -36,7 +36,7 @@ export class UnigridSection extends React.Component {
     }
   }
 
-  static createSection(cfg, box, props, counter, section, data, item) {
+  static create(cfg, box, props, counter, section, data, item) {
     let children = createChildren(cfg, box, props, counter, data, item);
     const cleaned = cleanProps(cfg);
     Object.assign(cleaned, {

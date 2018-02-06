@@ -32,7 +32,7 @@ import {isDefined, tryAmend, idMaker, cleanProps} from 'src/helpers';
 import {applyFormatter} from 'src/sorting';
 
 export class UnigridRow extends React.Component {
-  mkProps(oCell, item, box, renderAs, rowAs, mixIn, addProp) {
+  static mkProps(oCell, item, box, renderAs, rowAs, mixIn, addProp) {
     let cell = undefined;
     let props = Object.assign({}, addProp, mixIn);
 
@@ -71,7 +71,7 @@ export class UnigridRow extends React.Component {
     return props;
   }
 
-  cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp) {
+  static cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp) {
     if (cell === null) {
       let props = this.mkProps(undefined, item, box, renderAs, rowAs, mixIn, addProp);
       return ['empty', tryAmend(props, item, box, 'cell', 'cell')];
@@ -92,7 +92,7 @@ export class UnigridRow extends React.Component {
     return [typeof(cellProps.cell), cellProps];
   }
 
-  createCellForType(type, oProps) {
+  static createCellForType(cellTypes, type, oProps) {
     let {show, using, as, bindToCell, ...nProps} = oProps;
 
     const Tx = nProps.renderAs || (nProps.rowAs === 'header' ? 'th' : 'td');
@@ -105,9 +105,8 @@ export class UnigridRow extends React.Component {
       return React.createElement(type, nProps);
     }
 
-    if (isDefined(this.props, 'cellTypes')
-      && isDefined(this.props.cellTypes, type)) {
-      return React.createElement(this.props.cellTypes[type], nProps);
+    if (cellTypes && isDefined(cellTypes, type)) {
+      return React.createElement(cellTypes[type], nProps);
     }
 
     switch (type) {
@@ -122,7 +121,7 @@ export class UnigridRow extends React.Component {
     );
   }
 
-  createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, oAddProp, idCounter) {
+  static createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, cellTypes, oAddProp, idCounter) {
     const addProp = Object.assign({}, oAddProp, {key: idCounter.next().value});
     let [type, props] = this.cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
@@ -139,15 +138,14 @@ export class UnigridRow extends React.Component {
         props[funName] = newFun.bind(newFun);
       }
     }
-    let component = this.createCellForType(type, props);
+    let component = this.createCellForType(cellTypes, type, props);
     for (let i = 0; i < toAdd.length; i++) {
       toAdd[i].unigridCell = component;
     }
     return component;
   }
 
-  render() {
-    const oCfg = this.props;
+  static create(oCfg) {
     const elems = oCfg.cells || [];
     const arr = [];
     const idCounter = idMaker();
@@ -157,20 +155,24 @@ export class UnigridRow extends React.Component {
     let cfg = tryAmend(oCfg, oCfg.item, oCfg.box);
 
     for (let i of elems) {
-      arr.push(this.createAndProcessCell(
-        i, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter
+      arr.push(UnigridRow.createAndProcessCell(
+        i, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, cfg.cellTypes, addProp, idCounter
       ));
     }
 
     const children = React.Children.map(cfg.children, (child) => {
       const chCfg = Object.assign({}, child.props, {as: child});
-      arr.push(this.createAndProcessCell(
-        chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter
+      arr.push(UnigridRow.createAndProcessCell(
+        chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, cfg.cellTypes, addProp, idCounter
       ));
     });
 
     const cleaned = cleanProps(cfg);
     return React.createElement(cfg.renderAs || 'tr', cleaned, arr);
+  }
+
+  render() {
+    return UnigridRow.create(this.props);
   }
 }
 

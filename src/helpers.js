@@ -216,7 +216,7 @@ function addRows(cfg, box, props, counter, acc, data, item) {
   aCfg = prepAmend(cfg, item, box, 'section');
   if (aCfg) {
     const {condition, fromProperty, process, select, section, ...nCfg} = aCfg;
-    acc.push(UnigridSection.createSection(nCfg, box, props, counter, aCfg.section, data, item));
+    acc.push(UnigridSection.create(nCfg, box, props, counter, aCfg.section, data, item));
     return;
   }
 
@@ -226,7 +226,7 @@ function addRows(cfg, box, props, counter, acc, data, item) {
     const {condition, fromProperty, process, select, section, children, ...nCfg} = aCfg;
     const nId = counter.next().value;
     const key = isDefined(item, '_unigridId') ? `${item._unigridId}-${nId}` : nId;
-    acc.push(<UnigridRow {...nCfg} box={box} item={item} cellTypes={cTypes} key={key} />);
+    acc.push(UnigridRow.create(Object.assign(nCfg, {box, item, cellTypes: cTypes, key})));
   }
 
   aCfg = prepAmend(cfg, item, box, '$do');

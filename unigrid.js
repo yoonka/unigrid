@@ -6,20 +6,6 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = _interopDefault(require('react'));
 
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
 var _regeneratorRuntime = (function (module) {
   /**
    * Copyright (c) 2014, Facebook, Inc.
@@ -842,6 +828,20 @@ var _slicedToArray = (function () {
   };
 })();
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
 var _classCallCheck = (function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -1212,6 +1212,11 @@ var UnigridRow = function (_React$Component) {
   }
 
   _createClass(UnigridRow, [{
+    key: 'render',
+    value: function render() {
+      return UnigridRow.create(this.props);
+    }
+  }], [{
     key: 'mkProps',
     value: function mkProps(oCell, item, box, renderAs, rowAs, mixIn, addProp) {
       var cell = undefined;
@@ -1273,7 +1278,7 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'createCellForType',
-    value: function createCellForType(type, oProps) {
+    value: function createCellForType(cellTypes, type, oProps) {
       var show = oProps.show;
       var using = oProps.using;
       var as = oProps.as;
@@ -1291,8 +1296,8 @@ var UnigridRow = function (_React$Component) {
         return React.createElement(type, nProps);
       }
 
-      if (isDefined(this.props, 'cellTypes') && isDefined(this.props.cellTypes, type)) {
-        return React.createElement(this.props.cellTypes[type], nProps);
+      if (cellTypes && isDefined(cellTypes, type)) {
+        return React.createElement(cellTypes[type], nProps);
       }
 
       switch (type) {
@@ -1309,7 +1314,7 @@ var UnigridRow = function (_React$Component) {
     }
   }, {
     key: 'createAndProcessCell',
-    value: function createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, oAddProp, idCounter) {
+    value: function createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, cellTypes, oAddProp, idCounter) {
       var addProp = Object.assign({}, oAddProp, { key: idCounter.next().value });
 
       var _cellTypeAndProps = this.cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
@@ -1338,18 +1343,15 @@ var UnigridRow = function (_React$Component) {
       for (var i = 0; i < binds.length; i++) {
         _loop(i);
       }
-      var component = this.createCellForType(type, props);
+      var component = this.createCellForType(cellTypes, type, props);
       for (var _i = 0; _i < toAdd.length; _i++) {
         toAdd[_i].unigridCell = component;
       }
       return component;
     }
   }, {
-    key: 'render',
-    value: function render() {
-      var _this2 = this;
-
-      var oCfg = this.props;
+    key: 'create',
+    value: function create(oCfg) {
       var elems = oCfg.cells || [];
       var arr = [];
       var idCounter = idMaker();
@@ -1365,7 +1367,7 @@ var UnigridRow = function (_React$Component) {
         for (var _iterator = elems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var i = _step.value;
 
-          arr.push(this.createAndProcessCell(i, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+          arr.push(UnigridRow.createAndProcessCell(i, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, cfg.cellTypes, addProp, idCounter));
         }
       } catch (err) {
         _didIteratorError = true;
@@ -1384,7 +1386,7 @@ var UnigridRow = function (_React$Component) {
 
       var children = React.Children.map(cfg.children, function (child) {
         var chCfg = Object.assign({}, child.props, { as: child });
-        arr.push(_this2.createAndProcessCell(chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, addProp, idCounter));
+        arr.push(UnigridRow.createAndProcessCell(chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, cfg.cellTypes, addProp, idCounter));
       });
 
       var cleaned = cleanProps(cfg);
@@ -1466,8 +1468,8 @@ var UnigridSection = function (_React$Component) {
       }
     }
   }, {
-    key: 'createSection',
-    value: function createSection(cfg, box, props, counter, section, data, item) {
+    key: 'create',
+    value: function create(cfg, box, props, counter, section, data, item) {
       var children = createChildren(cfg, box, props, counter, data, item);
       var cleaned = cleanProps(cfg);
       Object.assign(cleaned, {
@@ -1826,7 +1828,7 @@ function addRows(cfg, box, props, counter, acc, data, item) {
 
     var _nCfg3 = _objectWithoutProperties(_aCfg4, ['condition', 'fromProperty', 'process', 'select', 'section']);
 
-    acc.push(UnigridSection.createSection(_nCfg3, box, props, counter, aCfg.section, data, item));
+    acc.push(UnigridSection.create(_nCfg3, box, props, counter, aCfg.section, data, item));
     return;
   }
 
@@ -1845,7 +1847,7 @@ function addRows(cfg, box, props, counter, acc, data, item) {
 
     var nId = counter.next().value;
     var key = isDefined(item, '_unigridId') ? item._unigridId + '-' + nId : nId;
-    acc.push(React.createElement(UnigridRow, _extends({}, _nCfg4, { box: box, item: item, cellTypes: cTypes, key: key })));
+    acc.push(UnigridRow.create(Object.assign(_nCfg4, { box: box, item: item, cellTypes: cTypes, key: key })));
   }
 
   aCfg = prepAmend(cfg, item, box, '$do');
