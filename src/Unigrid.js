@@ -38,6 +38,15 @@ export default class Unigrid extends React.Component {
     return true;
   }
 
+  static create(oProps, oBox) {
+    const pTable = oProps.table || {};
+    const nProps = Object.assign({}, pTable, oProps);
+    const {table, data, item, box, cellTypes, ...cfg} = nProps;
+    const children = newChildren(cfg, oBox, oProps, data, item);
+    const cleaned = cleanProps(oProps);
+    return React.createElement(cfg.renderAs || 'table', cleaned, children);
+  }
+
   getBox() {
     return this.box || this.props.box || {};
   }
@@ -48,11 +57,6 @@ export default class Unigrid extends React.Component {
   }
 
   render() {
-    const pTable = this.props.table || {};
-    const props = Object.assign({}, pTable, this.props);
-    const {table, data, item, box, cellTypes, ...cfg} = props;
-    const children = newChildren(this, cfg, data, item);
-    const cleaned = cleanProps(props);
-    return React.createElement(cfg.renderAs || 'table', cleaned, children);
+    return Unigrid.create(this.props, this.getBox());
   }
 }

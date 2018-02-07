@@ -269,9 +269,7 @@ export const createChildren = (cfg, box, props, counter, data, item) => {
   return acc;
 }
 
-export const newChildren = (unigrid, cfg, data, item) => {
-  const box = unigrid.getBox();
-  const props = unigrid.props;
+export const newChildren = (cfg, box, props, data, item) => {
   const counter = idMaker();
   return createChildren(cfg, box, props, counter, data, item);
 }

@@ -1952,9 +1952,7 @@ var createChildren = function createChildren(cfg, box, props, counter, data, ite
   return acc;
 };
 
-var newChildren = function newChildren(unigrid, cfg, data, item) {
-  var box = unigrid.getBox();
-  var props = unigrid.props;
+var newChildren = function newChildren(cfg, box, props, data, item) {
   var counter = idMaker();
   return createChildren(cfg, box, props, counter, data, item);
 };
@@ -2011,24 +2009,29 @@ var Unigrid = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var pTable = this.props.table || {};
-      var props = Object.assign({}, pTable, this.props);
-      var table = props.table;
-      var data = props.data;
-      var item = props.item;
-      var box = props.box;
-      var cellTypes = props.cellTypes;
-
-      var cfg = _objectWithoutProperties(props, ['table', 'data', 'item', 'box', 'cellTypes']);
-
-      var children = newChildren(this, cfg, data, item);
-      var cleaned = cleanProps(props);
-      return React.createElement(cfg.renderAs || 'table', cleaned, children);
+      return Unigrid.create(this.props, this.getBox());
     }
   }], [{
     key: 'isUnigrid',
     value: function isUnigrid() {
       return true;
+    }
+  }, {
+    key: 'create',
+    value: function create(oProps, oBox) {
+      var pTable = oProps.table || {};
+      var nProps = Object.assign({}, pTable, oProps);
+      var table = nProps.table;
+      var data = nProps.data;
+      var item = nProps.item;
+      var box = nProps.box;
+      var cellTypes = nProps.cellTypes;
+
+      var cfg = _objectWithoutProperties(nProps, ['table', 'data', 'item', 'box', 'cellTypes']);
+
+      var children = newChildren(cfg, oBox, oProps, data, item);
+      var cleaned = cleanProps(oProps);
+      return React.createElement(cfg.renderAs || 'table', cleaned, children);
     }
   }]);
 
