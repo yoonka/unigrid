@@ -2019,8 +2019,7 @@ var Unigrid = function (_React$Component) {
   }, {
     key: 'create',
     value: function create(oProps, oBox) {
-      var pTable = oProps.table || {};
-      var nProps = Object.assign({}, pTable, oProps);
+      var nProps = Object.assign({}, oProps.table || {}, oProps);
       var table = nProps.table;
       var data = nProps.data;
       var item = nProps.item;
@@ -2030,7 +2029,7 @@ var Unigrid = function (_React$Component) {
       var cfg = _objectWithoutProperties(nProps, ['table', 'data', 'item', 'box', 'cellTypes']);
 
       var children = newChildren(cfg, oBox, oProps, data, item);
-      var cleaned = cleanProps(oProps);
+      var cleaned = cleanProps(nProps);
       return React.createElement(cfg.renderAs || 'table', cleaned, children);
     }
   }]);
