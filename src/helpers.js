@@ -35,7 +35,7 @@ let NODE_ENV = typeof process !== 'undefined' ? process.env.NODE_ENV : 'developm
 
 export const isDefined = (obj, prop) => {
   var undefined; // really undefined
-  return typeof obj === 'object' && obj.hasOwnProperty(prop) && obj[prop] !== undefined;
+  return !!obj && typeof obj === 'object' && obj.hasOwnProperty(prop) && obj[prop] !== undefined;
 };
 
 export const cleanProps = (props) => {
