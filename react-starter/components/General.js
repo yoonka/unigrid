@@ -1,9 +1,6 @@
 import React from 'react';
 import "../sass/general.scss";
-import { Unigrid } from "../unigrid";
-import { UnigridExamples } from "../examples/UnigridExamples"
-
-
+import { UnigridExample14 } from "../examples/UnigridExample14"
 
 
 
@@ -11,8 +8,7 @@ function General() {
     return (
         <div>
             <div className="container">Hello React</div>
-            <Unigrid />
-            <UnigridExamples />
+            <UnigridExample14 />
         </div>
 
     )
