@@ -1,10 +1,17 @@
 const webpack = require('webpack');
 const path = require('path');
+const json = require('./examples/json');
 
 module.exports = {
     mode: 'development',
     entry: path.resolve(__dirname, './src/index.js'),
     module: {
+        loaders: [
+            {
+                test: /\.json$/,
+                loader: 'json-loader'
+            }
+        ],
         rules: [
             {
                 exclude: /node_modules/,

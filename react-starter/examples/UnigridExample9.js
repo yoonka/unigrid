@@ -25,21 +25,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp5.json!';
+import tableData from './json/tableResp5.json';
 import {
   Unigrid,
   UnigridHeader,
   UnigridSegment,
   UnigridRow,
   UnigridTextCell
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample9 extends React.Component {
   render() {
 
-    const formatA = (cfg, item) => item.a === "apple" ? {style: {backgroundColor: '#55ff55'}} : undefined;
+    const formatA = (cfg, item) => item.a === "apple" ? { style: { backgroundColor: '#55ff55' } } : undefined;
 
-    const handleClick = function() {
+    const handleClick = function () {
       console.log('handleClick', this.props.item);
     };
 

@@ -25,8 +25,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp2.json!';
-import {Unigrid} from 'src/index';
+import tableData from './json//tableResp2.json';
+import { Unigrid } from '../unigrid';
 
 export class UnigridExample3 extends React.Component {
   render() {
@@ -35,14 +35,14 @@ export class UnigridExample3 extends React.Component {
       select: 'all',
       section: 'body',
       cells: [
-        {myData: 'key1'},
-        {myData: 'key2'}
+        { myData: 'key1' },
+        { myData: 'key2' }
       ],
-      mixIn: {as: 'myCell'}
+      mixIn: { as: 'myCell' }
     };
 
     const cellTypes = {
-      myCell: ({myData, item}) => <td>{item[myData]}</td>
+      myCell: ({ myData, item }) => <td>{item[myData]}</td>
     }
 
     return (

@@ -5,16 +5,13 @@
     "hStreet": "Street",
     "hName": "Name",
     "hNumber": "Number",
-
     "agent": "Anna",
     "date": "01.03.2012",
     "street": "Long Street",
     "name": "Merquat",
     "number": 2,
-
     "fSum": "Sum",
     "fTotal": "Total",
-
     "sum": "20",
     "total": "120"
   },

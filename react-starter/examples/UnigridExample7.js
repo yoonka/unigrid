@@ -25,17 +25,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp3.json!';
+import tableData from './json/tableResp3.json';
 import {
   Unigrid,
   getSorter,
   sort
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample7 extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {row: false, col: false};
+    this.state = { row: false, col: false };
   }
 
   clickHandler(field) {
@@ -45,38 +45,38 @@ export class UnigridExample7 extends React.Component {
   render() {
     const chStyleY = (cfg, item, box) => {
       this.isColorB = !this.isColorB;
-      return {style: {backgroundColor: '#ffcc00'}}
+      return { style: { backgroundColor: '#ffcc00' } }
     };
 
     const chStyleG = (cfg, item, box) => {
       this.isColorB = !this.isColorB;
-      return {style: {backgroundColor: '#55ff55'}}
+      return { style: { backgroundColor: '#55ff55' } }
     };
 
     const chStyleR = (cfg, item, box) => {
       const isColorR = this.isColorR ? false : true;
       this.isColorR = isColorR;
-      return isColorR ? {style: {backgroundColor: '#ff5555'}} : undefined;
+      return isColorR ? { style: { backgroundColor: '#ff5555' } } : undefined;
     };
 
     const chStyleB = (cfg, item, box) => {
       const isColorB = this.isColorB ? false : true;
       this.isColorB = isColorB;
-      return isColorB ? {style: {backgroundColor: '#4455ff'}} : undefined;
+      return isColorB ? { style: { backgroundColor: '#4455ff' } } : undefined;
     };
 
     const table = {
       className: 'unigrid',
-      treeAmend: {cells: chStyleR, cell: chStyleB},
+      treeAmend: { cells: chStyleR, cell: chStyleB },
       $do: [
         {
           section: 'header', className: 'unigrid-header',
           cells: [
-            {cell: 'AAA', onClick: this.clickHandler('a')},
-            {cell: 'BBB', onClick: this.clickHandler('b')},
-            {cell: 'CCC', onClick: this.clickHandler('c')},
-            {cell: 'DDD', onClick: this.clickHandler('d')},
-            {cell: 'EEE', onClick: this.clickHandler('e')}
+            { cell: 'AAA', onClick: this.clickHandler('a') },
+            { cell: 'BBB', onClick: this.clickHandler('b') },
+            { cell: 'CCC', onClick: this.clickHandler('c') },
+            { cell: 'DDD', onClick: this.clickHandler('d') },
+            { cell: 'EEE', onClick: this.clickHandler('e') }
           ],
           rowAs: 'header'
         },
@@ -94,13 +94,13 @@ export class UnigridExample7 extends React.Component {
                   fromProperty: 'l2',
                   process: getSorter(),
                   select: 'all',
-                  cells: ['a', {amend: chStyleY, show: 'b'}, 'c', 'd', 'e'],
+                  cells: ['a', { amend: chStyleY, show: 'b' }, 'c', 'd', 'e'],
                   $do: [
                     {
                       fromProperty: 'l3',
                       process: getSorter(),
                       select: 'all',
-                      cells: ['a', 'b', 'c', {show: 'd', amend: {cell: chStyleG}}, 'e'],
+                      cells: ['a', 'b', 'c', { show: 'd', amend: { cell: chStyleG } }, 'e'],
                     }
                   ]
                 }
@@ -111,12 +111,12 @@ export class UnigridExample7 extends React.Component {
       ]
     };
 
-    const box = {column: 'A'};
+    const box = { column: 'A' };
 
     return (
       <div>
         <p>Example 7 : Stripped grid (no JSX)</p>
-        <Unigrid data={tableData} table={table} box={box} ref={(ref) => {this.unigrid = ref;}} />
+        <Unigrid data={tableData} table={table} box={box} ref={(ref) => { this.unigrid = ref; }} />
       </div>
     );
   }

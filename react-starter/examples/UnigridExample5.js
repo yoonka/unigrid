@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp1.json!';
+import tableData from './json/tableResp1.json';
 import {
   Unigrid,
   UnigridHeader,
@@ -34,12 +34,12 @@ import {
   UnigridRow,
   UnigridEmptyCell,
   UnigridTextCell
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample5 extends React.Component {
   constructor() {
     super();
-    this.idCounter = () => {var counter = 0; return () => counter += 1;}
+    this.idCounter = () => { var counter = 0; return () => counter += 1; }
   }
 
   handleClick() {
@@ -69,7 +69,7 @@ export class UnigridExample5 extends React.Component {
           </Unigrid>
           <Unigrid select={'all'}>
             <UnigridSegment className={'unigrid-segment'}>
-              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
+              <Unigrid condition={{ ifDoes: 'exist', property: 'list' }}
                 fromProperty={'list'}
                 select={0}>
                 <UnigridRow rowAs={'header'}>
@@ -78,7 +78,7 @@ export class UnigridExample5 extends React.Component {
                   <UnigridTextCell show={'hNumber'} />
                 </UnigridRow>
               </Unigrid>
-              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
+              <Unigrid condition={{ ifDoes: 'exist', property: 'list' }}
                 fromProperty={'list'}>
                 <UnigridRow rowAs={'header'}>
                   <UnigridTextCell cell={'category2'} />
@@ -98,11 +98,11 @@ export class UnigridExample5 extends React.Component {
                   bindToCell={['onClick']}
                 />
               </UnigridRow>
-              <Unigrid condition={{ifDoes: 'exist', property: 'list'}}
+              <Unigrid condition={{ ifDoes: 'exist', property: 'list' }}
                 fromProperty={'list'}
                 select={'all'}
               >
-                <UnigridRow mixIn={{onClick: this.handleClick, bindToCell: 'onClick'}}>
+                <UnigridRow mixIn={{ onClick: this.handleClick, bindToCell: 'onClick' }}>
                   <UnigridEmptyCell colSpan={3} />
                   <UnigridTextCell show={'name'} />
                   <UnigridTextCell show={'number'} />

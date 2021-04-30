@@ -20,6 +20,7 @@
     "babel-loader": "^8.2.2",
     "css-loader": "^5.2.4",
     "express": "^4.17.1",
+    "json-loader": "^0.5.7",
     "sass": "^1.32.11",
     "sass-loader": "^11.0.1",
     "style-loader": "^2.0.0",
