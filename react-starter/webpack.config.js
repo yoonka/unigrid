@@ -1,15 +1,20 @@
 const webpack = require('webpack');
 const path = require('path');
-const json = require('./examples/json');
+// const json = require('json-loader!./file.json');
+var contents = require("cson!./file.cson");
 
 module.exports = {
     mode: 'development',
     entry: path.resolve(__dirname, './src/index.js'),
+    resolve: {
+        extensions: ['.cson']
+    },
     module: {
         loaders: [
             {
-                test: /\.json$/,
-                loader: 'json-loader'
+                test: /\.cson$/, loader: "cson",
+                // loader: 'json-loader'
+
             }
         ],
         rules: [
