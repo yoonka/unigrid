@@ -1,14 +1,16 @@
 import React from "react";
 import "../sass/App.scss"
 import { Unigrid } from "../unigrid"
-import { UnigridExample14 } from "../examples/UnigridExample14"
+import { UnigridExample1 } from "../examples/UnigridExample1"
+// import { UnigridExamples } from "../examples/UnigridExamples"
 
 function App() {
     return (
         <div>
             <div className="container">Hello React</div>
             <Unigrid />
-            <UnigridExample14 />
+            <UnigridExample1 />
+            {/* <UnigridExamples /> */}
         </div>
 
     )

@@ -28,6 +28,7 @@ import React from 'react';
 import tableData from './json/tableResp2.json';
 import { Unigrid } from '../unigrid';
 
+
 export class UnigridExample2 extends React.Component {
   render() {
     const table = {

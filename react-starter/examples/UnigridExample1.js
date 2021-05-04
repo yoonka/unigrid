@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp1.json';
+// import tableData1 from './json/tableResp1.json';
 import {
   Unigrid,
   UnigridEmptyCell,
@@ -34,7 +34,12 @@ import {
   idMaker
 } from '../unigrid';
 
-const json = require('./json/tableResp1.json')
+const tableData1 = require('./json/tableResp1.json');
+
+console.log(tableData1);
+
+
+const tableData = [];
 
 export class UnigridExample1 extends React.Component {
   handleClick() {
