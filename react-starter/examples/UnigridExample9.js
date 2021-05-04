@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-// import tableData from './json/tableResp5.json';
+import { tableData } from './data/Resp5';
 import {
   Unigrid,
   UnigridHeader,
@@ -34,11 +34,8 @@ import {
   UnigridTextCell
 } from '../unigrid';
 
-
 export class UnigridExample9 extends React.Component {
   render() {
-    const tableData = [{ a: "A", b: "B", c: "C", d: "D", e: "E", f: "F", g: "G", h: "H" }, { a: "apple", b: "banana" }, { a: "alpha", b: "beta" }];
-
     const formatA = (cfg, item) => item.a === "apple" ? { style: { backgroundColor: '#55ff55' } } : undefined;
 
     const handleClick = function () {

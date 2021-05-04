@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-// import tableData from './json/tableResp6.json';
+import { tableData } from './data/Resp6';
 import {
   Unigrid,
   UnigridHeader,
@@ -44,8 +44,6 @@ export class UnigridExample10 extends React.Component {
   }
 
   render() {
-    const tableData = [{ a: "a", b: "b", c: 1, d: 0 }, { a: "b", b: "a", c: 2, d: 1 }, { a: "a", b: "A", c: 0, d: 2 }, { a: null, b: null, c: null, d: null }, { a: 3 }, { a: "c", b: null, c: "a" }, { a: "", b: 0, c: "", d: "A" }];
-
     return (
       <div>
         <p>Example 10 : Sorting with null, undefined and empty values</p>

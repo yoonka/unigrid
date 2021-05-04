@@ -1,1 +1,1 @@
-const tableData = [{ a: "A", b: "B", c: "C", d: "D", e: "E", f: "F", g: "G", h: "H" }, { a: "apple", b: "banana" }, { a: "alpha", b: "beta" }]
+export let tableData = [{ a: "A", b: "B", c: "C", d: "D", e: "E", f: "F", g: "G", h: "H" }, { a: "apple", b: "banana" }, { a: "alpha", b: "beta" }]

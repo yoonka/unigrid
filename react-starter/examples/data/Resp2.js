@@ -1,2 +1,3 @@
-const newLocal = [{ "dummy1": "someVal", nList: [{ "key1": "key1", "key2": "key2" }, { "key1": "def", "key2": "jkl" }] }];
-const tableData = newLocal
+export let tableData = [
+    { "dummy1": "someVal", nList: [{ "key1": "key1", "key2": "key2" }, { "key1": "def", "key2": "jkl" }] }
+];

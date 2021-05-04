@@ -25,16 +25,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-// import tableData from './json/tableResp4.json';
+import { tableData } from './data/Resp4';
 import { Unigrid } from '../unigrid';
-
-
 
 export class UnigridExample8 extends React.Component {
   render() {
-
-    const tableData = { a: "A", b: "B", c: "C", d: "D", e: "E", f: "F", g: "G", h: "H" };
-
     return (
       <div>
         <p>Example 8 : Tree rendering a flat section (JSX - generic components)</p>

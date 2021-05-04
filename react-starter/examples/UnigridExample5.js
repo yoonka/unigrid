@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-// import tableData from './json/tableResp1.json';
+import {tableData} from './data/Resp1';
 import {
   Unigrid,
   UnigridHeader,
@@ -35,8 +35,6 @@ import {
   UnigridEmptyCell,
   UnigridTextCell
 } from '../unigrid';
-
-
 
 export class UnigridExample5 extends React.Component {
   constructor() {
@@ -49,8 +47,6 @@ export class UnigridExample5 extends React.Component {
   }
 
   render() {
-    const tableData = [{ hAgent: "Agent", hDate: "Date", hStreet: "Street", hName: "Name", hNumber: "Number", agent: "Anna", date: "01.03.2012", street: "Long Street", name: "Merquat", number: 2, fSum: "Sum", fTotal: "Total", sum: "20", total: "120" }, { agent: "Charlie", date: "05.05.2013", street: "Red Street", name: "Teddy", number: 1, list: [{ hCategory: "cat1", hNumber: "No", name: "Berta", number: 7 }, { name: "Tobias", number: 5 }] }, { agent: "Eve", date: "10.12.2014", street: "Closed Circle", name: "Berry", number: 4 }];
-
     const cellTypes = {
       empty: UnigridEmptyCell,
       string: UnigridTextCell
