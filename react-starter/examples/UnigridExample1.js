@@ -34,7 +34,7 @@ import {
   idMaker
 } from '../unigrid';
 
-const json = require('./examples/json/tableResp1.json')
+const json = require('./json/tableResp1.json')
 
 export class UnigridExample1 extends React.Component {
   handleClick() {
