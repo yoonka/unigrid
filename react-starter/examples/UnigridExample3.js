@@ -25,13 +25,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json//tableResp2.json';
+// import tableData from './json//tableResp2.json';
 import { Unigrid } from '../unigrid';
 
 
 
 export class UnigridExample3 extends React.Component {
   render() {
+
+    const tableData = [{ "dummy1": "someVal", nList: [{ "key1": "key1", "key2": "key2" }, { "key1": "def", "key2": "jkl" }] }];
+
     const table = {
       fromProperty: 'nList',
       select: 'all',

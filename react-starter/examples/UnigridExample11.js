@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp7.json';
+// import tableData from './json/tableResp7.json';
 import {
   Unigrid,
   UnigridHeader,
@@ -35,6 +35,10 @@ import {
   getSorter,
   sort
 } from '../unigrid';
+
+const tableData = [
+  { "x1": { "x2": { "x3": "aaa" } }, "y1": { "y2": { "y3": "bbb" } } }, { "x1": { "x2": { "x3": "ggg" } }, "y1": { "y2": { "y3": "hhh" } } }, { "x1": { "x2": { "x3": "eee" } }, "y1": { "y2": { "y3": "ccc" } } }
+]
 
 export class UnigridExample11 extends React.Component {
   clickHandler(field) {
