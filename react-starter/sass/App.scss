@@ -1,15 +1,77 @@
-.container {
-    background-color: red;
+@import "./reset";
+@import "./fonts.scss";
+@import "./colors.scss";
+
+* {
+    color: $c-font;
 }
 
-.unigrid-main-class {
-    background-color: rgb(238, 238, 235);
+.main-container {
+    display: flex;
+    flex-direction: column;
+    background-color: $c-bg1;
 }
 
-.unigird-header {
-    border: 2px solid black;
+.main-container-tittle {
+    height: 50rem;
+    padding: 1.875rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: $c-bg2;
 }
 
-.unigird-segment {
-    background-color: blue;
+.main-container-tittle-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 75%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid$c-font;
+}
+
+.main-container-description {
+    height: 25rem;
+    width: 100%;
+    background-color: $c-bg1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container-description-box {
+    width: 70%;
+}
+
+.main-container-description-details {
+    height: 25rem;
+    width: 100%;
+    background-color: $c-bg1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container-description-details-box {
+    width: 70%;
+}
+
+.examples-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.examples-tittle {
+    margin: 10px 0 10px 0;
+}
+
+.examples-container-box {
+    width: 70%;
 }
