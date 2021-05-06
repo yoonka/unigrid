@@ -5,6 +5,9 @@
 
 h1 {
     font-size: 2.25rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.175rem;
+    border-bottom: solid 3px red;
 }
 
 h2 {
@@ -16,16 +19,12 @@ h3 {
 }
 
 a {
-    color: grey;
+    color: #8a2be2;
 }
 
 a:link {
     // color:rgb(36, 35, 35);
     text-decoration: none;
-    font-weight: 700;
-}
-
-a:visited {
     font-weight: 500;
 }
 

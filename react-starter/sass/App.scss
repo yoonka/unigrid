@@ -21,22 +21,24 @@
     justify-content: center;
     align-items: center;
     background-color: $c-bg2;
+    // background-image: url("../assets/desk.jpeg")
 }
 
 .main-container-tittle-box {
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     width: 75%;
     height: 80%;
-    background-color: white;
-    border: 1px solid$c-font;
+    // background-color: white;
+    // border: 1px solid$c-font;
 }
 
 .main-container-description {
     height: 25rem;
     width: 100%;
-    background-color: $c-bg1;
+    // background-color: $c-bg1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -47,17 +49,18 @@
     width: 70%;
 }
 
-.main-container-description-details {
+.main-container-details {
     height: 25rem;
     width: 100%;
-    background-color: $c-bg1;
+    // background-color: $c-bg1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.main-container-description-details-box {
+.main-container-details-box {
     width: 70%;
+
 }
 
 .examples-container {
@@ -66,6 +69,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: $c-bg2;
 }
 
 .examples-tittle {
@@ -74,4 +78,6 @@
 
 .examples-container-box {
     width: 70%;
+    // background-color: $c-bg1;
 }
+
