@@ -92,13 +92,17 @@
 .examples-container-box {
     width: 70%;
     // background-color: $c-bg1;
+
+    p {
+        margin-top: 1.5rem;
+    }
 }
 
 table {
     width: 100%;
     margin: 0.5rem 0 0.5rem 0;
     padding: 0.3rem;
-    border: solid 1px $c-details;
+    border: solid 0.06rem $c-details;
     text-align: center;
 
     th {
@@ -110,6 +114,50 @@ table {
         padding: 0.3rem;
         border-radius: 0.3rem;
     }
+}
+
+hr {
+    border: 1px solid red;
+    margin: 0.5rem 0 0.4rem 0;
+}
+
+.example13-container {
+    margin-top: 0.5rem;
+}
+
+.example13-container-box {
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 0.5rem;
+    padding: 0.3rem;
+    border: solid 0.06rem $c-details;
+    display: inline-grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-gap: 0.5rem;
+}
+
+.unigrid-header {
+    grid-column: 1 / 6;
+    background-color: red;
+}
+
+.unigrid-header-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
 
 
+}
+
+.unigrid-header-container-box {
+    grid-column: 1/6;
+}
+.unigrid-segment {
+    grid-row: 2 / 5;
+    background-color: blue;
+}
+
+.unigrid-footer {
+    grid-row: 5;
+    background-color: yellow;
 }

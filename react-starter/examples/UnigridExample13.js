@@ -54,9 +54,9 @@ export class UnigridExample13 extends React.Component {
     };
 
     return (
-      <div>
+      <div className="example13-container">
         <p>Example 13 : Div Multitable (JSX - specialized components rendered as divs)</p>
-        <Unigrid renderAs="div" data={tableData} cellTypes={cellTypes}>
+        <Unigrid renderAs="div" className="example13-container-box" data={tableData} cellTypes={cellTypes}>
           <Unigrid className={'unigrid-main-class'}>
             <UnigridHeader className={'unigrid-header'}>
               <UnigridHeaderRow>
