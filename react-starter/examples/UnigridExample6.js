@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp1.json';
+import { tableData } from './data/Resp1';
 import {
   Unigrid,
   UnigridEmptyCell,
@@ -43,7 +43,6 @@ export class UnigridExample6 extends React.Component {
   }
 
   render() {
-
     const cellTypes = {
       empty: UnigridEmptyCell,
       string: UnigridTextCell

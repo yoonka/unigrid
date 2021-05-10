@@ -27,8 +27,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import React from 'react';
 import {UnigridEmptyCell,
         UnigridTextCell,
-        UnigridNumberCell} from 'src/UnigridCells';
-import {isDefined, tryAmend, idMaker, cleanProps} from 'src/helpers';
+        UnigridNumberCell} from './UnigridCells';
+import {isDefined, tryAmend, idMaker, cleanProps} from './helpers';
 import {applyFormatter} from 'src/sorting';
 
 export class UnigridRow extends React.Component {

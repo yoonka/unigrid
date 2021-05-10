@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp7.json';
+import {tableData} from './data/Resp7';
 import {
   Unigrid,
   UnigridHeader,

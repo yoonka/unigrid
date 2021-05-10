@@ -1,19 +1,10 @@
 const webpack = require('webpack');
 const path = require('path');
-// const json = require('json-loader!./file.json');
-
 
 module.exports = {
     mode: 'development',
     entry: path.resolve(__dirname, './src/index.js'),
     module: {
-        // loaders: [
-        //     {
-        //         test: /\.json$/,
-        //         loader: 'json-loader'
-
-        //     }
-        // ],
         rules: [
             {
                 exclude: /node_modules/,
@@ -30,6 +21,11 @@ module.exports = {
                     "sass-loader",
                 ],
             },
+            {
+                test: /\.json$/,
+                loader: 'json-loader'
+
+            }
         ],
     },
 

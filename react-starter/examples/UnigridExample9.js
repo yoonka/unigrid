@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp5.json';
+import { tableData } from './data/Resp5';
 import {
   Unigrid,
   UnigridHeader,
@@ -36,7 +36,6 @@ import {
 
 export class UnigridExample9 extends React.Component {
   render() {
-
     const formatA = (cfg, item) => item.a === "apple" ? { style: { backgroundColor: '#55ff55' } } : undefined;
 
     const handleClick = function () {

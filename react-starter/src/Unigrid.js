@@ -28,6 +28,8 @@ import React from 'react';
 import { isDefined, cleanProps, newChildren } from './helpers';
 import { getIterator } from './iterators';
 
+const json = require('./json/tableResp1.json')
+
 export default class Unigrid extends React.Component {
   constructor(props) {
     super(props);
