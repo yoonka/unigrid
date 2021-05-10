@@ -3,8 +3,6 @@ import "../sass/App.scss"
 import { Unigrid } from "../unigrid"
 import { UnigridExamples } from '../examples/UnigridExamples';
 
-
-
 function App() {
     return (
         <div className="examples-container">
@@ -14,7 +12,6 @@ function App() {
                 <UnigridExamples />
             </div>
         </div >
-
     )
 }
 

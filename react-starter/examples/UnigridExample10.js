@@ -36,8 +36,6 @@ import {
   sort
 } from '../unigrid';
 
-
-
 export class UnigridExample10 extends React.Component {
   clickHandler(field) {
     return () => sort(this.unigrid, field);

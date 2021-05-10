@@ -32,7 +32,6 @@ import {
   UnigridTextCell
 } from '../unigrid';
 
-
 export class UnigridExample6 extends React.Component {
   constructor() {
     super();
