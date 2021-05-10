@@ -25,11 +25,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {UnigridEmptyCell,
-        UnigridTextCell,
-        UnigridNumberCell} from './UnigridCells';
-import {isDefined, tryAmend, idMaker, cleanProps} from './helpers';
-import {applyFormatter} from 'src/sorting';
+import {
+  UnigridEmptyCell,
+  UnigridTextCell,
+  UnigridNumberCell
+} from './UnigridCells';
+import { isDefined, tryAmend, idMaker, cleanProps } from './helpers';
+import { applyFormatter } from './sorting';
 
 export class UnigridRow extends React.Component {
   static mkProps(oCell, item, box, renderAs, rowAs, mixIn, addProp) {
@@ -38,14 +40,14 @@ export class UnigridRow extends React.Component {
 
     // Special case for deep merging 'cell'
     const cellMixIn = isDefined(props, 'cell') &&
-          typeof(props.cell === 'object') ? props.cell : false;
+      typeof (props.cell === 'object') ? props.cell : false;
 
     // create a shallow copy to avoid mutating props
-    if (typeof(oCell) === 'object') {
+    if (typeof (oCell) === 'object') {
       Object.assign(props, oCell);
       // Re-merge the 'cell' objects from oCell and mixIn
       if (cellMixIn && isDefined(oCell, 'cell')
-          && typeof(oCell.cell) === 'object') {
+        && typeof (oCell.cell) === 'object') {
         props.cell = Object.assign({}, cellMixIn, oCell.cell);
       }
     } else {
@@ -53,19 +55,19 @@ export class UnigridRow extends React.Component {
     }
 
     if (cell !== undefined) {
-      Object.assign(props, {show: cell});
+      Object.assign(props, { show: cell });
     }
     if (!isDefined(props, 'item') && item !== undefined) {
-      Object.assign(props, {item: item});
+      Object.assign(props, { item: item });
     }
     if (!isDefined(props, 'box') && box !== undefined) {
-      Object.assign(props, {box: box});
+      Object.assign(props, { box: box });
     }
     if (!isDefined(props, 'renderAs') && renderAs !== undefined) {
-      Object.assign(props, {renderAs: renderAs});
+      Object.assign(props, { renderAs: renderAs });
     }
     if (!isDefined(props, 'rowAs') && rowAs !== undefined) {
-      Object.assign(props, {rowAs: rowAs});
+      Object.assign(props, { rowAs: rowAs });
     }
 
     return props;
@@ -80,7 +82,7 @@ export class UnigridRow extends React.Component {
     let cellProps = this.mkProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
 
     if (!isDefined(cellProps, 'cell') && isDefined(cellProps, 'show')) {
-      Object.assign(cellProps, {cell: applyFormatter(cellProps)});
+      Object.assign(cellProps, { cell: applyFormatter(cellProps) });
     }
 
     cellProps = tryAmend(cellProps, item, box, 'cell', 'cell');
@@ -89,16 +91,16 @@ export class UnigridRow extends React.Component {
       return [cellProps.as, cellProps];
     }
 
-    return [typeof(cellProps.cell), cellProps];
+    return [typeof (cellProps.cell), cellProps];
   }
 
   static createCellForType(cellTypes, type, oProps) {
-    let {show, using, as, bindToCell, ...nProps} = oProps;
+    let { show, using, as, bindToCell, ...nProps } = oProps;
 
     const Tx = nProps.renderAs || (nProps.rowAs === 'header' ? 'th' : 'td');
-    Object.assign(nProps, {Tx: Tx});
+    Object.assign(nProps, { Tx: Tx });
 
-    if (typeof(type) !== 'string') {
+    if (typeof (type) !== 'string') {
       if (isDefined(type, 'type')) {
         return React.cloneElement(type, nProps);
       }
@@ -110,9 +112,9 @@ export class UnigridRow extends React.Component {
     }
 
     switch (type) {
-    case 'string': return (<UnigridTextCell   {...nProps} />);
-    case 'number': return (<UnigridNumberCell {...nProps} />);
-    case 'empty':  return (<UnigridEmptyCell  {...nProps} />);
+      case 'string': return (<UnigridTextCell   {...nProps} />);
+      case 'number': return (<UnigridNumberCell {...nProps} />);
+      case 'empty': return (<UnigridEmptyCell  {...nProps} />);
     }
 
     // 'undefined' type
@@ -122,16 +124,16 @@ export class UnigridRow extends React.Component {
   }
 
   static createAndProcessCell(cell, item, box, renderAs, rowAs, mixIn, cellTypes, oAddProp, idCounter) {
-    const addProp = Object.assign({}, oAddProp, {key: idCounter.next().value});
+    const addProp = Object.assign({}, oAddProp, { key: idCounter.next().value });
     let [type, props] = this.cellTypeAndProps(cell, item, box, renderAs, rowAs, mixIn, addProp);
     let binds = props.bindToCell || [];
-    binds = typeof(binds) === 'string' ? [binds] : binds;
+    binds = typeof (binds) === 'string' ? [binds] : binds;
     let toAdd = [];
     for (let i = 0; i < binds.length; i++) {
-    let funName = binds[i];
+      let funName = binds[i];
       let oldFun = props[funName];
       if (oldFun !== undefined) {
-        let newFun = function() {
+        let newFun = function () {
           return oldFun.apply(this.unigridCell, arguments);
         }
         toAdd.push(newFun);
@@ -150,7 +152,7 @@ export class UnigridRow extends React.Component {
     const arr = [];
     const idCounter = idMaker();
     let addProp = isDefined(oCfg, 'treeAmend') ?
-        {treeAmend: oCfg.treeAmend} : undefined;
+      { treeAmend: oCfg.treeAmend } : undefined;
 
     let cfg = tryAmend(oCfg, oCfg.item, oCfg.box);
 
@@ -161,7 +163,7 @@ export class UnigridRow extends React.Component {
     }
 
     const children = React.Children.map(cfg.children, (child) => {
-      const chCfg = Object.assign({}, child.props, {as: child});
+      const chCfg = Object.assign({}, child.props, { as: child });
       arr.push(UnigridRow.createAndProcessCell(
         chCfg, cfg.item, cfg.box, cfg.renderAs, cfg.rowAs, cfg.mixIn, cfg.cellTypes, addProp, idCounter
       ));
