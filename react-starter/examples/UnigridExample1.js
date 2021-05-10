@@ -25,14 +25,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-// import tableData from './json/tableResp1.json!';
+import tableData from './json/tableResp1.json';
 import {
   Unigrid,
   UnigridEmptyCell,
   UnigridTextCell,
   isDefined,
   idMaker
-} from 'src/index';
+} from '../unigrid';
+
+const json = require('./json/tableResp1.json')
 
 export class UnigridExample1 extends React.Component {
   handleClick() {
@@ -62,10 +64,10 @@ export class UnigridExample1 extends React.Component {
             $do: [
               {
                 cells: [
-                  {show: 'hAgent', as: UnigridTextCell},
+                  { show: 'hAgent', as: UnigridTextCell },
                   'hDate',
                   'hStreet',
-                  {show: 'hName', as: 'string', className: 'name-header-cell'},
+                  { show: 'hName', as: 'string', className: 'name-header-cell' },
                   'hNumber'
                 ],
                 rowAs: 'header'
@@ -80,15 +82,15 @@ export class UnigridExample1 extends React.Component {
                 className: 'unigrid-segment',
                 $do: [
                   {
-                    condition: {ifDoes: 'exist', property: 'list'},
+                    condition: { ifDoes: 'exist', property: 'list' },
                     fromProperty: 'list',
                     select: 0,
                     $do: [
                       {
                         cells: [
                           'hCategory',
-                          {as: 'empty', colSpan: 1},
-                          {show: this.showFun},
+                          { as: 'empty', colSpan: 1 },
+                          { show: this.showFun },
                           this.showFun2,
                           'hNumber'],
                         rowAs: 'header'
@@ -96,13 +98,13 @@ export class UnigridExample1 extends React.Component {
                     ]
                   },
                   {
-                    condition: {ifDoes: 'exist', property: 'list'},
+                    condition: { ifDoes: 'exist', property: 'list' },
                     fromProperty: 'list',
                     $do: [
                       {
                         cells: [
-                          {cell: 'category2'},
-                          {as: 'empty', colSpan: 3},
+                          { cell: 'category2' },
+                          { as: 'empty', colSpan: 3 },
                           'hNumber'],
                         rowAs: 'header'
                       }
@@ -112,20 +114,21 @@ export class UnigridExample1 extends React.Component {
                     className: 'some-row-class',
                     cells: [
                       'agent', 'date', 'street', 'name',
-                      {show: 'number',
-                       as: 'string',
-                       className: 'number-cell',
-                       onClick: this.handleClick,
-                       bindToCell: 'onClick'
+                      {
+                        show: 'number',
+                        as: 'string',
+                        className: 'number-cell',
+                        onClick: this.handleClick,
+                        bindToCell: 'onClick'
                       }]
                   },
                   {
-                    condition: {ifDoes: 'exist', property: 'list'},
+                    condition: { ifDoes: 'exist', property: 'list' },
                     fromProperty: 'list',
                     select: 'all',
                     $do: [
                       {
-                        cells: [{as: 'empty', colSpan: 3}, 'name', 'number'],
+                        cells: [{ as: 'empty', colSpan: 3 }, 'name', 'number'],
                         mixIn: {
                           onClick: this.handleClick,
                           bindToCell: 'onClick'
@@ -144,8 +147,8 @@ export class UnigridExample1 extends React.Component {
               {
                 select: 0,
                 $do: [
-                  {cells: [null, null, null, 'fSum', 'fTotal']},
-                  {cells: [null, null, null, 'sum', 'total']}
+                  { cells: [null, null, null, 'fSum', 'fTotal'] },
+                  { cells: [null, null, null, 'sum', 'total'] }
                 ]
               }
             ]

@@ -25,51 +25,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import { UnigridExample1 } from './UnigridExample1';
-import { UnigridExample2 } from './UnigridExample2';
-import { UnigridExample3 } from './UnigridExample3';
-import { UnigridExample4 } from './UnigridExample4';
-import { UnigridExample5 } from './UnigridExample5';
-import { UnigridExample6 } from './UnigridExample6';
-import { UnigridExample7 } from './UnigridExample7';
-import { UnigridExample8 } from './UnigridExample8';
-import { UnigridExample9 } from './UnigridExample9';
-import { UnigridExample10 } from './UnigridExample10';
-import { UnigridExample11 } from './UnigridExample11';
-import { UnigridExample12 } from './UnigridExample12';
-import { UnigridExample13 } from './UnigridExample13';
+import tableData from './json/tableResp6.json';
+import {
+  Unigrid,
+  UnigridHeader,
+  UnigridSegment,
+  UnigridRow,
+  UnigridTextCell,
+  getSorter,
+  sort
+} from '../unigrid';
 
-export class UnigridExamples extends React.Component {
+export class UnigridExample10 extends React.Component {
+  clickHandler(field) {
+    return () => sort(this.unigrid, field);
+  }
+
   render() {
     return (
       <div>
-        <hr />
-        <UnigridExample1 />
-        <hr />
-        <UnigridExample2 />
-        <hr />
-        <UnigridExample3 />
-        <hr />
-        <UnigridExample4 />
-        <hr />
-        <UnigridExample5 />
-        <hr />
-        <UnigridExample6 />
-        <hr />
-        <UnigridExample7 />
-        <hr />
-        <UnigridExample8 />
-        <hr />
-        <UnigridExample9 />
-        <hr />
-        <UnigridExample10 />
-        <hr />
-        <UnigridExample11 />
-        <hr />
-        <UnigridExample12 />
-        <hr />
-        <UnigridExample13 />
-        <hr />
+        <p>Example 10 : Sorting with null, undefined and empty values</p>
+        <Unigrid
+          box={{ column: 'a', order: 'asc' }}
+          data={tableData}
+          ref={ref => { this.unigrid = ref; }}
+        >
+          <UnigridHeader>
+            <UnigridRow rowAs={'header'}>
+              <UnigridTextCell cell="A" onClick={this.clickHandler('a')} />
+              <UnigridTextCell cell="B" onClick={this.clickHandler('b')} />
+              <UnigridTextCell cell="C" onClick={this.clickHandler('c')} />
+              <UnigridTextCell cell="D" onClick={this.clickHandler('d')} />
+            </UnigridRow>
+          </UnigridHeader>
+          <UnigridSegment
+            process={getSorter()}
+            select={'all'}
+          >
+            <UnigridRow>
+              <UnigridTextCell show="a" />
+              <UnigridTextCell show="b" />
+              <UnigridTextCell show="c" />
+              <UnigridTextCell show="d" />
+            </UnigridRow>
+          </UnigridSegment>
+        </Unigrid>
       </div>
     );
   }

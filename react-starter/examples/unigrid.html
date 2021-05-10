@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    
+    <title>Unigrid Style Guide</title>
+    <meta name="description" content="Unigrid Style Guide">
+    <meta name="Grzegorz Junka" content="Cells, Rows, and Tables">
+    <style>
+      body {
+      background-color: #ffffff;
+      font-family: "Georgia", serif;
+      font-size: 0.9em;
+      }
+      dt {
+      margin: 1em auto 0.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Unigrid Style Guide</h1>
+    <p>Unigrid is a React component that implements a configurable table composed of lower-level multipurpose reusable components.</p>
+
+    <h2 id="unigrid">Unigrid</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table">&lt;table&gt;</a>. The main component, contains the following components:</p>
+    <dl>
+      <dt><a href="#unigrid-header"><b>UnigridHeader</b></a> (optional)</dt>
+      <dd>Semantically it's the main header of the whole table.</dd>
+      
+      <dt><a href="#unigrid-segment"><b>UnigridSegment</b></a> (zero or more)</dt>
+      <dd>Semantically it's the body of the table, all the rows between <a href="#unigrid-header"><b>UnigridHeader</b></a> and <a href="#unigrid-footer"><b>UnigridFooter</b></a>. A simple table will contain exactly one <a href="#unigrid-segment"><b>UnigridSegment</b></a>. A &quot;multitable&quot; (tables within tables) will contain multiple <a href="#unigrid-segment"><b>UnigridSegment</b></a> components, one for each nested table.</dd>
+      
+      <dt><a href="#unigrid-footer"><b>UnigridFooter</b></a> (optional)</dt>
+      <dd>Semantically it's the main footer of the whole table.</dd>
+    </dl>
+    <p>More complex tables, e.g. containing multiple headers or footers, or more than one level of nested tables, should be implemented by splitting the complex table into multiple separate <a href="#unigrid"><b>Unigrid</b></a> components. Those components should then be placed on a page within a new dedicated component built using non-table tags (i.e. <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div">&lt;div&gt;</a> or similar that are semantically correct depending on the context within the page). <a href="#unigrid"><b>Unigrid</b></a> components <b>can not</b> be nested (can not be contained within other Unigrid components).</p>
+
+    <h2 id="unigrid-header">UnigridHeader</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/thead">&lt;thead&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components.</p>
+    
+    <h2 id="unigrid-segment">UnigridSegment</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tbody">&lt;tbody&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components, each of which can contain either <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> or <a href="#unigrid-cell"><b>UnigridCell</b></a> components.</p>
+
+    <h2 id="unigrid-footer">UnigridFooter</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tfoot">&lt;tfoot&gt;</a>. Contains zero or more <a href="#unigrid-row"><b>UnigridRow</b></a> components.</p>
+
+    <h2 id="unigrid-row">UnigridRow</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tr">&lt;tr&gt;</a>. Contains zero or more of either <a href="#unigrid-header-cell"><b>UnigridHeaderCell</b></a> or <a href="#unigrid-cell"><b>UnigridCell</b></a> (or a mix of them). It's the basic component to build rows of the table.</p>
+    
+    <h2 id="unigrid-header-cell">UnigridHeaderCell</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th">&lt;th&gt;</a>. This is the parent component for all types of cell components that can be shown in the table or segment headers.</p>
+    
+    <h2 id="unigrid-cell">UnigridCell</h2>
+    <p>Uses tag <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td">&lt;td&gt;</a>. This is the parent component for all types of cell components that can be shown in rows of table segments.</p>
+
+    <h1>Unigrid Examples</h1>
+    <div id="container"></div>
+    <script src="/jspm_packages/system.js"></script>
+    <script src="/jspm.config.js"></script>
+    <script>SystemJS.import('examples/app');</script>
+  </body>
+</html>
