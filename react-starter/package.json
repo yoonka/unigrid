@@ -30,6 +30,8 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "eslint": "^7.25.0",
+    "image-webpack-loader": "^7.0.1",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

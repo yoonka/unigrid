@@ -36,7 +36,7 @@ import {
 
 export class UnigridExample9 extends React.Component {
   render() {
-    const formatA = (cfg, item) => item.a === "apple" ? { style: { backgroundColor: '#55ff55' } } : undefined;
+    const formatA = (cfg, item) => item.a === "apple" ? { style: { backgroundColor: '#b8b8b8' } } : undefined;
 
     const handleClick = function () {
       console.log('handleClick', this.props.item);

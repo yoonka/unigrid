@@ -1,0 +1,32 @@
+* {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 1rem;
+}
+
+h1 {
+  font-size: 2.25rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.175rem;
+  border-bottom: solid 3px red;
+}
+
+h2 {
+  font-size: 1.375rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+a {
+  color: #8a2be2;
+}
+
+a:link {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}

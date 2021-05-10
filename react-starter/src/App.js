@@ -5,11 +5,13 @@ import { UnigridExamples } from '../examples/UnigridExamples';
 
 function App() {
     return (
-        <div>
-            <div className="container">Hello React</div>
-            <Unigrid />
-            <UnigridExamples />
-        </div>
+        <div className="examples-container">
+            <div className="examples-container-box">
+                <h1 className="examples-tittle">Unigrid Examples</h1>
+                {/* <Unigrid /> */}
+                <UnigridExamples />
+            </div>
+        </div >
     )
 }
 
