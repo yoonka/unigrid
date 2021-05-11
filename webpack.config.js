@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -26,9 +27,9 @@ module.exports = {
 
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: 'bundle.js',
+        filename: 'index_bundle.js',
     },
-    plugins: [new webpack.HotModuleReplacementPlugin()],
+    plugins: [[new webpack.HotModuleReplacementPlugin()], [new HtmlWebpackPlugin()]],
     devServer: {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
