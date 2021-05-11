@@ -139,14 +139,11 @@ hr {
 
 .unigrid-header {
     grid-column: 1 / 6;
-    background-color: red;
 }
 
 .unigrid-header-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-
-
 }
 
 .unigrid-header-container-box {
@@ -154,11 +151,9 @@ hr {
 }
 .unigrid-segment {
     grid-row: 2 / 5;
-    background-color: blue;
 }
 
 .unigrid-footer {
     grid-row: 5;
-    background-color: yellow;
 }
 
