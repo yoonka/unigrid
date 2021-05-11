@@ -25,14 +25,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp2.json!';
-import {Unigrid} from 'src/index';
+import { tableData } from './data/Resp2';
+import { Unigrid } from '../unigrid';
 
 export class UnigridExample2 extends React.Component {
   render() {
     const table = {
       className: 'unigrid-main-class',
-      condition: {ifDoes: 'exist', property: 'nList'},
+      condition: { ifDoes: 'exist', property: 'nList' },
       fromProperty: 'nList',
       select: 'all',
       section: 'body',

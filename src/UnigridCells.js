@@ -25,22 +25,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import {cleanCellProps} from 'src/helpers';
+import { cleanCellProps } from 'src/helpers';
 
 export const UnigridEmptyCell = (p) => {
-  const cleaned = cleanCellProps(p);
-  const Tx = p.Tx;
-  return (<Tx {...cleaned} />);
+    const cleaned = cleanCellProps(p);
+    const Tx = p.Tx;
+    return (<Tx {...cleaned} />);
 }
 
 export const UnigridTextCell = (p) => {
-  const cleaned = cleanCellProps(p);
-  const Tx = p.Tx;
-  return (<Tx {...cleaned} >{p.cell}</Tx>);
+    const cleaned = cleanCellProps(p);
+    const Tx = p.Tx;
+    return (<Tx {...cleaned} >{p.cell}</Tx>);
 }
 
 export const UnigridNumberCell = (p) => {
-  const cleaned = cleanCellProps(p);
-  const Tx = p.Tx;
-  return (<Tx {...cleaned} >{p.cell.toString()}</Tx>);
+    const cleaned = cleanCellProps(p);
+    const Tx = p.Tx;
+    return (<Tx {...cleaned} >{p.cell.toString()}</Tx>);
 }
