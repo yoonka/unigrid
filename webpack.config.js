@@ -8,8 +8,15 @@ module.exports = {
     module: {
         rules: [
             {
-                exclude: /node_modules/,
-                use: ['babel-loader'],
+                test: /\.js$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            rootMode: 'upward',
+                        }
+                    }
+                ]
             },
             {
                 test: /\.s[ac]ss$/i,
@@ -29,7 +36,12 @@ module.exports = {
         path: path.resolve(__dirname, './dist'),
         filename: 'index_bundle.js',
     },
-    plugins: [[new webpack.HotModuleReplacementPlugin()], [new HtmlWebpackPlugin()]],
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, './index.html'),
+        })
+    ],
     devServer: {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
