@@ -1,6 +1,6 @@
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin'); // eslint-disable-line import/no-extraneous-dependencies
 
 module.exports = {
@@ -49,14 +49,15 @@ module.exports = {
         port: 4000,
     },
     optimization: {
+        minimize: true,
         usedExports: true,
-        namedChunks: true,
+        // namedChunks: true,
         // Explicit tree shaker and CSS minimizer
         minimizer: [
             new TerserPlugin({
-                cache: true,
+                // cache: true,
                 parallel: true,
-                sourceMap: true, // Must be set to true if using source-maps in production
+                // sourceMap: true, // Must be set to true if using source-maps in production
                 terserOptions: {
                     module: true,
                     toplevel: true
