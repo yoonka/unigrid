@@ -51,13 +51,10 @@ module.exports = {
     optimization: {
         minimize: true,
         usedExports: true,
-        // namedChunks: true,
-        // Explicit tree shaker and CSS minimizer
         minimizer: [
             new TerserPlugin({
                 // cache: true,
                 parallel: true,
-                // sourceMap: true, // Must be set to true if using source-maps in production
                 terserOptions: {
                     module: true,
                     toplevel: true
