@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin'); // eslint-disable-line import/no-extraneous-dependencies
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     mode: 'development',
@@ -20,6 +20,10 @@ module.exports = {
                 ]
             },
             {
+                exclude: /node_modules/,
+                use: ['babel-loader'],
+            },
+            {
                 test: /\.s[ac]ss$/i,
                 use: [
                     // Creates `style` nodes from JS strings
@@ -35,13 +39,13 @@ module.exports = {
 
     output: {
         path: path.resolve(__dirname, './dist'),
-        filename: 'index_bundle.js',
+        filename: 'bundle.js',
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, './index.html'),
-        })
+        // new HtmlWebpackPlugin({
+        //     template: path.resolve(__dirname, './index.html'),
+        // })
     ],
     devServer: {
         contentBase: path.join(__dirname, 'dist'),
@@ -53,7 +57,6 @@ module.exports = {
         usedExports: true,
         minimizer: [
             new TerserPlugin({
-                // cache: true,
                 parallel: true,
                 terserOptions: {
                     module: true,
@@ -62,4 +65,4 @@ module.exports = {
             }),
         ],
     }
-}
+};
