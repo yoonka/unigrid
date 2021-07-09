@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp1.json!';
+import { tableData } from './data/Resp1';
 import {
   Unigrid,
   UnigridHeader,
@@ -35,7 +35,7 @@ import {
   UnigridHeaderRow,
   UnigridEmptyCell,
   UnigridTextCell
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample13 extends React.Component {
   constructor() {
@@ -54,17 +54,17 @@ export class UnigridExample13 extends React.Component {
     };
 
     return (
-      <div>
+      <div className="example13-container">
         <p>Example 13 : Div Multitable (JSX - specialized components rendered as divs)</p>
-        <Unigrid renderAs="div" data={tableData} cellTypes={cellTypes}>
+        <Unigrid renderAs="div" className="example13-container-box" data={tableData} cellTypes={cellTypes}>
           <Unigrid className={'unigrid-main-class'}>
             <UnigridHeader className={'unigrid-header'}>
-              <UnigridHeaderRow className={'unigrid-header-container'}>
-                <UnigridTextCell className={'unigrid-header-container-box'} show="hAgent" />
-                <UnigridTextCell className={'unigrid-header-container-box'} show="hDate" />
-                <UnigridTextCell className={'unigrid-header-container-box'} show="hStreet" />
-                <UnigridTextCell className={'unigrid-header-container-box'} show="hName" className={'name-header-cell'} />
-                <UnigridTextCell className={'unigrid-header-container-box'} show="hNumber" />
+              <UnigridHeaderRow>
+                <UnigridTextCell show="hAgent" />
+                <UnigridTextCell show="hDate" />
+                <UnigridTextCell show="hStreet" />
+                <UnigridTextCell show="hName" className={'name-header-cell'} />
+                <UnigridTextCell show="hNumber" />
               </UnigridHeaderRow>
             </UnigridHeader>
           </Unigrid>
