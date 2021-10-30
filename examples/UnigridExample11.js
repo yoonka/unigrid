@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp7.json!';
+import {tableData} from './data/Resp7';
 import {
   Unigrid,
   UnigridHeader,
@@ -34,7 +34,7 @@ import {
   UnigridTextCell,
   getSorter,
   sort
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample11 extends React.Component {
   clickHandler(field) {
@@ -44,28 +44,28 @@ export class UnigridExample11 extends React.Component {
   render() {
     return (
       <div>
-      <p>Example 11 : Sorting with nested objects</p>
-      <Unigrid
-        box={{column: 'x1.x2.x3', order: 'asc'}}
-        data={tableData}
-        ref={ref => {this.unigrid = ref;}}
-      >
-        <UnigridHeader>
-          <UnigridRow rowAs={'header'}>
-            <UnigridTextCell cell="X" onClick={this.clickHandler('x1.x2.x3')} />
-            <UnigridTextCell cell="Y" onClick={this.clickHandler('y1.y2.y3')} />
-          </UnigridRow>
-        </UnigridHeader>
-        <UnigridSegment
-          process={getSorter()}
-          select={'all'}
+        <p>Example 11 : Sorting with nested objects</p>
+        <Unigrid
+          box={{ column: 'x1.x2.x3', order: 'asc' }}
+          data={tableData}
+          ref={ref => { this.unigrid = ref; }}
         >
-          <UnigridRow>
-            <UnigridTextCell show="x1.x2.x3" />
-            <UnigridTextCell show="y1.y2.y3" />
-          </UnigridRow>
-        </UnigridSegment>
-      </Unigrid>
+          <UnigridHeader>
+            <UnigridRow rowAs={'header'}>
+              <UnigridTextCell cell="X" onClick={this.clickHandler('x1.x2.x3')} />
+              <UnigridTextCell cell="Y" onClick={this.clickHandler('y1.y2.y3')} />
+            </UnigridRow>
+          </UnigridHeader>
+          <UnigridSegment
+            process={getSorter()}
+            select={'all'}
+          >
+            <UnigridRow>
+              <UnigridTextCell show="x1.x2.x3" />
+              <UnigridTextCell show="y1.y2.y3" />
+            </UnigridRow>
+          </UnigridSegment>
+        </Unigrid>
       </div>
     );
   }

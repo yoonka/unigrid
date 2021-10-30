@@ -98,12 +98,19 @@
     }
 }
 
+table,
+td,
+th {
+    border: 0.06rem solid $c-details;
+}
+
 table {
     width: 100%;
     margin: 0.5rem 0 0.5rem 0;
     padding: 0.3rem;
-    border: solid 0.06rem $c-details;
+    border: solid 0.12rem $c-details;
     text-align: center;
+    border-collapse: collapse;
 
     th {
         font-weight: 700;
@@ -112,7 +119,6 @@ table {
 
     td {
         padding: 0.3rem;
-        border-radius: 0.3rem;
     }
 }
 
@@ -131,34 +137,31 @@ hr {
     margin-top: 0.5rem;
     padding: 0.3rem;
     border: solid 0.06rem $c-details;
-    display: inline-grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    grid-gap: 0.5rem;
+
+    .unigrid-header {
+        padding-bottom: 0.5rem;
+        border-bottom: solid 0.06rem $c-details;
+        div {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 1fr);
+            font-weight: 600;
+        }
+    }
+
+    .unigrid-segment {
+        .some-row-class {
+            width: 100%;
+            display: inline-grid;
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+    .unigrid-footer {
+        padding-top: 0.5rem;
+        border-top: solid 0.06rem $c-details;
+        div {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 1fr);
+            font-weight: 600;
+        }
+    }
 }
-
-.unigrid-header {
-    grid-column: 1 / 6;
-    background-color: red;
-}
-
-.unigrid-header-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-
-
-}
-
-.unigrid-header-container-box {
-    grid-column: 1/6;
-}
-.unigrid-segment {
-    grid-row: 2 / 5;
-    background-color: blue;
-}
-
-.unigrid-footer {
-    grid-row: 5;
-    background-color: yellow;
-}
-

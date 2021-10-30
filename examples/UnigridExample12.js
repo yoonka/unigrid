@@ -25,14 +25,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import React from 'react';
-import tableData from './json/tableResp8.json!';
+import { tableData } from './data/Resp8';
 import {
   Unigrid,
   UnigridHeader,
   UnigridSegment,
   UnigridRow,
   UnigridTextCell
-} from 'src/index';
+} from '../unigrid';
 
 export class UnigridExample12 extends React.Component {
   render() {
@@ -49,7 +49,7 @@ export class UnigridExample12 extends React.Component {
           </UnigridHeader>
           <UnigridSegment>
             <Unigrid
-              condition={{ifDoes: 'exist', property: 'w'}}
+              condition={{ ifDoes: 'exist', property: 'w' }}
               fromProperty={'w'}
             >
               <UnigridRow>
@@ -59,7 +59,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'exist', property: 'abc'}}
+              condition={{ ifDoes: 'exist', property: 'abc' }}
               fromProperty={'w'}
             >
               <UnigridRow>
@@ -69,7 +69,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'equal', property: 't', value: 'test'}}
+              condition={{ ifDoes: 'equal', property: 't', value: 'test' }}
               fromProperty={'x'}
             >
               <UnigridRow>
@@ -79,7 +79,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'equal', property: 't', value: 'testabc'}}
+              condition={{ ifDoes: 'equal', property: 't', value: 'testabc' }}
               fromProperty={'x'}
             >
               <UnigridRow>
@@ -89,7 +89,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'notExist', property: 'not'}}
+              condition={{ ifDoes: 'notExist', property: 'not' }}
               fromProperty={'y'}
             >
               <UnigridRow>
@@ -99,7 +99,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'notExist', property: 'w'}}
+              condition={{ ifDoes: 'notExist', property: 'w' }}
               fromProperty={'y'}
             >
               <UnigridRow>
@@ -109,7 +109,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'notEqual', property: 't', value: 'abc'}}
+              condition={{ ifDoes: 'notEqual', property: 't', value: 'abc' }}
               fromProperty={'z'}
             >
               <UnigridRow>
@@ -119,7 +119,7 @@ export class UnigridExample12 extends React.Component {
               </UnigridRow>
             </Unigrid>
             <Unigrid
-              condition={{ifDoes: 'notEqual', property: 't', value: 'test'}}
+              condition={{ ifDoes: 'notEqual', property: 't', value: 'test' }}
               fromProperty={'z'}
             >
               <UnigridRow>

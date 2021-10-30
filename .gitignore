@@ -1,4 +1,4 @@
-jspm_packages/
-node_modules/
-npm-debug.log
-react-starter/dist/
+# dependencies
+/node_modules
+.history
+/dist
