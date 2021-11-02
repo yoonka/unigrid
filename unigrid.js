@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+function _interopDefault(ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var React = _interopDefault(require('react'));
 
@@ -86,9 +86,9 @@ var _regeneratorRuntime = (function (module) {
     // .constructor.prototype properties for functions that return Generator
     // objects. For full spec compliance, you may wish to configure your
     // minifier not to mangle the names of these two functions.
-    function Generator() {}
-    function GeneratorFunction() {}
-    function GeneratorFunctionPrototype() {}
+    function Generator() { }
+    function GeneratorFunction() { }
+    function GeneratorFunctionPrototype() { }
 
     var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
     GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
@@ -108,9 +108,9 @@ var _regeneratorRuntime = (function (module) {
     runtime.isGeneratorFunction = function (genFun) {
       var ctor = typeof genFun === "function" && genFun.constructor;
       return ctor ? ctor === GeneratorFunction ||
-      // For the native GeneratorFunction constructor, the best we can
-      // do is to check its .name property.
-      (ctor.displayName || ctor.name) === "GeneratorFunction" : false;
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction" : false;
     };
 
     runtime.mark = function (genFun) {
@@ -191,22 +191,22 @@ var _regeneratorRuntime = (function (module) {
         }
 
         return previousPromise =
-        // If enqueue has been called before, then we want to wait until
-        // all previous Promises have been resolved before calling invoke,
-        // so that results are always delivered in the correct order. If
-        // enqueue has not been called before, then it is important to
-        // call invoke immediately, without waiting on a callback to fire,
-        // so that the async generator function has the opportunity to do
-        // any necessary setup in a predictable way. This predictability
-        // is why the Promise constructor synchronously invokes its
-        // executor callback, and why async functions synchronously
-        // execute code before the first await. Since we implement simple
-        // async functions in terms of async generators, it is especially
-        // important to get this right, even though it requires care.
-        previousPromise ? previousPromise.then(callInvokeWithMethodAndArg,
-        // Avoid propagating failures to Promises returned by later
-        // invocations of the iterator.
-        callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+          // If enqueue has been called before, then we want to wait until
+          // all previous Promises have been resolved before calling invoke,
+          // so that results are always delivered in the correct order. If
+          // enqueue has not been called before, then it is important to
+          // call invoke immediately, without waiting on a callback to fire,
+          // so that the async generator function has the opportunity to do
+          // any necessary setup in a predictable way. This predictability
+          // is why the Promise constructor synchronously invokes its
+          // executor callback, and why async functions synchronously
+          // execute code before the first await. Since we implement simple
+          // async functions in terms of async generators, it is especially
+          // important to get this right, even though it requires care.
+          previousPromise ? previousPromise.then(callInvokeWithMethodAndArg,
+            // Avoid propagating failures to Promises returned by later
+            // invocations of the iterator.
+            callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
       }
 
       // Define the unified helper method that is used to implement .next,
@@ -223,9 +223,9 @@ var _regeneratorRuntime = (function (module) {
       var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList));
 
       return runtime.isGeneratorFunction(outerFn) ? iter // If outerFn is a generator, return the full iterator.
-      : iter.next().then(function (result) {
-        return result.done ? result.value : iter.next();
-      });
+        : iter.next().then(function (result) {
+          return result.done ? result.value : iter.next();
+        });
     };
 
     function makeInvokeMethod(innerFn, self, context) {
@@ -443,20 +443,20 @@ var _regeneratorRuntime = (function (module) {
 
         if (!isNaN(iterable.length)) {
           var i = -1,
-              next = function next() {
-            while (++i < iterable.length) {
-              if (hasOwn.call(iterable, i)) {
-                next.value = iterable[i];
-                next.done = false;
-                return next;
+            next = function next() {
+              while (++i < iterable.length) {
+                if (hasOwn.call(iterable, i)) {
+                  next.value = iterable[i];
+                  next.done = false;
+                  return next;
+                }
               }
-            }
 
-            next.value = undefined;
-            next.done = true;
+              next.value = undefined;
+              next.done = true;
 
-            return next;
-          };
+              return next;
+            };
 
           return next.next = next;
         }
@@ -639,10 +639,10 @@ var _regeneratorRuntime = (function (module) {
       }
     };
   }(
-  // Among the various tricks for obtaining a reference to the global
-  // object, this seems to be the most reliable technique that does not
-  // use indirect eval (which violates Content Security Policy).
-  typeof global === "object" ? global : typeof window === "object" ? window : typeof self === "object" ? self : this);
+    // Among the various tricks for obtaining a reference to the global
+    // object, this seems to be the most reliable technique that does not
+    // use indirect eval (which violates Content Security Policy).
+    typeof global === "object" ? global : typeof window === "object" ? window : typeof self === "object" ? self : this);
   return module.exports;
 })({ exports: {} });
 
@@ -1931,31 +1931,6 @@ var Unigrid = function (_React$Component) {
   return Unigrid;
 }(React.Component);
 
-/*
-Copyright (c) 2018, Grzegorz Junka
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 
 exports.Unigrid = Unigrid;
 exports.isDefined = isDefined;
@@ -1974,3 +1949,4 @@ exports.UnigridRow = UnigridRow;
 exports.UnigridHeaderRow = UnigridHeaderRow;
 
 //# sourceMappingURL=unigrid.js.map
+
