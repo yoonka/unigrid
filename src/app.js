@@ -1,7 +1,7 @@
 import React from "react";
 import "../sass/App.scss";
 import { Unigrid } from "../unigrid"
-import { UnigridExamples } from '../examples/UnigridExamples';
+import { UnigridExamples } from '../examples/unigridExamples';
 
 function App() {
     return (
