@@ -1,5 +1,5 @@
 import React from 'react';
-import { tableData } from './data/Resp5';
+import { tableData } from './data/resp5';
 import {
   Unigrid,
   UnigridHeader,

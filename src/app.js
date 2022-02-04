@@ -1,6 +1,5 @@
-
 import React from "react";
-import "../sass/App.scss";
+import "../sass/app.scss";
 import { Unigrid } from "../unigrid"
 import { UnigridExamples } from '../examples/unigridExamples';
 
@@ -15,5 +14,6 @@ function App() {
     </div >
   )
 }
+
 
 export default App

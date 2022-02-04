@@ -1,5 +1,5 @@
 import React from 'react';
-import { tableData } from './data/Resp1';
+import { tableData } from './data/resp1';
 import {
   Unigrid,
   getSorter,

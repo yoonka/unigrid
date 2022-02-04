@@ -1,5 +1,5 @@
 import React from 'react';
-import { tableData } from './data/Resp2';
+import { tableData } from './data/resp2';
 import { Unigrid } from '../unigrid';
 
 export class UnigridExample2 extends React.Component {
